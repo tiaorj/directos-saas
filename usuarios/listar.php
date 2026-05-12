@@ -4,23 +4,20 @@ require_once "../config/conexao.php";
 
 $sql = "
     SELECT 
-        ClienteId,
+        UsuarioId,
         Nome,
-        Telefone,
         Email,
-        Documento,
-        Cidade,
-        Estado,
+        Perfil,
         Ativo,
         DataCadastro
-    FROM OS_Clientes
-    ORDER BY ClienteId DESC
+    FROM OS_Usuarios
+    ORDER BY UsuarioId DESC
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 
-$clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -30,12 +27,12 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h3>Clientes</h3>
-            <p class="text-muted mb-0">Cadastro de clientes do sistema DirectOS</p>
+            <h3>Usuários</h3>
+            <p class="text-muted mb-0">Cadastro de usuários do sistema</p>
         </div>
 
         <a href="cadastrar.php" class="btn btn-primary">
-            Novo Cliente
+            Novo Usuário
         </a>
     </div>
 
@@ -48,45 +45,39 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
-                            <th>Telefone</th>
                             <th>Email</th>
-                            <th>Documento</th>
-                            <th>Cidade/UF</th>
+                            <th>Perfil</th>
                             <th>Status</th>
+                            <th>Cadastro</th>
                             <th width="180">Ações</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <?php if (count($clientes) === 0): ?>
+                        <?php if (count($usuarios) === 0): ?>
                             <tr>
-                                <td colspan="8" class="text-center">
-                                    Nenhum cliente cadastrado.
+                                <td colspan="7" class="text-center">
+                                    Nenhum usuário cadastrado.
                                 </td>
                             </tr>
                         <?php endif; ?>
 
-                        <?php foreach ($clientes as $cliente): ?>
+                        <?php foreach ($usuarios as $usuario): ?>
                             <tr>
-                                <td><?= $cliente["ClienteId"] ?></td>
+                                <td><?= $usuario["UsuarioId"] ?></td>
 
-                                <td><?= htmlspecialchars($cliente["Nome"] ?? "") ?></td>
+                                <td><?= htmlspecialchars($usuario["Nome"] ?? "") ?></td>
 
-                                <td><?= htmlspecialchars($cliente["Telefone"] ?? "") ?></td>
-
-                                <td><?= htmlspecialchars($cliente["Email"] ?? "") ?></td>
-
-                                <td><?= htmlspecialchars($cliente["Documento"] ?? "") ?></td>
+                                <td><?= htmlspecialchars($usuario["Email"] ?? "") ?></td>
 
                                 <td>
-                                    <?= htmlspecialchars($cliente["Cidade"] ?? "") ?>
-                                    <?php if (!empty($cliente["Estado"])): ?>
-                                        / <?= htmlspecialchars($cliente["Estado"]) ?>
-                                    <?php endif; ?>
+                                    <span class="badge bg-dark">
+                                        <?= htmlspecialchars($usuario["Perfil"] ?? "") ?>
+                                    </span>
                                 </td>
 
                                 <td>
-                                    <?php if ((int)$cliente["Ativo"] === 1): ?>
+                                    <?php if ((int)$usuario["Ativo"] === 1): ?>
                                         <span class="badge bg-success">Ativo</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary">Inativo</span>
@@ -94,16 +85,25 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <a href="editar.php?id=<?= $cliente["ClienteId"] ?>" 
+                                    <?= !empty($usuario["DataCadastro"]) 
+                                        ? date("d/m/Y H:i", strtotime($usuario["DataCadastro"])) 
+                                        : "-" 
+                                    ?>
+                                </td>
+
+                                <td>
+                                    <a href="editar.php?id=<?= $usuario["UsuarioId"] ?>" 
                                        class="btn btn-sm btn-warning">
                                         Editar
                                     </a>
 
-                                    <a href="excluir.php?id=<?= $cliente["ClienteId"] ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Deseja realmente excluir este cliente?')">
-                                        Inativar
-                                    </a>
+                                    <?php if ((int)$usuario["UsuarioId"] !== (int)$_SESSION["UsuarioId"]): ?>
+                                        <a href="excluir.php?id=<?= $usuario["UsuarioId"] ?>" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Deseja realmente inativar este usuário?')">
+                                            Inativar
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

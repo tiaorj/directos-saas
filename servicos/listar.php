@@ -1,4 +1,5 @@
 <?php
+require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
 $sql = "
@@ -89,7 +90,7 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <a href="excluir.php?id=<?= $servico["ServicoId"] ?>" 
                                        class="btn btn-sm btn-danger"
                                        onclick="return confirm('Deseja realmente excluir este serviço?')">
-                                        Excluir
+                                        Inativar
                                     </a>
                                 </td>
                             </tr>

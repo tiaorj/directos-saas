@@ -1,4 +1,5 @@
 <?php
+require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
 $statusFiltro = $_GET["status"] ?? "";
@@ -286,7 +287,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <a href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>" 
                                        class="btn btn-sm btn-danger"
                                        onclick="return confirm('Deseja realmente excluir esta OS?')">
-                                        Excluir
+                                        Inativar
                                     </a>
                                 </td>
                             </tr>

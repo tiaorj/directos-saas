@@ -1,4 +1,5 @@
 <?php
+require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
 $id = $_GET["id"] ?? 0;
@@ -8,7 +9,10 @@ if ($id <= 0) {
 }
 
 $sql = "
-    DELETE FROM OS_OrdensServico
+    UPDATE OS_OrdensServico
+    SET 
+        Status = 'Cancelada',
+        DataConclusao = NULL
     WHERE OrdemServicoId = :OrdemServicoId
 ";
 

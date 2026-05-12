@@ -34,8 +34,22 @@
                         Ordens de Serviço
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="/sistema-os-php-sqlserver/usuarios/listar.php">
+                        Usuários
+                    </a>
+                </li>
             </ul>
+
+            <div class="d-flex align-items-center text-white">
+                <span class="me-3">
+                    <?= htmlspecialchars($_SESSION["UsuarioNome"] ?? "Usuário") ?>
+                </span>
+
+                <a href="/sistema-os-php-sqlserver/logout.php" class="btn btn-outline-light btn-sm">
+                    Sair
+                </a>
+            </div>
         </div>
     </div>
 </nav>

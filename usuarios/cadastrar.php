@@ -1,14 +1,16 @@
-<?php 
+<?php
 require_once "../includes/proteger.php";
-require_once "../includes/header.php";
-require_once "../includes/menu.php"; 
+require_once "../config/conexao.php";
 ?>
+
+<?php require_once "../includes/header.php"; ?>
+<?php require_once "../includes/menu.php"; ?>
 
 <div class="container">
 
     <div class="mb-3">
-        <h3>Novo Serviço</h3>
-        <p class="text-muted mb-0">Preencha os dados do serviço</p>
+        <h3>Novo Usuário</h3>
+        <p class="text-muted mb-0">Preencha os dados de acesso</p>
     </div>
 
     <div class="card shadow-sm">
@@ -22,13 +24,23 @@ require_once "../includes/menu.php";
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Descrição</label>
-                    <textarea name="Descricao" class="form-control" rows="3" maxlength="500"></textarea>
+                    <label class="form-label">Email *</label>
+                    <input type="email" name="Email" class="form-control" required maxlength="150">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Valor Base</label>
-                    <input type="number" step="0.01" name="ValorBase" class="form-control">
+                    <label class="form-label">Senha *</label>
+                    <input type="password" name="Senha" class="form-control" required minlength="6">
+                    <small class="text-muted">Mínimo de 6 caracteres.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Perfil</label>
+                    <select name="Perfil" class="form-control">
+                        <option value="Admin">Admin</option>
+                        <option value="Atendente">Atendente</option>
+                        <option value="Tecnico">Técnico</option>
+                    </select>
                 </div>
 
                 <div class="mb-3">

@@ -1,5 +1,8 @@
-<?php require_once "../includes/header.php"; ?>
-<?php require_once "../includes/menu.php"; ?>
+<?php 
+require_once "../includes/proteger.php";
+require_once "../includes/header.php";
+require_once "../includes/menu.php"; 
+?>
 
 <div class="container">
 

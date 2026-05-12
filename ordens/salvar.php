@@ -1,4 +1,5 @@
 <?php
+require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
 $clienteId = $_POST["ClienteId"] ?? 0;
