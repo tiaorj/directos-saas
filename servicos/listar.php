@@ -1,6 +1,9 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
+
+$podeEditarServicos = usuarioTemPerfil(["Admin"]);
 
 $sql = "
     SELECT 
@@ -31,9 +34,11 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <p class="text-muted mb-0">Cadastro de serviços oferecidos</p>
         </div>
 
-        <a href="cadastrar.php" class="btn btn-primary">
-            Novo Serviço
-        </a>
+        <?php if ($podeEditarServicos): ?>
+            <a href="cadastrar.php" class="btn btn-primary">
+                Novo Serviço
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="card shadow-sm">
@@ -82,16 +87,20 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <a href="editar.php?id=<?= $servico["ServicoId"] ?>" 
-                                       class="btn btn-sm btn-warning">
-                                        Editar
-                                    </a>
+                                    <?php if ($podeEditarServicos): ?>
+                                        <a href="editar.php?id=<?= $servico["ServicoId"] ?>" 
+                                        class="btn btn-sm btn-warning">
+                                            Editar
+                                        </a>
 
-                                    <a href="excluir.php?id=<?= $servico["ServicoId"] ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Deseja realmente excluir este serviço?')">
-                                        Inativar
-                                    </a>
+                                        <a href="excluir.php?id=<?= $servico["ServicoId"] ?>" 
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Deseja realmente inativar este serviço?')">
+                                            Inativar
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted">Somente leitura</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

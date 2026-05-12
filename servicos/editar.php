@@ -1,5 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
+require_once "../includes/permissoes.php";
+exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
 
 $id = $_GET["id"] ?? 0;

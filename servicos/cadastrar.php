@@ -2,6 +2,8 @@
 require_once "../includes/proteger.php";
 require_once "../includes/header.php";
 require_once "../includes/menu.php"; 
+require_once "../includes/permissoes.php";
+exigirPerfil(["Admin"]);
 ?>
 
 <div class="container">
