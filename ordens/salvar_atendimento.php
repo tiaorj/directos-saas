@@ -1,18 +1,24 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/historico.php";
 
 $ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
 $status = $_POST["Status"] ?? "Aberta";
 $descricaoSolucao = trim($_POST["DescricaoSolucao"] ?? "");
 $observacao = trim($_POST["Observacao"] ?? "");
+$usuarioId = $_SESSION["UsuarioId"];
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
 }
 
 $sqlAtual = "
-    SELECT Status, DataConclusao
+    SELECT 
+        Status, 
+        DataConclusao,
+        DescricaoSolucao,
+        Observacao
     FROM OS_OrdensServico
     WHERE OrdemServicoId = :OrdemServicoId
 ";
@@ -27,6 +33,7 @@ if (!$ordemAtual) {
     die("Ordem de serviço não encontrada.");
 }
 
+$statusAnterior = $ordemAtual["Status"];
 $dataConclusao = $ordemAtual["DataConclusao"];
 
 if ($status === "Concluída" && empty($dataConclusao)) {
@@ -54,6 +61,29 @@ $stmt->bindValue(":Observacao", $observacao);
 $stmt->bindValue(":DataConclusao", $dataConclusao, $dataConclusao === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 $stmt->execute();
+
+$descricaoHistorico = "Atendimento técnico atualizado.";
+
+if ($statusAnterior !== $status) {
+    $descricaoHistorico .= " Status alterado de '{$statusAnterior}' para '{$status}'.";
+}
+
+if (($ordemAtual["DescricaoSolucao"] ?? "") !== $descricaoSolucao) {
+    $descricaoHistorico .= " Solução aplicada atualizada.";
+}
+
+if (($ordemAtual["Observacao"] ?? "") !== $observacao) {
+    $descricaoHistorico .= " Observação atualizada.";
+}
+
+registrarHistoricoOS(
+    $conn,
+    $ordemServicoId,
+    $usuarioId,
+    $statusAnterior,
+    $status,
+    $descricaoHistorico
+);
 
 header("Location: visualizar.php?id=" . $ordemServicoId);
 exit;

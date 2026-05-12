@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
+require_once "../includes/historico.php";
 
 exigirPerfil(["Admin", "Atendente"]);
 
@@ -31,7 +32,9 @@ if ($titulo === "") {
 }
 
 $sqlAtual = "
-    SELECT Status, DataConclusao
+    SELECT 
+        Status, 
+        DataConclusao
     FROM OS_OrdensServico
     WHERE OrdemServicoId = :OrdemServicoId
 ";
@@ -91,6 +94,24 @@ $stmt->bindValue(":Observacao", $observacao);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 
 $stmt->execute();
+
+$usuarioId = $_SESSION["UsuarioId"];
+$statusAnterior = $ordemAtual["Status"];
+
+$descricaoHistorico = "Ordem de serviço atualizada pela edição completa.";
+
+if ($statusAnterior !== $status) {
+    $descricaoHistorico .= " Status alterado de '{$statusAnterior}' para '{$status}'.";
+}
+
+registrarHistoricoOS(
+    $conn,
+    $ordemServicoId,
+    $usuarioId,
+    $statusAnterior,
+    $status,
+    $descricaoHistorico
+);
 
 header("Location: visualizar.php?id=" . $ordemServicoId);
 exit;

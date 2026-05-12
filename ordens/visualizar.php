@@ -30,6 +30,27 @@ $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$ordem) {
     die("Ordem de serviço não encontrada.");
 }
+
+$sqlHistorico = "
+    SELECT 
+        h.HistoricoId,
+        h.StatusAnterior,
+        h.StatusNovo,
+        h.Descricao,
+        h.DataRegistro,
+        u.Nome AS UsuarioNome
+    FROM OS_Historico h
+    INNER JOIN OS_Usuarios u ON u.UsuarioId = h.UsuarioId
+    WHERE h.OrdemServicoId = :OrdemServicoId
+    ORDER BY h.DataRegistro DESC
+";
+
+$stmtHistorico = $conn->prepare($sqlHistorico);
+$stmtHistorico->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtHistorico->execute();
+
+$historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -165,6 +186,64 @@ if (!$ordem) {
         </div>
     <?php endif; ?>
 
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-dark text-white">
+        Histórico de Movimentações
+    </div>
+
+    <div class="card-body">
+
+        <?php if (count($historicos) === 0): ?>
+            <p class="text-muted mb-0">
+                Nenhuma movimentação registrada.
+            </p>
+        <?php else: ?>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Status Anterior</th>
+                            <th>Status Novo</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php foreach ($historicos as $hist): ?>
+                            <tr>
+                                <td>
+                                    <?= date("d/m/Y H:i", strtotime($hist["DataRegistro"])) ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($hist["UsuarioNome"] ?? "") ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($hist["StatusAnterior"] ?? "-") ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($hist["StatusNovo"] ?? "-") ?>
+                                </td>
+
+                                <td>
+                                    <?= nl2br(htmlspecialchars($hist["Descricao"] ?? "")) ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+        <?php endif; ?>
+
+    </div>
 </div>
 
 <?php require_once "../includes/footer.php"; ?>

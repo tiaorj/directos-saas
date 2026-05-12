@@ -1,6 +1,10 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
+require_once "../includes/historico.php";
+
+exigirPerfil(["Admin", "Atendente"]);
 
 $clienteId = $_POST["ClienteId"] ?? 0;
 $servicoId = $_POST["ServicoId"] !== "" ? $_POST["ServicoId"] : null;
@@ -73,6 +77,17 @@ $stmt->bindValue(":DataConclusao", $dataConclusao, $dataConclusao === null ? PDO
 $stmt->bindValue(":Observacao", $observacao);
 
 $stmt->execute();
+
+$ordemServicoId = $conn->lastInsertId();
+
+registrarHistoricoOS(
+    $conn,
+    $ordemServicoId,
+    $_SESSION["UsuarioId"],
+    null,
+    $status,
+    "Ordem de serviço criada."
+);
 
 header("Location: listar.php");
 exit;
