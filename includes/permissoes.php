@@ -14,6 +14,7 @@ function usuarioTemPerfil($perfisPermitidos)
 function exigirPerfil($perfisPermitidos)
 {
     if (!usuarioTemPerfil($perfisPermitidos)) {
-        die("Acesso negado. Você não tem permissão para acessar esta funcionalidade.");
+        header("Location: /sistema-os-php-sqlserver/acesso_negado.php");
+        exit;
     }
 }

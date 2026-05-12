@@ -1,6 +1,12 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
+
+$podeCriarOS = usuarioTemPerfil(["Admin", "Atendente"]);
+$podeEditarOS = usuarioTemPerfil(["Admin", "Atendente"]);
+$podeCancelarOS = usuarioTemPerfil(["Admin"]);
+$podeAtenderOS = usuarioTemPerfil(["Admin", "Atendente", "Tecnico"]);
 
 $statusFiltro = $_GET["status"] ?? "";
 $prioridadeFiltro = $_GET["prioridade"] ?? "";
@@ -88,10 +94,11 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h3>Ordens de Serviço</h3>
             <p class="text-muted mb-0">Acompanhamento das ordens abertas, em andamento e concluídas</p>
         </div>
-
-        <a href="cadastrar.php" class="btn btn-primary">
-            Nova OS
-        </a>
+        <?php if ($podeCriarOS): ?>
+            <a href="cadastrar.php" class="btn btn-primary">
+                Nova OS
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -274,21 +281,32 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
+                                    <?php if ($podeAtenderOS): ?>
+                                        <a href="atendimento.php?id=<?= $ordem["OrdemServicoId"] ?>" 
+                                        class="btn btn-sm btn-success">
+                                            Atender
+                                        </a>
+                                    <?php endif; ?>
+
                                     <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                       class="btn btn-sm btn-info">
+                                    class="btn btn-sm btn-info">
                                         Ver
                                     </a>
 
-                                    <a href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                       class="btn btn-sm btn-warning">
-                                        Editar
-                                    </a>
+                                    <?php if ($podeEditarOS): ?>
+                                        <a href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
+                                        class="btn btn-sm btn-warning">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
 
-                                    <a href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Deseja realmente excluir esta OS?')">
-                                        Inativar
-                                    </a>
+                                    <?php if ($podeCancelarOS): ?>
+                                        <a href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>" 
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Deseja realmente cancelar esta OS?')">
+                                            Cancelar
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

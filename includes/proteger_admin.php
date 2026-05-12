@@ -2,5 +2,6 @@
 require_once "proteger.php";
 
 if (($_SESSION["UsuarioPerfil"] ?? "") !== "Admin") {
-    die("Acesso negado. Esta área é restrita a administradores.");
+    header("Location: /sistema-os-php-sqlserver/acesso_negado.php");
+    exit;
 }
