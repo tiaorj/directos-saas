@@ -1,3 +1,3 @@
 <?php
-header("Location: lancamentos/listar.php");
+header("Location: dashboard.php");
 exit();
