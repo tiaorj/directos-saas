@@ -10,6 +10,7 @@ $id = $_GET["id"] ?? 0;
 $sql = "
     SELECT 
         OrdemServicoId,
+        CodigoOS,
         ClienteId,
         ServicoId,
         Titulo,
@@ -65,7 +66,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 <div class="container">
 
     <div class="mb-3">
-        <h3>Editar Ordem de Serviço Nº <?= $ordem["OrdemServicoId"] ?></h3>
+        <h3>
+            Editar Ordem de Serviço <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
+        </h3>
         <p class="text-muted mb-0">Atualize os dados da OS</p>
     </div>
 

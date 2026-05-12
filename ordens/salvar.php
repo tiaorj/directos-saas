@@ -79,14 +79,27 @@ $stmt->bindValue(":Observacao", $observacao);
 $stmt->execute();
 
 $ordemServicoId = $conn->lastInsertId();
+$usuarioId = $_SESSION["UsuarioId"];
+
+$anoAtual = date("Y");
+$codigoOS = "OS-" . $anoAtual . "-" . str_pad($ordemServicoId, 6, "0", STR_PAD_LEFT);
+$sqlCodigo = "
+    UPDATE OS_OrdensServico
+    SET CodigoOS = :CodigoOS
+    WHERE OrdemServicoId = :OrdemServicoId
+";
+$stmtCodigo = $conn->prepare($sqlCodigo);
+$stmtCodigo->bindValue(":CodigoOS", $codigoOS);
+$stmtCodigo->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+$stmtCodigo->execute();
 
 registrarHistoricoOS(
     $conn,
     $ordemServicoId,
-    $_SESSION["UsuarioId"],
+    $usuarioId,
     null,
     $status,
-    "Ordem de serviço criada."
+    "Ordem de serviço criada. Código: {$codigoOS}."
 );
 
 header("Location: listar.php");

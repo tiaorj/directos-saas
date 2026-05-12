@@ -28,6 +28,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 $sql = "
     SELECT 
         os.OrdemServicoId,
+        os.CodigoOS,
         os.Titulo,
         os.Status,
         os.Prioridade,
@@ -190,7 +191,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <table class="table table-bordered table-striped table-hover align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>Nº OS</th>
+                            <th>Código</th>
                             <th>Cliente</th>
                             <th>Serviço</th>
                             <th>Título</th>
@@ -214,7 +215,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <?php foreach ($ordens as $ordem): ?>
                             <tr>
-                                <td><?= $ordem["OrdemServicoId"] ?></td>
+                                <td><?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?></td>
 
                                 <td><?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?></td>
 

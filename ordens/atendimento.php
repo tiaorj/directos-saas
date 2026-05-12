@@ -11,6 +11,7 @@ if ($id <= 0) {
 $sql = "
     SELECT 
         os.OrdemServicoId,
+        CodigoOS,
         os.Titulo,
         os.DescricaoProblema,
         os.DescricaoSolucao,
@@ -44,7 +45,7 @@ if (!$ordem) {
 <div class="container">
 
     <div class="mb-3">
-        <h3>Atendimento da OS Nº <?= $ordem["OrdemServicoId"] ?></h3>
+        <h3>Atendimento da OS <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?></h3>
         <p class="text-muted mb-0">
             Atualização técnica da ordem de serviço
         </p>
@@ -56,6 +57,8 @@ if (!$ordem) {
         </div>
 
         <div class="card-body">
+            <strong>Código:</strong>
+            <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?><br>
             <strong>Cliente:</strong> <?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?><br>
             <strong>Serviço:</strong> <?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?><br>
             <strong>Título:</strong> <?= htmlspecialchars($ordem["Titulo"] ?? "") ?><br>

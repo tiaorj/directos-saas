@@ -1,6 +1,7 @@
 <?php
 require_once "includes/proteger.php";
 require_once "config/conexao.php";
+require_once "includes/funcoes.php";
 
 function buscarValor($conn, $sql)
 {
@@ -73,6 +74,7 @@ $valorFinalizado = buscarValor($conn, "
 $sqlUltimas = "
     SELECT TOP 5
         os.OrdemServicoId,
+        os.CodigoOS,
         os.Titulo,
         os.Status,
         os.Prioridade,
@@ -220,7 +222,7 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
                 <table class="table table-bordered table-striped table-hover align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>Nº OS</th>
+                            <th>Código</th>
                             <th>Cliente</th>
                             <th>Serviço</th>
                             <th>Título</th>
@@ -242,7 +244,9 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
 
                         <?php foreach ($ultimasOrdens as $ordem): ?>
                             <tr>
-                                <td><?= $ordem["OrdemServicoId"] ?></td>
+                                <td>
+                                    <?= htmlspecialchars(formatarCodigoOS($ordem["OrdemServicoId"], $ordem["CodigoOS"] ?? null, $ordem["DataAbertura"] ?? null)) ?>
+                                </td>
 
                                 <td><?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?></td>
 

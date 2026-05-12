@@ -60,7 +60,7 @@ $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h3>Ordem de Serviço Nº <?= $ordem["OrdemServicoId"] ?></h3>
+            <h3>Ordem de Serviço <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?></h3>
             <p class="text-muted mb-0"><?= htmlspecialchars($ordem["Titulo"]) ?></p>
         </div>
 
@@ -86,6 +86,10 @@ $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="card-body">
             <div class="row">
+                <div class="col-md-4">
+                    <strong>Código:</strong><br>
+                    <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
+                </div>                
                 <div class="col-md-4">
                     <strong>Status:</strong><br>
                     <?= htmlspecialchars($ordem["Status"]) ?>
