@@ -21,6 +21,9 @@ $sql = "
         os.ValorFinal,
         os.DescricaoProblema,
         os.DescricaoSolucao,
+        os.MostrarValorCliente,
+        os.MostrarSolucaoCliente,
+        os.MostrarHistoricoCliente,
         c.Nome AS ClienteNome,
         c.Telefone AS ClienteTelefone,
         c.Email AS ClienteEmail,
@@ -33,7 +36,7 @@ $sql = "
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
     LEFT JOIN OS_Empresas e ON e.EmpresaId = os.EmpresaId
-    WHERE os.TokenAcompanhamento = :Token           
+    WHERE os.TokenAcompanhamento = :Token
 ";
 
 $stmt = $conn->prepare($sql);
@@ -213,7 +216,7 @@ function classeStatus($status)
         </div>
     </div>
 
-    <?php if (!empty($ordem["DescricaoSolucao"])): ?>
+    <?php if ((int)($ordem["MostrarSolucaoCliente"] ?? 1) === 1 && !empty($ordem["DescricaoSolucao"])): ?>
         <div class="card shadow-sm mb-3">
             <div class="card-header bg-dark text-white">
                 Solução Aplicada
@@ -225,20 +228,23 @@ function classeStatus($status)
         </div>
     <?php endif; ?>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-dark text-white">
-            Valores
+    <?php if ((int)($ordem["MostrarValorCliente"] ?? 1) === 1): ?>
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-dark text-white">
+                Valores
+            </div>
+
+            <div class="card-body">
+                <strong>Valor previsto:</strong>
+                R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?><br>
+
+                <strong>Valor final:</strong>
+                R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?>
+            </div>
         </div>
+    <?php endif; ?>
 
-        <div class="card-body">
-            <strong>Valor previsto:</strong>
-            R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?><br>
-
-            <strong>Valor final:</strong>
-            R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?>
-        </div>
-    </div>
-
+    <?php if ((int)($ordem["MostrarHistoricoCliente"] ?? 1) === 1): ?>
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-dark text-white">
             Histórico de Movimentações
@@ -275,6 +281,7 @@ function classeStatus($status)
             <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
 
     <?php if (!empty($ordem["EmpresaWhatsApp"])): ?>
         <?php

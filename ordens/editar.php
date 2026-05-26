@@ -22,7 +22,10 @@ $sql = "
         ValorFinal,
         DataPrevisao,
         DataConclusao,
-        Observacao
+        Observacao,
+        MostrarValorCliente,
+        MostrarSolucaoCliente,
+        MostrarHistoricoCliente
     FROM OS_OrdensServico
     WHERE OrdemServicoId = :OrdemServicoId
 ";
@@ -184,7 +187,59 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <label class="form-label">Observação</label>
                     <textarea name="Observacao" class="form-control" rows="3"><?= htmlspecialchars($ordem["Observacao"] ?? "") ?></textarea>
                 </div>
+                <div class="card border-primary mb-3">
+                    <div class="card-header bg-primary text-white">
+                        Área do Cliente
+                    </div>
 
+                    <div class="card-body">
+                        <p class="text-muted">
+                            Defina quais informações desta OS ficarão visíveis no link público enviado ao cliente.
+                        </p>
+
+                        <div class="form-check mb-2">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="MostrarValorCliente" 
+                                id="MostrarValorCliente" 
+                                value="1"
+                                <?= (int)($ordem["MostrarValorCliente"] ?? 1) === 1 ? "checked" : "" ?>
+                            >
+                            <label class="form-check-label" for="MostrarValorCliente">
+                                Mostrar valores para o cliente
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="MostrarSolucaoCliente" 
+                                id="MostrarSolucaoCliente" 
+                                value="1"
+                                <?= (int)($ordem["MostrarSolucaoCliente"] ?? 1) === 1 ? "checked" : "" ?>
+                            >
+                            <label class="form-check-label" for="MostrarSolucaoCliente">
+                                Mostrar solução aplicada para o cliente
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="MostrarHistoricoCliente" 
+                                id="MostrarHistoricoCliente" 
+                                value="1"
+                                <?= (int)($ordem["MostrarHistoricoCliente"] ?? 1) === 1 ? "checked" : "" ?>
+                            >
+                            <label class="form-check-label" for="MostrarHistoricoCliente">
+                                Mostrar histórico de movimentações para o cliente
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-success">
                     Atualizar
                 </button>

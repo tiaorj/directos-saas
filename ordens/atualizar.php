@@ -18,6 +18,9 @@ $valorPrevisto = $_POST["ValorPrevisto"] !== "" ? $_POST["ValorPrevisto"] : null
 $valorFinal = $_POST["ValorFinal"] !== "" ? $_POST["ValorFinal"] : null;
 $dataPrevisao = $_POST["DataPrevisao"] !== "" ? $_POST["DataPrevisao"] : null;
 $observacao = trim($_POST["Observacao"] ?? "");
+$mostrarValorCliente = isset($_POST["MostrarValorCliente"]) ? 1 : 0;
+$mostrarSolucaoCliente = isset($_POST["MostrarSolucaoCliente"]) ? 1 : 0;
+$mostrarHistoricoCliente = isset($_POST["MostrarHistoricoCliente"]) ? 1 : 0;
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
@@ -73,7 +76,10 @@ $sql = "
         ValorFinal = :ValorFinal,
         DataPrevisao = :DataPrevisao,
         DataConclusao = :DataConclusao,
-        Observacao = :Observacao
+        Observacao = :Observacao,
+        MostrarValorCliente = :MostrarValorCliente,
+        MostrarSolucaoCliente = :MostrarSolucaoCliente,
+        MostrarHistoricoCliente = :MostrarHistoricoCliente
     WHERE OrdemServicoId = :OrdemServicoId
 ";
 
@@ -91,6 +97,9 @@ $stmt->bindValue(":ValorFinal", $valorFinal, $valorFinal === null ? PDO::PARAM_N
 $stmt->bindValue(":DataPrevisao", $dataPrevisao, $dataPrevisao === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 $stmt->bindValue(":DataConclusao", $dataConclusao, $dataConclusao === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 $stmt->bindValue(":Observacao", $observacao);
+$stmt->bindValue(":MostrarValorCliente", $mostrarValorCliente, PDO::PARAM_INT);
+$stmt->bindValue(":MostrarSolucaoCliente", $mostrarSolucaoCliente, PDO::PARAM_INT);
+$stmt->bindValue(":MostrarHistoricoCliente", $mostrarHistoricoCliente, PDO::PARAM_INT);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 
 $stmt->execute();
