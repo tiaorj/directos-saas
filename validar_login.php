@@ -14,6 +14,7 @@ if ($email === "" || $senha === "") {
 $sql = "
     SELECT 
         UsuarioId,
+        EmpresaId,
         Nome,
         Email,
         SenhaHash,
@@ -48,6 +49,6 @@ $_SESSION["UsuarioId"] = $usuario["UsuarioId"];
 $_SESSION["UsuarioNome"] = $usuario["Nome"];
 $_SESSION["UsuarioEmail"] = $usuario["Email"];
 $_SESSION["UsuarioPerfil"] = $usuario["Perfil"];
-
+$_SESSION["EmpresaId"] = $usuario["EmpresaId"];
 header("Location: dashboard.php");
 exit;

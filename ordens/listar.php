@@ -14,14 +14,18 @@ $clienteFiltro = $_GET["cliente"] ?? "";
 $dataInicioFiltro = $_GET["data_inicio"] ?? "";
 $dataFimFiltro = $_GET["data_fim"] ?? "";
 
+$empresaId = $_SESSION["EmpresaId"];
+
 $sqlClientes = "
     SELECT ClienteId, Nome
     FROM OS_Clientes
-    WHERE Ativo = 1
+    WHERE Ativo = 1 
+    AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
 $stmtClientes = $conn->prepare($sqlClientes);
+$stmtClientes->bindValue(":EmpresaId", $empresaId);
 $stmtClientes->execute();
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
@@ -42,10 +46,11 @@ $sql = "
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
-    WHERE 1 = 1
+    WHERE os.EmpresaId = :EmpresaId
 ";
 
 $parametros = [];
+$parametros[":EmpresaId"] = $empresaId;
 
 if ($statusFiltro !== "") {
     $sql .= " AND os.Status = :Status ";

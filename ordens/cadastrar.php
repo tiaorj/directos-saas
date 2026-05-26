@@ -1,15 +1,18 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+$empresaId = $_SESSION["EmpresaId"];
 
 $sqlClientes = "
     SELECT ClienteId, Nome
     FROM OS_Clientes
     WHERE Ativo = 1
+    AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
 $stmtClientes = $conn->prepare($sqlClientes);
+$stmtClientes->bindValue(":EmpresaId", $_SESSION["EmpresaId"]);
 $stmtClientes->execute();
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
@@ -17,10 +20,12 @@ $sqlServicos = "
     SELECT ServicoId, Nome, ValorBase
     FROM OS_Servicos
     WHERE Ativo = 1
+    AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
 $stmtServicos = $conn->prepare($sqlServicos);
+$stmtServicos->bindValue(":EmpresaId", $_SESSION["EmpresaId"]);
 $stmtServicos->execute();
 $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 ?>
