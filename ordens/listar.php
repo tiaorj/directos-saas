@@ -13,6 +13,7 @@ $prioridadeFiltro = $_GET["prioridade"] ?? "";
 $clienteFiltro = $_GET["cliente"] ?? "";
 $dataInicioFiltro = $_GET["data_inicio"] ?? "";
 $dataFimFiltro = $_GET["data_fim"] ?? "";
+$baseUrl = "http://localhost:8080/sistema-os-php-sqlserver";
 
 $empresaId = $_SESSION["EmpresaId"];
 
@@ -43,6 +44,8 @@ $sql = "
         os.DataPrevisao,
         os.DataConclusao,
         c.Nome AS ClienteNome,
+        c.Telefone AS ClienteTelefone,
+        c.Email AS ClienteEmail,
         s.Nome AS ServicoNome
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
@@ -295,19 +298,47 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </a>
                                     <?php endif; ?>
 
+                                    <?php
+                                        $linkCliente = $baseUrl . "/public/os.php?token=" . $ordem["TokenAcompanhamento"];
+
+                                        $telefoneCliente = preg_replace('/\D/', '', $ordem["ClienteTelefone"] ?? "");
+
+                                        $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT));
+
+                                        $mensagemWhatsApp = "Olá " . ($ordem["ClienteNome"] ?? "") . 
+                                            ", sua ordem de serviço " . $codigoOS . 
+                                            " pode ser acompanhada pelo link: " . $linkCliente;
+
+                                        $linkWhatsApp = "";
+
+                                        if ($telefoneCliente !== "") {
+                                            $linkWhatsApp = "https://wa.me/55" . $telefoneCliente . "?text=" . urlencode($mensagemWhatsApp);
+                                        }
+                                    ?>
+
                                     <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
                                     class="btn btn-sm btn-info">
                                         Ver
                                     </a>
-                                    <a href="../public/os.php?token=<?= $ordem["TokenAcompanhamento"] ?>" 
+
+                                    <a href="<?= htmlspecialchars($linkCliente) ?>" 
                                     target="_blank"
                                     class="btn btn-sm btn-outline-primary">
                                         Link Cliente
                                     </a>
-                                    <?php if ($podeEditarOS): ?>
-                                        <a href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                        class="btn btn-sm btn-warning">
-                                            Editar
+
+                                    <button 
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        onclick="copiarLinkCliente('<?= htmlspecialchars($linkCliente, ENT_QUOTES) ?>')">
+                                        Copiar Link
+                                    </button>
+
+                                    <?php if ($linkWhatsApp !== ""): ?>
+                                        <a href="<?= htmlspecialchars($linkWhatsApp) ?>" 
+                                        target="_blank"
+                                        class="btn btn-sm btn-success">
+                                            WhatsApp
                                         </a>
                                     <?php endif; ?>
 
@@ -330,5 +361,15 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
 </div>
-
+<script>
+function copiarLinkCliente(link) {
+    navigator.clipboard.writeText(link)
+        .then(function() {
+            alert("Link de acompanhamento copiado!");
+        })
+        .catch(function() {
+            prompt("Copie o link abaixo:", link);
+        });
+}
+</script>
 <?php require_once "../includes/footer.php"; ?>
