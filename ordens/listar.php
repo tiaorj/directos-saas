@@ -32,6 +32,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 $sql = "
     SELECT 
         os.OrdemServicoId,
+        os.TokenAcompanhamento,
         os.CodigoOS,
         os.Titulo,
         os.Status,
@@ -298,7 +299,11 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     class="btn btn-sm btn-info">
                                         Ver
                                     </a>
-
+                                    <a href="../public/os.php?token=<?= $ordem["TokenAcompanhamento"] ?>" 
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-primary">
+                                        Link Cliente
+                                    </a>
                                     <?php if ($podeEditarOS): ?>
                                         <a href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
                                         class="btn btn-sm btn-warning">
