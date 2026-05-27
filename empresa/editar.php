@@ -2,7 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
-$empresaId = $_SESSION["EmpresaId"];
+$empresaId = (int)$_SESSION["EmpresaId"];
 
 $sql = "
     SELECT
@@ -37,13 +37,19 @@ $erro = $_GET["erro"] ?? "";
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page">
 
-    <div class="mb-3">
-        <h3>Minha Empresa</h3>
-        <p class="text-muted mb-0">
-            Atualize os dados da empresa exibidos no sistema e na área do cliente.
-        </p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Minha Empresa</h3>
+            <p>
+                Atualize os dados da empresa exibidos no sistema, na área do cliente e nos links públicos.
+            </p>
+        </div>
+
+        <a href="../dashboard.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
     <?php if ($sucesso !== ""): ?>
@@ -58,8 +64,55 @@ $erro = $_GET["erro"] ?? "";
         </div>
     <?php endif; ?>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Status da empresa</div>
+
+                    <div class="mt-2">
+                        <?php if ((int)$empresa["Ativo"] === 1): ?>
+                            <span class="badge bg-success">Ativa</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary">Inativa</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Slug</div>
+
+                    <h6 class="mb-0 mt-2">
+                        <?= htmlspecialchars($empresa["Slug"] ?? "-") ?>
+                    </h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Data de cadastro</div>
+
+                    <h6 class="mb-0 mt-2">
+                        <?= !empty($empresa["DataCadastro"]) 
+                            ? date("d/m/Y H:i", strtotime($empresa["DataCadastro"])) 
+                            : "-" 
+                        ?>
+                    </h6>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card form-card">
+        <div class="card-header">
             Dados da Empresa
         </div>
 
@@ -68,9 +121,13 @@ $erro = $_GET["erro"] ?? "";
 
                 <input type="hidden" name="EmpresaId" value="<?= (int)$empresa["EmpresaId"] ?>">
 
+                <div class="form-section-title">
+                    Identificação
+                </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Nome Fantasia *</label>
+                        <label class="form-label required-label">Nome Fantasia</label>
                         <input 
                             type="text" 
                             name="NomeFantasia" 
@@ -106,6 +163,26 @@ $erro = $_GET["erro"] ?? "";
                     </div>
 
                     <div class="col-md-4 mb-3">
+                        <label class="form-label">Slug</label>
+                        <input 
+                            type="text" 
+                            name="Slug" 
+                            class="form-control"
+                            maxlength="80"
+                            value="<?= htmlspecialchars($empresa["Slug"] ?? "") ?>"
+                        >
+                        <div class="input-help">
+                            Usado futuramente para URL personalizada da empresa.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section-title">
+                    Contato
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Telefone</label>
                         <input 
                             type="text" 
@@ -125,14 +202,12 @@ $erro = $_GET["erro"] ?? "";
                             maxlength="20"
                             value="<?= htmlspecialchars($empresa["WhatsApp"] ?? "") ?>"
                         >
-                        <small class="text-muted">
+                        <div class="input-help">
                             Informe com DDD. Exemplo: 21999999999
-                        </small>
+                        </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-8 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">E-mail</label>
                         <input 
                             type="email" 
@@ -142,40 +217,22 @@ $erro = $_GET["erro"] ?? "";
                             value="<?= htmlspecialchars($empresa["Email"] ?? "") ?>"
                         >
                     </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Slug</label>
-                        <input 
-                            type="text" 
-                            name="Slug" 
-                            class="form-control"
-                            maxlength="80"
-                            value="<?= htmlspecialchars($empresa["Slug"] ?? "") ?>"
-                        >
-                        <small class="text-muted">
-                            Usado futuramente para URL personalizada.
-                        </small>
-                    </div>
                 </div>
 
-                <hr>
-
-                <div class="mb-3">
-                    <strong>Status:</strong>
-                    <?php if ((int)$empresa["Ativo"] === 1): ?>
-                        <span class="badge bg-success">Ativa</span>
-                    <?php else: ?>
-                        <span class="badge bg-secondary">Inativa</span>
-                    <?php endif; ?>
+                <div class="alert alert-info mb-0">
+                    <strong>Observação:</strong>
+                    os dados de WhatsApp, e-mail e nome fantasia podem aparecer na área pública do cliente e nos links de acompanhamento da OS.
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Salvar Alterações
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Salvar Alterações
+                    </button>
 
-                <a href="../dashboard.php" class="btn btn-secondary">
-                    Voltar
-                </a>
+                    <a href="../dashboard.php" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
             </form>
         </div>

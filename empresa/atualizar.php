@@ -28,6 +28,20 @@ if ($slug === "") {
     $slug = trim($slug, '-');
 }
 
+$slug = strtolower($slug);
+$slug = preg_replace('/[^a-z0-9]+/i', '-', $slug);
+$slug = trim($slug, '-');
+
+if ($slug === "") {
+    header("Location: editar.php?erro=Slug inválido.");
+    exit;
+}
+
+if ($email !== "" && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    header("Location: editar.php?erro=E-mail inválido.");
+    exit;
+}
+
 $sqlSlug = "
     SELECT COUNT(*) AS Total
     FROM OS_Empresas
