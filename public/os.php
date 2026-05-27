@@ -250,17 +250,17 @@ function classeStatus($status)
                 <div class="row">
                     <?php foreach ($anexos as $anexo): ?>
                         <?php
-                            $caminhoArquivo = "../" . $anexo["CaminhoArquivo"];
-                            $extensao = strtolower(pathinfo($anexo["NomeOriginal"], PATHINFO_EXTENSION));
-                            $ehImagem = in_array($extensao, ["jpg", "jpeg", "png", "gif"]);
+                        $linkAnexo = "anexo.php?id=" . (int)$anexo["AnexoId"] . "&token=" . urlencode($token);
+                        $extensao = strtolower(pathinfo($anexo["NomeOriginal"], PATHINFO_EXTENSION));
+                        $ehImagem = in_array($extensao, ["jpg", "jpeg", "png", "gif"]);
                         ?>
 
                         <div class="col-md-4 mb-3">
                             <div class="card h-100 border">
                                 <?php if ($ehImagem): ?>
-                                    <a href="<?= htmlspecialchars($caminhoArquivo) ?>" target="_blank">
+                                    <a href="<?= htmlspecialchars($linkAnexo) ?>" target="_blank">
                                         <img 
-                                            src="<?= htmlspecialchars($caminhoArquivo) ?>" 
+                                            src="<?= htmlspecialchars($linkAnexo) ?>" 
                                             class="card-img-top" 
                                             style="height: 180px; object-fit: cover;"
                                             alt="Anexo"
@@ -287,7 +287,7 @@ function classeStatus($status)
                                     </p>
 
                                     <a 
-                                        href="<?= htmlspecialchars($caminhoArquivo) ?>" 
+                                        href="<?= htmlspecialchars($linkAnexo) ?>" 
                                         target="_blank"
                                         class="btn btn-sm btn-primary w-100"
                                     >

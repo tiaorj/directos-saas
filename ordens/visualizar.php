@@ -284,7 +284,7 @@ $anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
 
                                 <td>
                                     <a 
-                                        href="../<?= htmlspecialchars($anexo["CaminhoArquivo"]) ?>" 
+                                        href="abrir_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>"
                                         target="_blank"
                                         class="btn btn-sm btn-info"
                                     >
