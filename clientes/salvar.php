@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $nome = trim($_POST["Nome"] ?? "");
 $telefone = trim($_POST["Telefone"] ?? "");
 $email = trim($_POST["Email"] ?? "");
@@ -25,6 +26,7 @@ $sql = "
         Endereco,
         Cidade,
         Estado,
+        EmpresaId,
         Ativo
     )
     VALUES
@@ -36,6 +38,7 @@ $sql = "
         :Endereco,
         :Cidade,
         :Estado,
+        :EmpresaId,
         :Ativo
     )
 ";
@@ -49,6 +52,7 @@ $stmt->bindValue(":Documento", $documento);
 $stmt->bindValue(":Endereco", $endereco);
 $stmt->bindValue(":Cidade", $cidade);
 $stmt->bindValue(":Estado", $estado);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->bindValue(":Ativo", $ativo, PDO::PARAM_INT);
 
 $stmt->execute();

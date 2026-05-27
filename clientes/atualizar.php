@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $clienteId = $_POST["ClienteId"] ?? 0;
 $nome = trim($_POST["Nome"] ?? "");
 $telefone = trim($_POST["Telefone"] ?? "");
@@ -32,6 +33,7 @@ $sql = "
         Estado = :Estado,
         Ativo = :Ativo
     WHERE ClienteId = :ClienteId
+      AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -45,7 +47,7 @@ $stmt->bindValue(":Cidade", $cidade);
 $stmt->bindValue(":Estado", $estado);
 $stmt->bindValue(":Ativo", $ativo, PDO::PARAM_INT);
 $stmt->bindValue(":ClienteId", $clienteId, PDO::PARAM_INT);
-
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 header("Location: listar.php");
