@@ -99,22 +99,24 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container-fluid">
 
-    <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3>Ordens de Serviço</h3>
-            <p>Acompanhe, filtre e gerencie as ordens de serviço da empresa.</p>
+            <h3 class="mb-1">Ordens de Serviço</h3>
+            <p class="text-muted mb-0">
+                Acompanhe, filtre e gerencie as ordens de serviço da empresa.
+            </p>
         </div>
 
         <?php if ($podeCriarOS): ?>
-            <a href="cadastrar.php" class="btn btn-primary btn-action-main">
+            <a href="cadastrar.php" class="btn btn-primary">
                 + Nova OS
             </a>
         <?php endif; ?>
     </div>
 
-    <div class="section-card filter-card">
-        <div class="section-card-header">
-            Filtros
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <strong>Filtros</strong>
         </div>
 
         <div class="section-card-body">
@@ -189,26 +191,26 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <div class="section-card table-card">
-        <div class="section-card-header dark table-toolbar">
-            <span>Resultado</span>
-            <span class="table-count"><?= count($ordens) ?> registro(s)</span>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Resultado</strong>
+
+            <span class="badge bg-primary">
+                <?= count($ordens) ?> registro(s)
+            </span>
         </div>
 
         <div class="section-card-body p-0">
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover align-middle">
+                <table class="table table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
-                            <th>Código</th>
+                            <th>OS</th>
                             <th>Cliente</th>
                             <th>Serviço</th>
-                            <th>Título</th>
                             <th>Status</th>
-                            <th>Prioridade</th>
-                            <th>Abertura</th>
-                            <th>Previsão</th>
+                            <th>Datas</th>
                             <th>Valor</th>
                             <th class="col-actions">Ações</th>
                         </tr>
@@ -225,14 +227,18 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <?php foreach ($ordens as $ordem): ?>
                             <tr>
-                                <td><?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?></td>
+                                <td>
+                                    
+                                    <span class="os-code">
+                                        <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
+                                        
+                                    </span>                                    
+                                </td>
 
                                 <td><?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?></td>
 
                                 <td><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></td>
-
-                                <td><?= htmlspecialchars($ordem["Titulo"] ?? "") ?></td>
-
+                                
                                 <td>
                                     <?php
                                         $status = $ordem["Status"];
@@ -255,32 +261,11 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <?php
-                                        $prioridade = $ordem["Prioridade"];
-                                        $classePrioridade = "bg-secondary";
-
-                                        if ($prioridade === "Baixa") {
-                                            $classePrioridade = "bg-info text-dark";
-                                        } elseif ($prioridade === "Alta") {
-                                            $classePrioridade = "bg-warning text-dark";
-                                        } elseif ($prioridade === "Urgente") {
-                                            $classePrioridade = "bg-danger";
-                                        }
-                                    ?>
-
-                                    <span class="badge badge-priority <?= $classePrioridade ?>">
-                                        <?= htmlspecialchars($prioridade) ?>
-                                    </span>
-                                </td>
-
-                                <td>
                                     <?= !empty($ordem["DataAbertura"]) 
                                         ? date("d/m/Y", strtotime($ordem["DataAbertura"])) 
                                         : "-" 
                                     ?>
-                                </td>
-
-                                <td>
+                                    <br>
                                     <?= !empty($ordem["DataPrevisao"]) 
                                         ? date("d/m/Y", strtotime($ordem["DataPrevisao"])) 
                                         : "-" 
