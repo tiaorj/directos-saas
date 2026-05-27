@@ -31,23 +31,32 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/menu.php"; ?>
 
 <div class="container-fluid">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3>Clientes</h3>
-            <p class="text-muted mb-0">Cadastro de clientes do sistema DirectOS</p>
+            <h3 class="mb-1">Clientes</h3>
+            <p class="text-muted mb-0">
+                Gerencie os clientes vinculados à sua empresa.
+            </p>
         </div>
 
         <a href="cadastrar.php" class="btn btn-primary">
-            Novo Cliente
+            + Novo Cliente
         </a>
     </div>
 
     <div class="card shadow-sm">
-        <div class="card-body">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Clientes cadastrados</strong>
+
+            <span class="badge bg-primary">
+                <?= count($clientes) ?> registro(s)
+            </span>
+        </div>
+
+        <div class="card-body p-0">>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover align-middle">
+                <table class="table table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
                             <th>ID</th>
@@ -64,8 +73,10 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <tbody>
                         <?php if (count($clientes) === 0): ?>
                             <tr>
-                                <td colspan="8" class="text-center">
-                                    Nenhum cliente cadastrado.
+                                <td colspan="9">
+                                    <div class="empty-state">
+                                        Nenhum cliente cadastrado até o momento.
+                                    </div>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -74,7 +85,17 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <td><?= $cliente["ClienteId"] ?></td>
 
-                                <td><?= htmlspecialchars($cliente["Nome"] ?? "") ?></td>
+                                <td>
+                                    <strong>
+                                        <?= htmlspecialchars($cliente["Nome"] ?? "") ?>
+                                    </strong>
+
+                                    <?php if (!empty($cliente["Email"])): ?>
+                                        <div class="os-subtitle">
+                                            <?= htmlspecialchars($cliente["Email"]) ?>
+                                        </div>
+                                    <?php endif; ?>                              
+                                </td>
 
                                 <td><?= htmlspecialchars($cliente["Telefone"] ?? "") ?></td>
 
@@ -98,16 +119,26 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <a href="editar.php?id=<?= $cliente["ClienteId"] ?>" 
-                                       class="btn btn-sm btn-warning">
-                                        Editar
-                                    </a>
+                                    <div class="table-actions">
 
-                                    <a href="excluir.php?id=<?= $cliente["ClienteId"] ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Deseja realmente excluir este cliente?')">
-                                        Inativar
-                                    </a>
+                                        <a 
+                                            href="editar.php?id=<?= $cliente["ClienteId"] ?>" 
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            Editar
+                                        </a>
+
+                                        <?php if ((int)$cliente["Ativo"] === 1): ?>
+                                            <a 
+                                                href="excluir.php?id=<?= $cliente["ClienteId"] ?>" 
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Deseja realmente inativar este cliente?')"
+                                            >
+                                                Inativar
+                                            </a>
+                                        <?php endif; ?>
+
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
