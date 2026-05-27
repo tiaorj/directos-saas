@@ -39,6 +39,11 @@
                         Minha Empresa
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/sistema-os-php-sqlserver/planos/meu_plano.php">
+                        Meu Plano
+                    </a>
+                </li>                
                 <?php if (($_SESSION["UsuarioPerfil"] ?? "") === "Admin"): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="/sistema-os-php-sqlserver/usuarios/listar.php">
