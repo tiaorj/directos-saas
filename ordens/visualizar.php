@@ -240,7 +240,7 @@ $anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
                             <th>Tamanho</th>
                             <th>Visível Cliente</th>
                             <th>Data</th>
-                            <th width="120">Ações</th>
+                            <th width="260">Ações</th>
                         </tr>
                     </thead>
 
@@ -278,6 +278,21 @@ $anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
                                         class="btn btn-sm btn-info"
                                     >
                                         Abrir
+                                    </a>
+
+                                    <a 
+                                        href="alternar_visibilidade_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>" 
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        <?= (int)$anexo["VisivelCliente"] === 1 ? "Ocultar" : "Liberar" ?>
+                                    </a>
+
+                                    <a 
+                                        href="excluir_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>" 
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Deseja realmente excluir este anexo?')"
+                                    >
+                                        Excluir
                                     </a>
                                 </td>
                             </tr>
