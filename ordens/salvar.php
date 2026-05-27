@@ -3,8 +3,17 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
+require_once "../includes/planos.php";
 
 exigirPerfil(["Admin", "Atendente"]);
+
+$empresaId = (int)$_SESSION["EmpresaId"];
+
+$validacaoPlano = empresaPodeCriarOS($conn, $empresaId);
+
+if (!$validacaoPlano["permitido"]) {
+    die($validacaoPlano["mensagem"]);
+}
 
 $clienteId = $_POST["ClienteId"] ?? 0;
 $servicoId = $_POST["ServicoId"] !== "" ? $_POST["ServicoId"] : null;
@@ -31,9 +40,46 @@ if ($status === "Concluída") {
     $dataConclusao = date("Y-m-d H:i:s");
 }
 
+$sqlCliente = "
+    SELECT COUNT(*)
+    FROM OS_Clientes
+    WHERE ClienteId = :ClienteId
+      AND EmpresaId = :EmpresaId
+      AND Ativo = 1
+";
+
+$stmtCliente = $conn->prepare($sqlCliente);
+$stmtCliente->bindValue(":ClienteId", $clienteId, PDO::PARAM_INT);
+$stmtCliente->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtCliente->execute();
+
+if ((int)$stmtCliente->fetchColumn() === 0) {
+    die("Cliente inválido para esta empresa.");
+}
+
+if ($servicoId !== null) {
+    $sqlServico = "
+        SELECT COUNT(*)
+        FROM OS_Servicos
+        WHERE ServicoId = :ServicoId
+          AND EmpresaId = :EmpresaId
+          AND Ativo = 1
+    ";
+
+    $stmtServico = $conn->prepare($sqlServico);
+    $stmtServico->bindValue(":ServicoId", $servicoId, PDO::PARAM_INT);
+    $stmtServico->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtServico->execute();
+
+    if ((int)$stmtServico->fetchColumn() === 0) {
+        die("Serviço inválido para esta empresa.");
+    }
+}
+
 $sql = "
     INSERT INTO OS_OrdensServico
     (
+        EmpresaId,
         ClienteId,
         ServicoId,
         Titulo,
@@ -48,6 +94,7 @@ $sql = "
     )
     VALUES
     (
+        :EmpresaId,
         :ClienteId,
         :ServicoId,
         :Titulo,
@@ -64,6 +111,7 @@ $sql = "
 
 $stmt = $conn->prepare($sql);
 
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->bindValue(":ClienteId", $clienteId, PDO::PARAM_INT);
 $stmt->bindValue(":ServicoId", $servicoId, $servicoId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
 $stmt->bindValue(":Titulo", $titulo);

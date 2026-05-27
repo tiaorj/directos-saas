@@ -1,13 +1,16 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/planos.php";
+
 $empresaId = $_SESSION["EmpresaId"];
+$validacaoPlano = empresaPodeCriarOS($conn, $empresaId);
 
 $sqlClientes = "
     SELECT ClienteId, Nome
     FROM OS_Clientes
     WHERE Ativo = 1
-    AND EmpresaId = :EmpresaId
+      AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
@@ -39,7 +42,36 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
         <h3>Nova Ordem de Serviço</h3>
         <p class="text-muted mb-0">Preencha os dados da OS</p>
     </div>
+    <?php if ($validacaoPlano["plano"]): ?>
+        <div class="alert alert-info">
+            <strong>Plano atual:</strong>
+            <?= htmlspecialchars($validacaoPlano["plano"]["Nome"]) ?>
 
+            <?php if ($validacaoPlano["limite"] !== null): ?>
+                · Uso mensal:
+                <?= (int)$validacaoPlano["totalMes"] ?> /
+                <?= (int)$validacaoPlano["limite"] ?> OS
+            <?php else: ?>
+                · OS ilimitadas
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!$validacaoPlano["permitido"]): ?>
+        <div class="alert alert-warning">
+            <strong>Atenção:</strong>
+            <?= htmlspecialchars($validacaoPlano["mensagem"]) ?>
+            <br>
+            Para continuar criando ordens de serviço, altere para o plano Profissional ou Empresa.
+        </div>
+
+        <a href="../dashboard.php" class="btn btn-secondary">
+            Voltar
+        </a>
+
+        <?php require_once "../includes/footer.php"; ?>
+        <?php exit; ?>
+    <?php endif; ?>
     <div class="card shadow-sm">
         <div class="card-body">
 
