@@ -34,7 +34,11 @@
                         Ordens de Serviço
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="/sistema-os-php-sqlserver/empresa/editar.php">
+                        Minha Empresa
+                    </a>
+                </li>
                 <?php if (($_SESSION["UsuarioPerfil"] ?? "") === "Admin"): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="/sistema-os-php-sqlserver/usuarios/listar.php">
