@@ -51,6 +51,26 @@ $stmtHistorico->execute();
 
 $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
 
+$sqlAnexos = "
+    SELECT
+        AnexoId,
+        NomeOriginal,
+        CaminhoArquivo,
+        TipoArquivo,
+        TamanhoBytes,
+        VisivelCliente,
+        DataCadastro
+    FROM OS_OrdensServicoAnexos
+    WHERE OrdemServicoId = :OrdemServicoId
+    ORDER BY AnexoId DESC
+";
+
+$stmtAnexos = $conn->prepare($sqlAnexos);
+$stmtAnexos->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtAnexos->execute();
+
+$anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -65,6 +85,9 @@ $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div>
+            <a href="anexar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-success">
+                Anexar Arquivo
+            </a>            
             <a href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-warning">
                 Editar
             </a>
@@ -190,6 +213,81 @@ $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span>Anexos da OS</span>
+
+        <a href="anexar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-sm btn-light">
+            Novo Anexo
+        </a>
+    </div>
+
+    <div class="card-body">
+        <?php if (count($anexos) === 0): ?>
+            <p class="text-muted mb-0">
+                Nenhum anexo cadastrado.
+            </p>
+        <?php else: ?>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Arquivo</th>
+                            <th>Tipo</th>
+                            <th>Tamanho</th>
+                            <th>Visível Cliente</th>
+                            <th>Data</th>
+                            <th width="120">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php foreach ($anexos as $anexo): ?>
+                            <tr>
+                                <td>
+                                    <?= htmlspecialchars($anexo["NomeOriginal"]) ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($anexo["TipoArquivo"] ?? "-") ?>
+                                </td>
+
+                                <td>
+                                    <?= number_format(((int)$anexo["TamanhoBytes"] / 1024), 2, ",", ".") ?> KB
+                                </td>
+
+                                <td>
+                                    <?php if ((int)$anexo["VisivelCliente"] === 1): ?>
+                                        <span class="badge bg-success">Sim</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Não</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td>
+                                    <?= date("d/m/Y H:i", strtotime($anexo["DataCadastro"])) ?>
+                                </td>
+
+                                <td>
+                                    <a 
+                                        href="../<?= htmlspecialchars($anexo["CaminhoArquivo"]) ?>" 
+                                        target="_blank"
+                                        class="btn btn-sm btn-info"
+                                    >
+                                        Abrir
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+        <?php endif; ?>
+    </div>
 </div>
 
 <div class="card shadow-sm mb-3">
