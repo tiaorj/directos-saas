@@ -66,6 +66,26 @@ $stmtHistorico->execute();
 
 $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
 
+$sqlAnexos = "
+    SELECT
+        AnexoId,
+        NomeOriginal,
+        CaminhoArquivo,
+        TipoArquivo,
+        TamanhoBytes,
+        DataCadastro
+    FROM OS_OrdensServicoAnexos
+    WHERE OrdemServicoId = :OrdemServicoId
+      AND VisivelCliente = 1
+    ORDER BY AnexoId DESC
+";
+
+$stmtAnexos = $conn->prepare($sqlAnexos);
+$stmtAnexos->bindValue(":OrdemServicoId", $ordem["OrdemServicoId"], PDO::PARAM_INT);
+$stmtAnexos->execute();
+
+$anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
+
 function formatarData($data, $comHora = false)
 {
     if (empty($data)) {
@@ -215,6 +235,73 @@ function classeStatus($status)
             <?= nl2br(htmlspecialchars($ordem["DescricaoProblema"] ?? "")) ?>
         </div>
     </div>
+
+    <?php if (count($anexos) > 0): ?>
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-dark text-white">
+                Anexos Disponíveis
+            </div>
+
+            <div class="card-body">
+                <p class="text-muted">
+                    Arquivos disponibilizados pela empresa para acompanhamento desta ordem de serviço.
+                </p>
+
+                <div class="row">
+                    <?php foreach ($anexos as $anexo): ?>
+                        <?php
+                            $caminhoArquivo = "../" . $anexo["CaminhoArquivo"];
+                            $extensao = strtolower(pathinfo($anexo["NomeOriginal"], PATHINFO_EXTENSION));
+                            $ehImagem = in_array($extensao, ["jpg", "jpeg", "png", "gif"]);
+                        ?>
+
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border">
+                                <?php if ($ehImagem): ?>
+                                    <a href="<?= htmlspecialchars($caminhoArquivo) ?>" target="_blank">
+                                        <img 
+                                            src="<?= htmlspecialchars($caminhoArquivo) ?>" 
+                                            class="card-img-top" 
+                                            style="height: 180px; object-fit: cover;"
+                                            alt="Anexo"
+                                        >
+                                    </a>
+                                <?php else: ?>
+                                    <div class="card-body text-center">
+                                        <div style="font-size: 48px;">
+                                            📄
+                                        </div>
+                                        <p class="mb-0">
+                                            Documento
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <?= htmlspecialchars($anexo["NomeOriginal"]) ?>
+                                    </h6>
+
+                                    <p class="text-muted small mb-2">
+                                        <?= number_format(((int)$anexo["TamanhoBytes"] / 1024), 2, ",", ".") ?> KB
+                                    </p>
+
+                                    <a 
+                                        href="<?= htmlspecialchars($caminhoArquivo) ?>" 
+                                        target="_blank"
+                                        class="btn btn-sm btn-primary w-100"
+                                    >
+                                        Abrir Arquivo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+            </div>
+        </div>
+    <?php endif; ?>
 
     <?php if ((int)($ordem["MostrarSolucaoCliente"] ?? 1) === 1 && !empty($ordem["DescricaoSolucao"])): ?>
         <div class="card shadow-sm mb-3">
