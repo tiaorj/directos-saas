@@ -6,6 +6,7 @@ require_once "../includes/historico.php";
 
 exigirPerfil(["Admin", "Atendente"]);
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
 $clienteId = $_POST["ClienteId"] ?? 0;
 $servicoId = $_POST["ServicoId"] !== "" ? $_POST["ServicoId"] : null;
@@ -39,11 +40,12 @@ $sqlAtual = "
         Status, 
         DataConclusao
     FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmtAtual = $conn->prepare($sqlAtual);
 $stmtAtual->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+$stmtAtual->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtAtual->execute();
 
 $ordemAtual = $stmtAtual->fetch(PDO::FETCH_ASSOC);
@@ -80,7 +82,7 @@ $sql = "
         MostrarValorCliente = :MostrarValorCliente,
         MostrarSolucaoCliente = :MostrarSolucaoCliente,
         MostrarHistoricoCliente = :MostrarHistoricoCliente
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -101,7 +103,7 @@ $stmt->bindValue(":MostrarValorCliente", $mostrarValorCliente, PDO::PARAM_INT);
 $stmt->bindValue(":MostrarSolucaoCliente", $mostrarSolucaoCliente, PDO::PARAM_INT);
 $stmt->bindValue(":MostrarHistoricoCliente", $mostrarHistoricoCliente, PDO::PARAM_INT);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
-
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $usuarioId = $_SESSION["UsuarioId"];

@@ -3,6 +3,7 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/historico.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
 $status = $_POST["Status"] ?? "Aberta";
 $descricaoSolucao = trim($_POST["DescricaoSolucao"] ?? "");
@@ -20,11 +21,12 @@ $sqlAtual = "
         DescricaoSolucao,
         Observacao
     FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmtAtual = $conn->prepare($sqlAtual);
 $stmtAtual->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+$stmtAtual->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtAtual->execute();
 
 $ordemAtual = $stmtAtual->fetch(PDO::FETCH_ASSOC);
@@ -51,7 +53,7 @@ $sql = "
         DescricaoSolucao = :DescricaoSolucao,
         Observacao = :Observacao,
         DataConclusao = :DataConclusao
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -60,6 +62,7 @@ $stmt->bindValue(":DescricaoSolucao", $descricaoSolucao);
 $stmt->bindValue(":Observacao", $observacao);
 $stmt->bindValue(":DataConclusao", $dataConclusao, $dataConclusao === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $descricaoHistorico = "Atendimento técnico atualizado.";

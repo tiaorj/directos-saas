@@ -5,6 +5,7 @@ require_once "../includes/permissoes.php";
 
 exigirPerfil(["Admin", "Atendente"]);
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
 
 $sql = "
@@ -27,11 +28,12 @@ $sql = "
         MostrarSolucaoCliente,
         MostrarHistoricoCliente
     FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,22 +45,24 @@ if (!$ordem) {
 $sqlClientes = "
     SELECT ClienteId, Nome
     FROM OS_Clientes
-    WHERE Ativo = 1
+    WHERE Ativo = 1 AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
 $stmtClientes = $conn->prepare($sqlClientes);
+$stmtClientes->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtClientes->execute();
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
 $sqlServicos = "
     SELECT ServicoId, Nome, ValorBase
     FROM OS_Servicos
-    WHERE Ativo = 1
+    WHERE Ativo = 1 AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
 $stmtServicos = $conn->prepare($sqlServicos);
+$stmtServicos->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtServicos->execute();
 $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 ?>

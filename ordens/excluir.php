@@ -6,6 +6,7 @@ require_once "../includes/historico.php";
 
 exigirPerfil(["Admin"]);
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
 
 if ($id <= 0) {
@@ -15,11 +16,12 @@ if ($id <= 0) {
 $sqlAtual = "
     SELECT Status
     FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmtAtual = $conn->prepare($sqlAtual);
 $stmtAtual->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtAtual->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtAtual->execute();
 
 $ordemAtual = $stmtAtual->fetch(PDO::FETCH_ASSOC);
@@ -38,12 +40,17 @@ $sql = "
     SET 
         Status = 'Cancelada',
         DataConclusao = NULL
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
+
+if ($stmt->rowCount() === 0) {
+    die("Ordem de serviço não encontrada para esta empresa.");
+}
 
 registrarHistoricoOS(
     $conn,

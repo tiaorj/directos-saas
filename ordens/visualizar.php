@@ -2,6 +2,8 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 
+
+$empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
 
 $sql = "
@@ -18,11 +20,12 @@ $sql = "
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
-    WHERE os.OrdemServicoId = :OrdemServicoId
+    WHERE os.OrdemServicoId = :OrdemServicoId AND os.EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -42,11 +45,18 @@ $sqlHistorico = "
     FROM OS_Historico h
     INNER JOIN OS_Usuarios u ON u.UsuarioId = h.UsuarioId
     WHERE h.OrdemServicoId = :OrdemServicoId
+        AND EXISTS (
+            SELECT 1
+            FROM OS_OrdensServico os2
+            WHERE os2.OrdemServicoId = h.OrdemServicoId
+                AND os2.EmpresaId = :EmpresaId
+        )
     ORDER BY h.DataRegistro DESC
 ";
 
 $stmtHistorico = $conn->prepare($sqlHistorico);
 $stmtHistorico->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtHistorico->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtHistorico->execute();
 
 $historicos = $stmtHistorico->fetchAll(PDO::FETCH_ASSOC);
@@ -61,12 +71,13 @@ $sqlAnexos = "
         VisivelCliente,
         DataCadastro
     FROM OS_OrdensServicoAnexos
-    WHERE OrdemServicoId = :OrdemServicoId
+    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
     ORDER BY AnexoId DESC
 ";
 
 $stmtAnexos = $conn->prepare($sqlAnexos);
 $stmtAnexos->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtAnexos->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtAnexos->execute();
 
 $anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
