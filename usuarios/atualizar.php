@@ -2,6 +2,7 @@
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $usuarioId = $_POST["UsuarioId"] ?? 0;
 $nome = trim($_POST["Nome"] ?? "");
 $email = trim($_POST["Email"] ?? "");
@@ -30,11 +31,13 @@ $sqlVerifica = "
     FROM OS_Usuarios 
     WHERE Email = :Email
       AND UsuarioId <> :UsuarioId
+      AND EmpresaId = :EmpresaId
 ";
 
 $stmtVerifica = $conn->prepare($sqlVerifica);
 $stmtVerifica->bindValue(":Email", $email);
 $stmtVerifica->bindValue(":UsuarioId", $usuarioId, PDO::PARAM_INT);
+$stmtVerifica->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtVerifica->execute();
 
 $existe = $stmtVerifica->fetchColumn();
@@ -55,6 +58,7 @@ if ($senha !== "") {
             Perfil = :Perfil,
             Ativo = :Ativo
         WHERE UsuarioId = :UsuarioId
+          AND EmpresaId = :EmpresaId
     ";
 
     $stmt = $conn->prepare($sql);
@@ -68,6 +72,7 @@ if ($senha !== "") {
             Perfil = :Perfil,
             Ativo = :Ativo
         WHERE UsuarioId = :UsuarioId
+          AND EmpresaId = :EmpresaId
     ";
 
     $stmt = $conn->prepare($sql);
@@ -78,6 +83,7 @@ $stmt->bindValue(":Email", $email);
 $stmt->bindValue(":Perfil", $perfil);
 $stmt->bindValue(":Ativo", $ativo, PDO::PARAM_INT);
 $stmt->bindValue(":UsuarioId", $usuarioId, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 if ((int)$usuarioId === (int)$_SESSION["UsuarioId"]) {

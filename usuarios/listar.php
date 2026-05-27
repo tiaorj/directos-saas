@@ -2,6 +2,8 @@
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
+
 $sql = "
     SELECT 
         UsuarioId,
@@ -11,10 +13,12 @@ $sql = "
         Ativo,
         DataCadastro
     FROM OS_Usuarios
+    WHERE EmpresaId = :EmpresaId
     ORDER BY UsuarioId DESC
 ";
 
 $stmt = $conn->prepare($sql);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);

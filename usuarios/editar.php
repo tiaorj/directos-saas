@@ -2,6 +2,8 @@
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
+
 $id = $_GET["id"] ?? 0;
 
 if ($id <= 0) {
@@ -17,10 +19,12 @@ $sql = "
         Ativo
     FROM OS_Usuarios
     WHERE UsuarioId = :UsuarioId
+      AND EmpresaId = :EmpresaId          
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":UsuarioId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -46,6 +50,7 @@ if (!$usuario) {
             <form method="post" action="atualizar.php">
 
                 <input type="hidden" name="UsuarioId" value="<?= $usuario["UsuarioId"] ?>">
+                <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">
 
                 <div class="mb-3">
                     <label class="form-label">Nome *</label>

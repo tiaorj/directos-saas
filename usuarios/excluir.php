@@ -2,6 +2,7 @@
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
 
 if ($id <= 0) {
@@ -16,10 +17,12 @@ $sql = "
     UPDATE OS_Usuarios
     SET Ativo = 0
     WHERE UsuarioId = :UsuarioId
+      AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":UsuarioId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 header("Location: listar.php");
