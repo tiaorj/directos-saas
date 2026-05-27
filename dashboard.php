@@ -3,73 +3,90 @@ require_once "includes/proteger.php";
 require_once "config/conexao.php";
 require_once "includes/funcoes.php";
 
-function buscarValor($conn, $sql)
+$empresaId = (int)$_SESSION["EmpresaId"];
+$usuarioNome = $_SESSION["UsuarioNome"] ?? "Usuário";
+
+function buscarValorEmpresa($conn, $sql, $empresaId)
 {
     $stmt = $conn->prepare($sql);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmt->execute();
+
     return $stmt->fetchColumn();
 }
 
-$totalClientesAtivos = buscarValor($conn, "
+$totalClientesAtivos = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_Clientes 
     WHERE Ativo = 1
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalServicosAtivos = buscarValor($conn, "
+$totalServicosAtivos = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_Servicos 
     WHERE Ativo = 1
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSAbertas = buscarValor($conn, "
+$totalOSAbertas = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico 
     WHERE Status = 'Aberta'
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSEmAndamento = buscarValor($conn, "
+$totalOSEmAndamento = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico 
     WHERE Status = 'Em andamento'
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSAguardando = buscarValor($conn, "
+$totalOSAguardando = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico 
     WHERE Status IN ('Aguardando cliente', 'Aguardando peça')
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSConcluidas = buscarValor($conn, "
+$totalOSConcluidas = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico 
     WHERE Status = 'Concluída'
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSCanceladas = buscarValor($conn, "
+$totalOSCanceladas = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico 
     WHERE Status = 'Cancelada'
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$totalOSAtrasadas = buscarValor($conn, "
+$totalOSAtrasadas = buscarValorEmpresa($conn, "
     SELECT COUNT(*) 
     FROM OS_OrdensServico
     WHERE DataPrevisao < CAST(GETDATE() AS DATE)
       AND Status NOT IN ('Concluída', 'Cancelada')
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$valorPrevisto = buscarValor($conn, "
+$valorPrevisto = buscarValorEmpresa($conn, "
     SELECT ISNULL(SUM(ValorPrevisto), 0)
     FROM OS_OrdensServico
     WHERE Status NOT IN ('Cancelada')
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
 
-$valorFinalizado = buscarValor($conn, "
+$valorFinalizado = buscarValorEmpresa($conn, "
     SELECT ISNULL(SUM(ValorFinal), 0)
     FROM OS_OrdensServico
     WHERE Status = 'Concluída'
-");
+      AND EmpresaId = :EmpresaId
+", $empresaId);
+
+$totalOSAtivas = $totalOSAbertas + $totalOSEmAndamento + $totalOSAguardando;
 
 $sqlUltimas = "
     SELECT TOP 5
@@ -85,129 +102,275 @@ $sqlUltimas = "
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    WHERE os.EmpresaId = :EmpresaId
     ORDER BY os.OrdemServicoId DESC
 ";
 
 $stmtUltimas = $conn->prepare($sqlUltimas);
+$stmtUltimas->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtUltimas->execute();
+
 $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <?php require_once "includes/header.php"; ?>
 <?php require_once "includes/menu.php"; ?>
 
+<style>
+    body {
+        background: #f5f6f8;
+    }
+
+    .dash-hero {
+        background: linear-gradient(135deg, #212529, #0d6efd);
+        color: #fff;
+        border-radius: 18px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+
+    .dash-hero h3 {
+        font-weight: 700;
+    }
+
+    .metric-card {
+        border: none;
+        border-radius: 16px;
+        height: 100%;
+    }
+
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .metric-value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .status-card {
+        border: none;
+        border-radius: 14px;
+    }
+
+    .quick-action-card {
+        border: none;
+        border-radius: 16px;
+    }
+</style>
+
 <div class="container">
 
-    <div class="mb-4">
-        <h3>Dashboard</h3>
-        <p class="text-muted mb-0">
-            Visão geral do sistema de Ordens de Serviço
-        </p>
+    <div class="dash-hero shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="mb-2">
+                    Olá, <?= htmlspecialchars($usuarioNome) ?> 👋
+                </h3>
+
+                <p class="mb-0">
+                    Aqui está o resumo das suas ordens de serviço, clientes e valores da operação.
+                </p>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="ordens/cadastrar.php" class="btn btn-light">
+                    Nova Ordem de Serviço
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="row mb-4">
+    <div class="row g-3 mb-4">
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-primary">
+        <div class="col-md-3">
+            <div class="card metric-card shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-muted">Clientes Ativos</h6>
-                    <h3><?= $totalClientesAtivos ?></h3>
-                    <a href="clientes/listar.php" class="small">Ver clientes</a>
+                    <div class="metric-label">OS Ativas</div>
+                    <p class="metric-value text-primary"><?= (int)$totalOSAtivas ?></p>
+                    <small class="text-muted">
+                        Abertas, em andamento ou aguardando
+                    </small>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-info">
+        <div class="col-md-3">
+            <div class="card metric-card shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-muted">Serviços Ativos</h6>
-                    <h3><?= $totalServicosAtivos ?></h3>
-                    <a href="servicos/listar.php" class="small">Ver serviços</a>
+                    <div class="metric-label">Clientes Ativos</div>
+                    <p class="metric-value"><?= (int)$totalClientesAtivos ?></p>
+                    <a href="clientes/listar.php" class="small text-decoration-none">
+                        Ver clientes
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-success">
+        <div class="col-md-3">
+            <div class="card metric-card shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-muted">Valor Previsto</h6>
-                    <h3>R$ <?= number_format((float)$valorPrevisto, 2, ",", ".") ?></h3>
-                    <span class="small text-muted">OS não canceladas</span>
+                    <div class="metric-label">Valor Previsto</div>
+                    <p class="metric-value">
+                        R$ <?= number_format((float)$valorPrevisto, 2, ",", ".") ?>
+                    </p>
+                    <small class="text-muted">
+                        OS não canceladas
+                    </small>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-dark">
+        <div class="col-md-3">
+            <div class="card metric-card shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-muted">Valor Finalizado</h6>
-                    <h3>R$ <?= number_format((float)$valorFinalizado, 2, ",", ".") ?></h3>
-                    <span class="small text-muted">OS concluídas</span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row mb-4">
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h6>Abertas</h6>
-                    <h3 class="text-primary"><?= $totalOSAbertas ?></h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h6>Em Andamento</h6>
-                    <h3 class="text-warning"><?= $totalOSEmAndamento ?></h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h6>Aguardando</h6>
-                    <h3 class="text-secondary"><?= $totalOSAguardando ?></h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h6>Concluídas</h6>
-                    <h3 class="text-success"><?= $totalOSConcluidas ?></h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h6>Canceladas</h6>
-                    <h3 class="text-danger"><?= $totalOSCanceladas ?></h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 mb-3">
-            <div class="card shadow-sm border-danger">
-                <div class="card-body text-center">
-                    <h6>Atrasadas</h6>
-                    <h3 class="text-danger"><?= $totalOSAtrasadas ?></h3>
+                    <div class="metric-label">Valor Finalizado</div>
+                    <p class="metric-value">
+                        R$ <?= number_format((float)$valorFinalizado, 2, ",", ".") ?>
+                    </p>
+                    <small class="text-muted">
+                        OS concluídas
+                    </small>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div class="card shadow-sm">
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php?status=Aberta" class="text-decoration-none">
+                <div class="card status-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Abertas</div>
+                        <h3 class="text-primary mb-0"><?= (int)$totalOSAbertas ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php?status=Em%20andamento" class="text-decoration-none">
+                <div class="card status-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Em andamento</div>
+                        <h3 class="text-warning mb-0"><?= (int)$totalOSEmAndamento ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php?status=Aguardando%20cliente" class="text-decoration-none">
+                <div class="card status-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Aguardando</div>
+                        <h3 class="text-secondary mb-0"><?= (int)$totalOSAguardando ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php?status=Conclu%C3%ADda" class="text-decoration-none">
+                <div class="card status-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Concluídas</div>
+                        <h3 class="text-success mb-0"><?= (int)$totalOSConcluidas ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php?status=Cancelada" class="text-decoration-none">
+                <div class="card status-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Canceladas</div>
+                        <h3 class="text-danger mb-0"><?= (int)$totalOSCanceladas ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="ordens/listar.php" class="text-decoration-none">
+                <div class="card status-card shadow-sm border-danger">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Atrasadas</div>
+                        <h3 class="text-danger mb-0"><?= (int)$totalOSAtrasadas ?></h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card quick-action-card shadow-sm">
+                <div class="card-body">
+                    <h6>Nova OS</h6>
+                    <p class="text-muted small">
+                        Abra uma nova ordem de serviço para um cliente.
+                    </p>
+                    <a href="ordens/cadastrar.php" class="btn btn-sm btn-primary">
+                        Criar OS
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card quick-action-card shadow-sm">
+                <div class="card-body">
+                    <h6>Novo Cliente</h6>
+                    <p class="text-muted small">
+                        Cadastre rapidamente um novo cliente.
+                    </p>
+                    <a href="clientes/cadastrar.php" class="btn btn-sm btn-outline-primary">
+                        Cadastrar Cliente
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card quick-action-card shadow-sm">
+                <div class="card-body">
+                    <h6>Minha Empresa</h6>
+                    <p class="text-muted small">
+                        Atualize nome, WhatsApp e dados da empresa.
+                    </p>
+                    <a href="empresa/editar.php" class="btn btn-sm btn-outline-dark">
+                        Configurar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card quick-action-card shadow-sm">
+                <div class="card-body">
+                    <h6>Serviços</h6>
+                    <p class="text-muted small">
+                        Gerencie os serviços oferecidos pela empresa.
+                    </p>
+                    <a href="servicos/listar.php" class="btn btn-sm btn-outline-dark">
+                        Ver Serviços
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <span>Últimas Ordens de Serviço</span>
 
