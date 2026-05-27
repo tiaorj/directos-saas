@@ -29,22 +29,32 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3>Usuários</h3>
-            <p class="text-muted mb-0">Cadastro de usuários do sistema</p>
+            <h3 class="mb-1">Usuários</h3>
+            <p class="text-muted mb-0">
+                Gerencie os usuários que acessam o sistema da sua empresa.
+            </p>
         </div>
 
         <a href="cadastrar.php" class="btn btn-primary">
-            Novo Usuário
+            + Novo Usuário
         </a>
     </div>
 
     <div class="card shadow-sm">
-        <div class="card-body">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Usuários cadastrados</strong>
+
+            <span class="badge bg-primary">
+                <?= count($usuarios) ?> registro(s)
+            </span>
+        </div>
+
+        <div class="card-body p-0">
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover align-middle">
+                <table class="table table-striped table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
                             <th>ID</th>
@@ -60,8 +70,10 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <tbody>
                         <?php if (count($usuarios) === 0): ?>
                             <tr>
-                                <td colspan="7" class="text-center">
-                                    Nenhum usuário cadastrado.
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        Nenhum usuário cadastrado até o momento.
+                                    </div>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -70,13 +82,34 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <td><?= $usuario["UsuarioId"] ?></td>
 
-                                <td><?= htmlspecialchars($usuario["Nome"] ?? "") ?></td>
-
-                                <td><?= htmlspecialchars($usuario["Email"] ?? "") ?></td>
+                                <td>
+                                    <strong>
+                                        <?= htmlspecialchars($usuario["Nome"] ?? "") ?>
+                                    </strong>
+                                </td>
 
                                 <td>
-                                    <span class="badge bg-dark">
-                                        <?= htmlspecialchars($usuario["Perfil"] ?? "") ?>
+                                    <span class="text-muted">
+                                        <?= htmlspecialchars($usuario["Email"] ?? "") ?>
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <?php
+                                        $perfil = $usuario["Perfil"] ?? "";
+                                        $classePerfil = "bg-secondary";
+
+                                        if ($perfil === "Admin") {
+                                            $classePerfil = "bg-dark";
+                                        } elseif ($perfil === "Atendente") {
+                                            $classePerfil = "bg-primary";
+                                        } elseif ($perfil === "Tecnico") {
+                                            $classePerfil = "bg-info text-dark";
+                                        }
+                                    ?>
+
+                                    <span class="badge <?= $classePerfil ?>">
+                                        <?= htmlspecialchars($perfil) ?>
                                     </span>
                                 </td>
 
@@ -94,17 +127,16 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         : "-" 
                                     ?>
                                 </td>
-
                                 <td>
                                     <a href="editar.php?id=<?= $usuario["UsuarioId"] ?>" 
-                                       class="btn btn-sm btn-warning">
+                                    class="btn btn-sm btn-warning">
                                         Editar
                                     </a>
 
                                     <?php if ((int)$usuario["UsuarioId"] !== (int)$_SESSION["UsuarioId"]): ?>
                                         <a href="excluir.php?id=<?= $usuario["UsuarioId"] ?>" 
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Deseja realmente inativar este usuário?')">
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Deseja realmente inativar este usuário?')">
                                             Inativar
                                         </a>
                                     <?php endif; ?>
