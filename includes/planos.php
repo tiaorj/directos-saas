@@ -94,3 +94,65 @@ function empresaPodeCriarOS($conn, $empresaId)
         "limite" => (int)$limite
     ];
 }
+
+function totalUsuariosEmpresa($conn, $empresaId)
+{
+    $sql = "
+        SELECT COUNT(*)
+        FROM OS_Usuarios
+        WHERE EmpresaId = :EmpresaId
+          AND Ativo = 1
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return (int)$stmt->fetchColumn();
+}
+
+function empresaPodeCriarUsuario($conn, $empresaId)
+{
+    $plano = obterPlanoEmpresa($conn, $empresaId);
+
+    if (!$plano) {
+        return [
+            "permitido" => false,
+            "mensagem" => "Empresa sem plano ativo.",
+            "plano" => null,
+            "totalUsuarios" => 0,
+            "limite" => 0
+        ];
+    }
+
+    $limite = $plano["LimiteUsuarios"];
+    $totalUsuarios = totalUsuariosEmpresa($conn, $empresaId);
+
+    if ($limite === null || $limite === "") {
+        return [
+            "permitido" => true,
+            "mensagem" => "",
+            "plano" => $plano,
+            "totalUsuarios" => $totalUsuarios,
+            "limite" => null
+        ];
+    }
+
+    if ($totalUsuarios >= (int)$limite) {
+        return [
+            "permitido" => false,
+            "mensagem" => "Limite de usuários atingido para o plano " . $plano["Nome"] . ".",
+            "plano" => $plano,
+            "totalUsuarios" => $totalUsuarios,
+            "limite" => (int)$limite
+        ];
+    }
+
+    return [
+        "permitido" => true,
+        "mensagem" => "",
+        "plano" => $plano,
+        "totalUsuarios" => $totalUsuarios,
+        "limite" => (int)$limite
+    ];
+}

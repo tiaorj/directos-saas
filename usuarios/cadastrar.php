@@ -1,6 +1,10 @@
 <?php
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
+require_once "../includes/planos.php";
+
+$empresaId = (int)$_SESSION["EmpresaId"];
+$validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -12,6 +16,41 @@ require_once "../config/conexao.php";
         <h3>Novo Usuário</h3>
         <p class="text-muted mb-0">Preencha os dados de acesso</p>
     </div>
+
+<?php if ($validacaoPlano["plano"]): ?>
+    <div class="alert alert-info">
+        <strong>Plano atual:</strong>
+        <?= htmlspecialchars($validacaoPlano["plano"]["Nome"]) ?>
+
+        <?php if ($validacaoPlano["limite"] !== null): ?>
+            · Usuários ativos:
+            <?= (int)$validacaoPlano["totalUsuarios"] ?> /
+            <?= (int)$validacaoPlano["limite"] ?>
+        <?php else: ?>
+            · Usuários ilimitados
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
+    <?php if (!$validacaoPlano["permitido"]): ?>
+        <div class="alert alert-warning">
+            <strong>Atenção:</strong>
+            <?= htmlspecialchars($validacaoPlano["mensagem"]) ?>
+            <br>
+            Para cadastrar mais usuários, altere para o plano Profissional ou Empresa.
+        </div>
+
+        <a href="../planos/meu_plano.php" class="btn btn-primary">
+            Ver Planos
+        </a>
+
+        <a href="listar.php" class="btn btn-secondary">
+            Voltar
+        </a>
+
+        <?php require_once "../includes/footer.php"; ?>
+        <?php exit; ?>
+    <?php endif; ?>    
 
     <div class="card shadow-sm">
         <div class="card-body">

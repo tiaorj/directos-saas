@@ -1,6 +1,15 @@
 <?php
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
+require_once "../includes/planos.php";
+
+$empresaId = (int)$_SESSION["EmpresaId"];
+
+$validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
+
+if (!$validacaoPlano["permitido"]) {
+    die($validacaoPlano["mensagem"]);
+}
 
 $nome = trim($_POST["Nome"] ?? "");
 $email = trim($_POST["Email"] ?? "");
@@ -41,6 +50,7 @@ $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 $sql = "
     INSERT INTO OS_Usuarios
     (
+        EmpresaId,
         Nome,
         Email,
         SenhaHash,
@@ -49,6 +59,7 @@ $sql = "
     )
     VALUES
     (
+        :EmpresaId,
         :Nome,
         :Email,
         :SenhaHash,
@@ -58,6 +69,7 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
+$stmt->bindValue(":EmpresaId", $empresaId);
 $stmt->bindValue(":Nome", $nome);
 $stmt->bindValue(":Email", $email);
 $stmt->bindValue(":SenhaHash", $senhaHash);
