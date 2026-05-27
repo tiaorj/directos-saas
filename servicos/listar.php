@@ -3,6 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
+
 $podeEditarServicos = usuarioTemPerfil(["Admin"]);
 
 $sql = "
@@ -14,10 +16,12 @@ $sql = "
         Ativo,
         DataCadastro
     FROM OS_Servicos
+    WHERE EmpresaId = :EmpresaId
     ORDER BY ServicoId DESC
 ";
 
 $stmt = $conn->prepare($sql);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);

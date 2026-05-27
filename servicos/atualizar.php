@@ -4,6 +4,7 @@ require_once "../includes/permissoes.php";
 exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $servicoId = $_POST["ServicoId"] ?? 0;
 $nome = trim($_POST["Nome"] ?? "");
 $descricao = trim($_POST["Descricao"] ?? "");
@@ -25,7 +26,7 @@ $sql = "
         Descricao = :Descricao,
         ValorBase = :ValorBase,
         Ativo = :Ativo
-    WHERE ServicoId = :ServicoId
+    WHERE ServicoId = :ServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -35,8 +36,12 @@ $stmt->bindValue(":Descricao", $descricao);
 $stmt->bindValue(":ValorBase", $valorBase, $valorBase === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 $stmt->bindValue(":Ativo", $ativo, PDO::PARAM_INT);
 $stmt->bindValue(":ServicoId", $servicoId, PDO::PARAM_INT);
-
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
+
+if ($stmt->rowCount() === 0) {
+    die("Serviço não encontrado para esta empresa.");
+}
 
 header("Location: listar.php");
 exit;

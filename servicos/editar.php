@@ -4,6 +4,7 @@ require_once "../includes/permissoes.php";
 exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
 
+$empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
 
 $sql = "
@@ -14,11 +15,12 @@ $sql = "
         ValorBase,
         Ativo
     FROM OS_Servicos
-    WHERE ServicoId = :ServicoId
+    WHERE ServicoId = :ServicoId AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(":ServicoId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $servico = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -44,6 +46,7 @@ if (!$servico) {
             <form method="post" action="atualizar.php">
 
                 <input type="hidden" name="ServicoId" value="<?= $servico["ServicoId"] ?>">
+                <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">
 
                 <div class="mb-3">
                     <label class="form-label">Nome *</label>
