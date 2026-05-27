@@ -7,6 +7,7 @@ $empresaId = (int)$_SESSION["EmpresaId"];
 
 $planoAtual = obterPlanoEmpresa($conn, $empresaId);
 $totalMes = totalOSMesEmpresa($conn, $empresaId);
+$totalUsuarios = totalUsuariosEmpresa($conn, $empresaId);
 
 $sqlPlanos = "
     SELECT
@@ -32,66 +33,42 @@ $planos = $stmtPlanos->fetchAll(PDO::FETCH_ASSOC);
 
 $sucesso = $_GET["sucesso"] ?? "";
 $erro = $_GET["erro"] ?? "";
+
+function formatarLimitePlano($valor, $textoIlimitado = "Ilimitado")
+{
+    if ($valor === null || $valor === "") {
+        return $textoIlimitado;
+    }
+
+    return (string)(int)$valor;
+}
+
+function percentualUsoPlano($total, $limite)
+{
+    if ($limite === null || $limite === "" || (int)$limite <= 0) {
+        return 0;
+    }
+
+    return min(100, round(((int)$total / (int)$limite) * 100));
+}
 ?>
 
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<style>
-    body {
-        background: #f5f6f8;
-    }
+<div class="container-fluid form-page-wide">
 
-    .plan-hero {
-        background: linear-gradient(135deg, #212529, #0d6efd);
-        color: #fff;
-        border-radius: 18px;
-        padding: 28px;
-        margin-bottom: 24px;
-    }
-
-    .plan-card {
-        border: none;
-        border-radius: 16px;
-        height: 100%;
-    }
-
-    .plan-card-current {
-        border: 2px solid #0d6efd;
-    }
-
-    .price {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-
-    .usage-box {
-        background: #fff;
-        border-radius: 16px;
-        padding: 20px;
-    }
-</style>
-
-<div class="container">
-
-    <div class="plan-hero shadow-sm">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h3 class="mb-2">
-                    Meu Plano
-                </h3>
-
-                <p class="mb-0">
-                    Acompanhe seu plano atual, limite mensal e recursos disponíveis.
-                </p>
-            </div>
-
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="../dashboard.php" class="btn btn-light">
-                    Voltar ao Dashboard
-                </a>
-            </div>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Meu Plano</h3>
+            <p>
+                Acompanhe sua assinatura, limites mensais e recursos disponíveis no DirectOS.
+            </p>
         </div>
+
+        <a href="../dashboard.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
     <?php if ($sucesso !== ""): ?>
@@ -107,96 +84,208 @@ $erro = $_GET["erro"] ?? "";
     <?php endif; ?>
 
     <?php if ($planoAtual): ?>
-        <div class="usage-box shadow-sm mb-4">
-            <div class="row align-items-center">
+        <?php
+            $limiteOS = $planoAtual["LimiteOSMes"];
+            $limiteUsuarios = $planoAtual["LimiteUsuarios"];
 
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <h5 class="mb-1">Plano atual</h5>
-                    <h3 class="text-primary mb-0">
-                        <?= htmlspecialchars($planoAtual["Nome"]) ?>
-                    </h3>
+            $percentualOS = percentualUsoPlano($totalMes, $limiteOS);
+            $percentualUsuarios = percentualUsoPlano($totalUsuarios, $limiteUsuarios);
+        ?>
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">Plano atual</div>
+
+                        <h4 class="mb-1 mt-2 text-primary">
+                            <?= htmlspecialchars($planoAtual["Nome"]) ?>
+                        </h4>
+
+                        <span class="badge bg-success">
+                            <?= htmlspecialchars($planoAtual["StatusAssinatura"] ?? "Ativa") ?>
+                        </span>
+                    </div>
                 </div>
+            </div>
 
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <h5 class="mb-1">Uso de OS no mês</h5>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">Valor mensal</div>
 
-                    <?php if ($planoAtual["LimiteOSMes"] === null || $planoAtual["LimiteOSMes"] === ""): ?>
-                        <h3 class="mb-0">
-                            <?= (int)$totalMes ?> / Ilimitado
-                        </h3>
-                    <?php else: ?>
-                        <h3 class="mb-0">
-                            <?= (int)$totalMes ?> / <?= (int)$planoAtual["LimiteOSMes"] ?>
-                        </h3>
-                    <?php endif; ?>
+                        <h4 class="mb-0 mt-2">
+                            R$ <?= number_format((float)$planoAtual["ValorMensal"], 2, ",", ".") ?>
+                        </h4>
+                    </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <h5 class="mb-1">Valor mensal</h5>
-                    <h3 class="mb-0">
-                        R$ <?= number_format((float)$planoAtual["ValorMensal"], 2, ",", ".") ?>
-                    </h3>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">OS no mês</div>
+
+                        <h4 class="mb-0 mt-2">
+                            <?= (int)$totalMes ?> / <?= htmlspecialchars(formatarLimitePlano($limiteOS)) ?>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">Usuários ativos</div>
+
+                        <h4 class="mb-0 mt-2">
+                            <?= (int)$totalUsuarios ?> / <?= htmlspecialchars(formatarLimitePlano($limiteUsuarios)) ?>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card form-card mb-4">
+            <div class="card-header">
+                Uso do Plano
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Ordens de Serviço no mês</strong>
+
+                            <?php if ($limiteOS === null || $limiteOS === ""): ?>
+                                <span class="text-muted">
+                                    <?= (int)$totalMes ?> / Ilimitado
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">
+                                    <?= (int)$totalMes ?> / <?= (int)$limiteOS ?> · <?= $percentualOS ?>%
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($limiteOS === null || $limiteOS === ""): ?>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar bg-success" style="width: 100%;"></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="progress" style="height: 12px;">
+                                <div 
+                                    class="progress-bar <?= $percentualOS >= 100 ? "bg-danger" : "bg-primary" ?>" 
+                                    style="width: <?= $percentualOS ?>%;">
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($limiteOS !== null && $limiteOS !== "" && $percentualOS >= 80): ?>
+                            <div class="input-help mt-2">
+                                Você está próximo do limite mensal de OS deste plano.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Usuários ativos</strong>
+
+                            <?php if ($limiteUsuarios === null || $limiteUsuarios === ""): ?>
+                                <span class="text-muted">
+                                    <?= (int)$totalUsuarios ?> / Ilimitado
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">
+                                    <?= (int)$totalUsuarios ?> / <?= (int)$limiteUsuarios ?> · <?= $percentualUsuarios ?>%
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($limiteUsuarios === null || $limiteUsuarios === ""): ?>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar bg-success" style="width: 100%;"></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="progress" style="height: 12px;">
+                                <div 
+                                    class="progress-bar <?= $percentualUsuarios >= 100 ? "bg-danger" : "bg-primary" ?>" 
+                                    style="width: <?= $percentualUsuarios ?>%;">
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($limiteUsuarios !== null && $limiteUsuarios !== "" && $percentualUsuarios >= 80): ?>
+                            <div class="input-help mt-2">
+                                Você está próximo do limite de usuários deste plano.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
                 </div>
 
             </div>
-
-            <?php if ($planoAtual["LimiteOSMes"] !== null && $planoAtual["LimiteOSMes"] !== ""): ?>
-                <?php
-                    $limite = (int)$planoAtual["LimiteOSMes"];
-                    $percentual = $limite > 0 ? min(100, round(($totalMes / $limite) * 100)) : 0;
-                ?>
-
-                <div class="mt-4">
-                    <div class="d-flex justify-content-between">
-                        <small>Utilização mensal</small>
-                        <small><?= $percentual ?>%</small>
-                    </div>
-
-                    <div class="progress" style="height: 12px;">
-                        <div 
-                            class="progress-bar <?= $percentual >= 100 ? "bg-danger" : "bg-primary" ?>" 
-                            role="progressbar" 
-                            style="width: <?= $percentual ?>%;">
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
+
     <?php else: ?>
         <div class="alert alert-warning">
             Nenhum plano ativo encontrado para esta empresa.
         </div>
     <?php endif; ?>
 
+    <div class="form-header mb-3">
+        <div>
+            <h4 class="mb-1">Planos disponíveis</h4>
+            <p>Compare os recursos e altere o plano da empresa quando necessário.</p>
+        </div>
+    </div>
+
     <div class="row g-4">
 
         <?php foreach ($planos as $plano): ?>
             <?php
                 $ehAtual = $planoAtual && (int)$planoAtual["PlanoId"] === (int)$plano["PlanoId"];
+                $valorMensal = (float)$plano["ValorMensal"];
             ?>
 
-            <div class="col-md-4">
-                <div class="card plan-card shadow-sm <?= $ehAtual ? "plan-card-current" : "" ?>">
-                    <div class="card-body">
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100 <?= $ehAtual ? "border border-primary border-2" : "" ?>">
+                    <div class="card-body d-flex flex-column">
 
-                        <?php if ($ehAtual): ?>
-                            <span class="badge bg-primary mb-2">
-                                Plano atual
-                            </span>
-                        <?php endif; ?>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h4 class="mb-1">
+                                    <?= htmlspecialchars($plano["Nome"]) ?>
+                                </h4>
 
-                        <h4><?= htmlspecialchars($plano["Nome"]) ?></h4>
+                                <?php if ($ehAtual): ?>
+                                    <span class="badge bg-primary">
+                                        Plano atual
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
                         <p class="text-muted">
                             <?= htmlspecialchars($plano["Descricao"] ?? "") ?>
                         </p>
 
-                        <div class="price mb-3">
-                            R$ <?= number_format((float)$plano["ValorMensal"], 2, ",", ".") ?>
-                            <small class="text-muted fs-6">/mês</small>
+                        <div class="mb-3">
+                            <span style="font-size: 2rem; font-weight: 800;">
+                                R$ <?= number_format($valorMensal, 2, ",", ".") ?>
+                            </span>
+
+                            <span class="text-muted">
+                                /mês
+                            </span>
                         </div>
 
-                        <ul class="mb-4">
+                        <ul class="mb-4 ps-3">
                             <?php if ($plano["LimiteOSMes"] === null || $plano["LimiteOSMes"] === ""): ?>
                                 <li>OS ilimitadas por mês</li>
                             <?php else: ?>
@@ -222,19 +311,21 @@ $erro = $_GET["erro"] ?? "";
                             <?php endif; ?>
                         </ul>
 
-                        <?php if ($ehAtual): ?>
-                            <button class="btn btn-secondary w-100" disabled>
-                                Plano atual
-                            </button>
-                        <?php else: ?>
-                            <a 
-                                href="alterar.php?plano=<?= (int)$plano["PlanoId"] ?>" 
-                                class="btn btn-primary w-100"
-                                onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["Nome"]) ?>?')"
-                            >
-                                Alterar para este plano
-                            </a>
-                        <?php endif; ?>
+                        <div class="mt-auto">
+                            <?php if ($ehAtual): ?>
+                                <button class="btn btn-secondary w-100" disabled>
+                                    Plano atual
+                                </button>
+                            <?php else: ?>
+                                <a 
+                                    href="alterar.php?plano=<?= (int)$plano["PlanoId"] ?>" 
+                                    class="btn btn-primary w-100"
+                                    onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["Nome"]) ?>?')"
+                                >
+                                    Alterar para este plano
+                                </a>
+                            <?php endif; ?>
+                        </div>
 
                     </div>
                 </div>

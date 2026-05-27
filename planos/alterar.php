@@ -11,7 +11,12 @@ if ($planoId <= 0) {
 }
 
 $sqlPlano = "
-    SELECT PlanoId, Nome
+    SELECT 
+        PlanoId, 
+        Nome,
+        Slug,
+        LimiteOSMes,
+        LimiteUsuarios
     FROM OS_Planos
     WHERE PlanoId = :PlanoId
       AND Ativo = 1
@@ -25,6 +30,70 @@ $plano = $stmtPlano->fetch(PDO::FETCH_ASSOC);
 
 if (!$plano) {
     header("Location: meu_plano.php?erro=Plano não encontrado.");
+    exit;
+}
+
+$sqlPlanoAtual = "
+    SELECT TOP 1
+        a.AssinaturaId,
+        a.PlanoId,
+        p.Nome
+    FROM OS_Assinaturas a
+    INNER JOIN OS_Planos p ON p.PlanoId = a.PlanoId
+    WHERE a.EmpresaId = :EmpresaId
+      AND a.Status = 'Ativa'
+    ORDER BY a.AssinaturaId DESC
+";
+
+$stmtPlanoAtual = $conn->prepare($sqlPlanoAtual);
+$stmtPlanoAtual->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtPlanoAtual->execute();
+
+$planoAtual = $stmtPlanoAtual->fetch(PDO::FETCH_ASSOC);
+
+if ($planoAtual && (int)$planoAtual["PlanoId"] === (int)$planoId) {
+    header("Location: meu_plano.php?erro=Este já é o plano atual da empresa.");
+    exit;
+}
+
+$totalUsuarios = 0;
+
+$sqlUsuarios = "
+    SELECT COUNT(*)
+    FROM OS_Usuarios
+    WHERE EmpresaId = :EmpresaId
+      AND Ativo = 1
+";
+
+$stmtUsuarios = $conn->prepare($sqlUsuarios);
+$stmtUsuarios->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtUsuarios->execute();
+
+$totalUsuarios = (int)$stmtUsuarios->fetchColumn();
+
+if ($plano["LimiteUsuarios"] !== null && $plano["LimiteUsuarios"] !== "" && $totalUsuarios > (int)$plano["LimiteUsuarios"]) {
+    header("Location: meu_plano.php?erro=Não é possível alterar para este plano. A empresa possui mais usuários ativos do que o limite permitido.");
+    exit;
+}
+
+$totalOSMes = 0;
+
+$sqlOSMes = "
+    SELECT COUNT(*)
+    FROM OS_OrdensServico
+    WHERE EmpresaId = :EmpresaId
+      AND DataAbertura >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)
+      AND DataAbertura < DATEADD(MONTH, 1, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))
+";
+
+$stmtOSMes = $conn->prepare($sqlOSMes);
+$stmtOSMes->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtOSMes->execute();
+
+$totalOSMes = (int)$stmtOSMes->fetchColumn();
+
+if ($plano["LimiteOSMes"] !== null && $plano["LimiteOSMes"] !== "" && $totalOSMes > (int)$plano["LimiteOSMes"]) {
+    header("Location: meu_plano.php?erro=Não é possível alterar para este plano. A empresa já possui mais OS no mês do que o limite permitido.");
     exit;
 }
 
