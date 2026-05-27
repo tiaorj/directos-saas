@@ -97,26 +97,27 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="page-header">
         <div>
             <h3>Ordens de Serviço</h3>
-            <p class="text-muted mb-0">Acompanhamento das ordens abertas, em andamento e concluídas</p>
+            <p>Acompanhe, filtre e gerencie as ordens de serviço da empresa.</p>
         </div>
+
         <?php if ($podeCriarOS): ?>
-            <a href="cadastrar.php" class="btn btn-primary">
-                Nova OS
+            <a href="cadastrar.php" class="btn btn-primary btn-action-main">
+                + Nova OS
             </a>
         <?php endif; ?>
     </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white">
+    <div class="section-card filter-card">
+        <div class="section-card-header">
             Filtros
         </div>
 
-        <div class="card-body">
+        <div class="section-card-body">
             <form method="get" action="listar.php">
 
                 <div class="row">
@@ -173,12 +174,12 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                value="<?= htmlspecialchars($dataFimFiltro) ?>">
                     </div>
 
-                    <div class="col-md-6 mb-3 d-flex align-items-end gap-2">
+                    <div class="col-md-6 mb-3 filter-actions">
                         <button type="submit" class="btn btn-primary">
                             Filtrar
                         </button>
 
-                        <a href="listar.php" class="btn btn-secondary">
+                        <a href="listar.php" class="btn btn-outline-secondary">
                             Limpar
                         </a>
                     </div>
@@ -188,13 +189,13 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <div class="section-card table-card">
+        <div class="section-card-header dark table-toolbar">
             <span>Resultado</span>
-            <span><?= count($ordens) ?> registro(s)</span>
+            <span class="table-count"><?= count($ordens) ?> registro(s)</span>
         </div>
 
-        <div class="card-body">
+        <div class="section-card-body p-0">
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover align-middle">
@@ -209,7 +210,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Abertura</th>
                             <th>Previsão</th>
                             <th>Valor</th>
-                            <th width="260">Ações</th>
+                            <th class="col-actions">Ações</th>
                         </tr>
                     </thead>
 
@@ -248,7 +249,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         }
                                     ?>
 
-                                    <span class="badge <?= $classeStatus ?>">
+                                    <span class="badge badge-status <?= $classeStatus ?>">
                                         <?= htmlspecialchars($status) ?>
                                     </span>
                                 </td>
@@ -267,7 +268,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         }
                                     ?>
 
-                                    <span class="badge <?= $classePrioridade ?>">
+                                    <span class="badge badge-priority <?= $classePrioridade ?>">
                                         <?= htmlspecialchars($prioridade) ?>
                                     </span>
                                 </td>
@@ -291,13 +292,6 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <?php if ($podeAtenderOS): ?>
-                                        <a href="atendimento.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                        class="btn btn-sm btn-success">
-                                            Atender
-                                        </a>
-                                    <?php endif; ?>
-
                                     <?php
                                         $linkCliente = $baseUrl . "/public/os.php?token=" . $ordem["TokenAcompanhamento"];
 
@@ -316,39 +310,99 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         }
                                     ?>
 
-                                    <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                    class="btn btn-sm btn-info">
-                                        Ver
-                                    </a>
+                                    <div class="d-flex gap-2 action-dropdown">
 
-                                    <a href="<?= htmlspecialchars($linkCliente) ?>" 
-                                    target="_blank"
-                                    class="btn btn-sm btn-outline-primary">
-                                        Link Cliente
-                                    </a>
+                                        <?php if ($podeAtenderOS): ?>
+                                            <a 
+                                                href="atendimento.php?id=<?= $ordem["OrdemServicoId"] ?>" 
+                                                class="btn btn-sm btn-success"
+                                            >
+                                                Atender
+                                            </a>
+                                        <?php endif; ?>
 
-                                    <button 
-                                        type="button"
-                                        class="btn btn-sm btn-outline-secondary"
-                                        onclick="copiarLinkCliente('<?= htmlspecialchars($linkCliente, ENT_QUOTES) ?>')">
-                                        Copiar Link
-                                    </button>
+                                        <div class="dropdown">
+                                            <button 
+                                                class="btn btn-sm btn-outline-dark dropdown-toggle" 
+                                                type="button" 
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                            >
+                                                Ações
+                                            </button>
 
-                                    <?php if ($linkWhatsApp !== ""): ?>
-                                        <a href="<?= htmlspecialchars($linkWhatsApp) ?>" 
-                                        target="_blank"
-                                        class="btn btn-sm btn-success">
-                                            WhatsApp
-                                        </a>
-                                    <?php endif; ?>
+                                            <ul class="dropdown-menu dropdown-menu-end">
 
-                                    <?php if ($podeCancelarOS): ?>
-                                        <a href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>" 
-                                        class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Deseja realmente cancelar esta OS?')">
-                                            Cancelar
-                                        </a>
-                                    <?php endif; ?>
+                                                <li>
+                                                    <a 
+                                                        class="dropdown-item" 
+                                                        href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>"
+                                                    >
+                                                        Ver detalhes
+                                                    </a>
+                                                </li>
+
+                                                <?php if ($podeEditarOS): ?>
+                                                    <li>
+                                                        <a 
+                                                            class="dropdown-item" 
+                                                            href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>"
+                                                        >
+                                                            Editar OS
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+
+                                                <li>
+                                                    <a 
+                                                        class="dropdown-item" 
+                                                        href="<?= htmlspecialchars($linkCliente) ?>" 
+                                                        target="_blank"
+                                                    >
+                                                        Abrir link do cliente
+                                                    </a>
+                                                </li>
+
+                                                <li>
+                                                    <button 
+                                                        type="button"
+                                                        class="dropdown-item"
+                                                        onclick="copiarLinkCliente('<?= htmlspecialchars($linkCliente, ENT_QUOTES) ?>')"
+                                                    >
+                                                        Copiar link
+                                                    </button>
+                                                </li>
+
+                                                <?php if ($linkWhatsApp !== ""): ?>
+                                                    <li>
+                                                        <a 
+                                                            class="dropdown-item" 
+                                                            href="<?= htmlspecialchars($linkWhatsApp) ?>" 
+                                                            target="_blank"
+                                                        >
+                                                            Enviar por WhatsApp
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+
+                                                <?php if ($podeCancelarOS): ?>
+                                                    <li><hr class="dropdown-divider"></li>
+
+                                                    <li>
+                                                        <a 
+                                                            class="dropdown-item text-danger" 
+                                                            href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>"
+                                                            onclick="return confirm('Deseja realmente cancelar esta OS?')"
+                                                        >
+                                                            Cancelar OS
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+
+                                            </ul>
+                                        </div>
+
+                                    </div>                                                                     
                                 </td>
                             </tr>
                         <?php endforeach; ?>

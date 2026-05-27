@@ -30,7 +30,7 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
