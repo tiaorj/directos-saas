@@ -70,16 +70,26 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page-wide">
 
-    <div class="mb-3">
-        <h3>
-            Editar Ordem de Serviço <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
-        </h3>
-        <p class="text-muted mb-0">Atualize os dados da OS</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">
+                Editar Ordem de Serviço 
+                <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
+            </h3>
+            <p>Atualize as informações, status, valores e regras da área do cliente.</p>
+        </div>
+
+        <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
+    <div class="card form-card">
+        <div class="card-header">
+            Dados da Ordem de Serviço
+        </div>
 
-    <div class="card shadow-sm">
         <div class="card-body">
 
             <form method="post" action="atualizar.php">
@@ -244,17 +254,18 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-success">
-                    Atualizar
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Atualizar OS
+                    </button>
+                    <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-info">
+                        Visualizar
+                    </a>
+                    <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
-                <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-info">
-                    Visualizar
-                </a>
-
-                <a href="listar.php" class="btn btn-secondary">
-                    Voltar
-                </a>
 
             </form>
 

@@ -37,14 +37,23 @@ if (!$usuario) {
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page">
 
-    <div class="mb-3">
-        <h3>Editar Usuário</h3>
-        <p class="text-muted mb-0">Atualize os dados do usuário</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Editar Usuário</h3>
+            <p>Atualize os dados de acesso deste usuário.</p>
+        </div>
+
+        <a href="listar.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card form-card">
+        <div class="card-header">
+            Dados do Usuário
+        </div>
         <div class="card-body">
 
             <form method="post" action="atualizar.php">
@@ -99,13 +108,15 @@ if (!$usuario) {
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Atualizar
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Atualizar Usuário
+                    </button>
 
-                <a href="listar.php" class="btn btn-secondary">
-                    Voltar
-                </a>
+                    <a href="listar.php" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
             </form>
 

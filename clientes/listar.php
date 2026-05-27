@@ -53,7 +53,7 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </span>
         </div>
 
-        <div class="card-body p-0">>
+        <div class="card-body p-0">
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-os">

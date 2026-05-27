@@ -10,11 +10,17 @@ $validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page">
 
-    <div class="mb-3">
-        <h3>Novo Usuário</h3>
-        <p class="text-muted mb-0">Preencha os dados de acesso</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Novo Usuário</h3>
+            <p>Cadastre um usuário para acessar o sistema da empresa.</p>
+        </div>
+
+        <a href="listar.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
 <?php if ($validacaoPlano["plano"]): ?>
@@ -52,7 +58,10 @@ $validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
         <?php exit; ?>
     <?php endif; ?>    
 
-    <div class="card shadow-sm">
+    <div class="card form-card">
+        <div class="card-header">
+            Dados do Usuário
+        </div>
         <div class="card-body">
 
             <form method="post" action="salvar.php">
@@ -90,13 +99,15 @@ $validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Salvar
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Salvar Usuário
+                    </button>
 
-                <a href="listar.php" class="btn btn-secondary">
-                    Voltar
-                </a>
+                    <a href="listar.php" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
             </form>
 

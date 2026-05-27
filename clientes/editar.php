@@ -36,14 +36,23 @@ if (!$cliente) {
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page">
 
-    <div class="mb-3">
-        <h3>Editar Cliente</h3>
-        <p class="text-muted mb-0">Atualize os dados do cliente</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Editar Cliente</h3>
+            <p>Atualize os dados cadastrais deste cliente.</p>
+        </div>
+
+        <a href="listar.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card form-card">
+        <div class="card-header">
+            Dados do Cliente
+        </div>
         <div class="card-body">
 
             <form method="post" action="atualizar.php">

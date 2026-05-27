@@ -6,21 +6,33 @@ require_once "../includes/menu.php";
 $empresaId = (int)$_SESSION["EmpresaId"];
 ?>
 
-<div class="container">
+<div class="container-fluid form-page">
 
-    <div class="mb-3">
-        <h3>Novo Cliente</h3>
-        <p class="text-muted mb-0">Preencha os dados do cliente</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Novo Cliente</h3>
+            <p>Cadastre os dados do cliente vinculado à sua empresa.</p>
+        </div>
+
+        <a href="listar.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card form-card">
+        <div class="card-header">
+            Dados do Cliente
+        </div>
+
         <div class="card-body">
 
             <form method="post" action="salvar.php">
 
+                <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">
+
                 <div class="row">
                     <div class="col-md-8 mb-3">
-                        <label class="form-label">Nome *</label>
+                        <label class="form-label required-label">Nome</label>
                         <input type="text" name="Nome" class="form-control" required maxlength="150">
                     </div>
 
@@ -67,13 +79,15 @@ $empresaId = (int)$_SESSION["EmpresaId"];
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Salvar
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Salvar Cliente
+                    </button>
 
-                <a href="listar.php" class="btn btn-secondary">
-                    Voltar
-                </a>
+                    <a href="listar.php" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
             </form>
 

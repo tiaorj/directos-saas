@@ -36,11 +36,17 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container">
+<div class="container-fluid form-page-wide">
 
-    <div class="mb-3">
-        <h3>Nova Ordem de Serviço</h3>
-        <p class="text-muted mb-0">Preencha os dados da OS</p>
+    <div class="form-header">
+        <div>
+            <h3 class="mb-1">Nova Ordem de Serviço</h3>
+            <p>Preencha os dados da OS para iniciar o atendimento.</p>
+        </div>
+
+        <a href="listar.php" class="btn btn-outline-secondary">
+            Voltar
+        </a>
     </div>
     <?php if ($validacaoPlano["plano"]): ?>
         <div class="alert alert-info">
@@ -72,12 +78,18 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
         <?php require_once "../includes/footer.php"; ?>
         <?php exit; ?>
     <?php endif; ?>
-    <div class="card shadow-sm">
+    <div class="card form-card">
+        <div class="card-header">
+            Dados da Ordem de Serviço
+        </div>
         <div class="card-body">
 
             <form method="post" action="salvar.php">
 
                 <div class="row">
+                    <div class="form-section-title">
+                        Cliente e Serviço
+                    </div>                    
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Cliente *</label>
                         <select name="ClienteId" class="form-control" required>
@@ -90,7 +102,6 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                             <?php endforeach; ?>
                         </select>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Serviço</label>
                         <select name="ServicoId" class="form-control" id="ServicoId">
@@ -106,7 +117,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
                 </div>
-
+                <div class="form-section-title">
+                    Detalhes da Solicitação
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Título *</label>
                     <input type="text" name="Titulo" class="form-control" required maxlength="150">
@@ -118,6 +131,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div class="row">
+                    <div class="form-section-title">
+                        Controle da OS
+                    </div>                    
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Status</label>
                         <select name="Status" class="form-control">
@@ -147,6 +163,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div class="row">
+                    <div class="form-section-title">
+                        Valores
+                    </div>                    
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Valor Previsto</label>
                         <input type="number" step="0.01" name="ValorPrevisto" id="ValorPrevisto" class="form-control">
@@ -163,13 +182,15 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <textarea name="Observacao" class="form-control" rows="3"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    Salvar
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Salvar OS
+                    </button>
 
-                <a href="listar.php" class="btn btn-secondary">
-                    Voltar
-                </a>
+                    <a href="listar.php" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
 
             </form>
 
