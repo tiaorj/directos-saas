@@ -74,7 +74,10 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
                 <span class="sidebar-icon">★</span>
                 <span>Meu Plano</span>
             </a>
-
+            <a class="sidebar-link" href="/sistema-os-php-sqlserver/configuracoes/index.php">
+                <span class="sidebar-icon">⚙</span>
+                <span>Configurações</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">

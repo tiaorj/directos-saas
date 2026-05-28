@@ -29,5 +29,10 @@ if ($origem === "empresa") {
     exit;
 }
 
+if ($origem === "configuracoes") {
+    header("Location: ../configuracoes/index.php");
+    exit;
+}
+
 header("Location: ../dashboard.php");
 exit;
