@@ -86,9 +86,19 @@ $empresas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </p>
         </div>
 
-        <a href="../dashboard.php" class="btn btn-outline-secondary">
-            Voltar
-        </a>
+        <?php if ($usuarioPerfil === "SuperAdmin"): ?>
+            <div class="sidebar-section">Plataforma</div>
+
+            <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/empresas.php">
+                <span class="sidebar-icon">◆</span>
+                <span>Admin SaaS</span>
+            </a>
+
+            <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/assinaturas.php">
+                <span class="sidebar-icon">★</span>
+                <span>Assinaturas</span>
+            </a>
+        <?php endif; ?>
     </div>
 
     <div class="row g-3 mb-4">

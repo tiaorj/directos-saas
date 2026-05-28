@@ -193,6 +193,26 @@ function classeStatusAdmin($status)
 
     return "bg-secondary";
 }
+
+$sqlHistoricoAssinaturas = "
+    SELECT TOP 10
+        a.AssinaturaId,
+        a.Status,
+        a.DataInicio,
+        a.DataFim,
+        p.Nome AS PlanoNome,
+        p.ValorMensal
+    FROM OS_Assinaturas a
+    INNER JOIN OS_Planos p ON p.PlanoId = a.PlanoId
+    WHERE a.EmpresaId = :EmpresaId
+    ORDER BY a.AssinaturaId DESC
+";
+
+$stmtHistoricoAssinaturas = $conn->prepare($sqlHistoricoAssinaturas);
+$stmtHistoricoAssinaturas->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtHistoricoAssinaturas->execute();
+
+$historicoAssinaturas = $stmtHistoricoAssinaturas->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -278,6 +298,91 @@ function classeStatusAdmin($status)
                         R$ <?= number_format((float)($empresa["ValorMensal"] ?? 0), 2, ",", ".") ?> / mês
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card form-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Histórico de Assinaturas</span>
+
+                <a href="assinaturas.php?empresa=<?= urlencode($empresa["NomeFantasia"] ?? "") ?>" class="btn btn-sm btn-outline-primary">
+                    Ver completo
+                </a>
+            </div>
+
+            <div class="card-body p-0">
+
+                <?php if (count($historicoAssinaturas) === 0): ?>
+                    <div class="empty-state">
+                        Nenhum histórico de assinatura encontrado.
+                    </div>
+                <?php else: ?>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle table-os mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Plano</th>
+                                    <th>Status</th>
+                                    <th>Valor</th>
+                                    <th>Início</th>
+                                    <th>Fim</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php foreach ($historicoAssinaturas as $assinatura): ?>
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                #<?= (int)$assinatura["AssinaturaId"] ?>
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                <?= htmlspecialchars($assinatura["PlanoNome"] ?? "-") ?>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <?php if ($assinatura["Status"] === "Ativa"): ?>
+                                                <span class="badge bg-success">Ativa</span>
+                                            <?php elseif ($assinatura["Status"] === "Cancelada"): ?>
+                                                <span class="badge bg-secondary">Cancelada</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-dark">
+                                                    <?= htmlspecialchars($assinatura["Status"] ?? "-") ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+
+                                        <td>
+                                            R$ <?= number_format((float)$assinatura["ValorMensal"], 2, ",", ".") ?>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($assinatura["DataInicio"])
+                                                ? date("d/m/Y H:i", strtotime($assinatura["DataInicio"]))
+                                                : "-"
+                                            ?>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($assinatura["DataFim"])
+                                                ? date("d/m/Y H:i", strtotime($assinatura["DataFim"]))
+                                                : "-"
+                                            ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                <?php endif; ?>
+
             </div>
         </div>
 
