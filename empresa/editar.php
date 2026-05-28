@@ -31,6 +31,44 @@ if (!$empresa) {
     die("Empresa não encontrada.");
 }
 
+function contarRegistrosEmpresa($conn, $sql, $empresaId)
+{
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return (int)$stmt->fetchColumn();
+}
+
+$totalServicosAtivos = contarRegistrosEmpresa($conn, "
+    SELECT COUNT(*)
+    FROM OS_Servicos
+    WHERE EmpresaId = :EmpresaId
+      AND Ativo = 1
+", $empresaId);
+
+$totalClientesAtivos = contarRegistrosEmpresa($conn, "
+    SELECT COUNT(*)
+    FROM OS_Clientes
+    WHERE EmpresaId = :EmpresaId
+      AND Ativo = 1
+", $empresaId);
+
+$totalOrdensServico = contarRegistrosEmpresa($conn, "
+    SELECT COUNT(*)
+    FROM OS_OrdensServico
+    WHERE EmpresaId = :EmpresaId
+", $empresaId);
+
+$empresaCompleta = !empty($empresa["NomeFantasia"]) 
+    && (!empty($empresa["Email"]) || !empty($empresa["WhatsApp"]));
+
+$onboardingConcluido = $empresaCompleta 
+    && $totalServicosAtivos > 0 
+    && $totalClientesAtivos > 0 
+    && $totalOrdensServico > 0;
+
+$onboardingOculto = (int)($empresa["OcultarOnboarding"] ?? 0) === 1;
 $sucesso = $_GET["sucesso"] ?? "";
 $erro = $_GET["erro"] ?? "";
 ?>
@@ -112,7 +150,22 @@ $erro = $_GET["erro"] ?? "";
 
     </div>
 
-    <?php if ((int)($empresa["OcultarOnboarding"] ?? 0) === 1): ?>
+    <?php if ($onboardingConcluido): ?>
+
+        <div class="alert alert-success d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Checklist inicial concluído.</strong>
+                <br>
+                Sua empresa já completou os primeiros passos: dados da empresa, serviço, cliente e primeira OS.
+            </div>
+
+            <a href="../dashboard.php" class="btn btn-sm btn-success">
+                Ir para o Dashboard
+            </a>
+        </div>
+
+    <?php elseif ($onboardingOculto): ?>
+
         <div class="alert alert-info d-flex justify-content-between align-items-center">
             <div>
                 <strong>Checklist inicial oculto.</strong>
@@ -120,11 +173,13 @@ $erro = $_GET["erro"] ?? "";
                 Você ocultou os primeiros passos do Dashboard. Pode reexibir quando quiser.
             </div>
 
-            <a href="alternar_onboarding.php?acao=exibir" class="btn btn-sm btn-primary">
+            <a href="alternar_onboarding.php?acao=exibir&origem=empresa" class="btn btn-sm btn-primary">
                 Reexibir checklist
             </a>
         </div>
+
     <?php else: ?>
+
         <div class="alert alert-light border d-flex justify-content-between align-items-center">
             <div>
                 <strong>Checklist inicial ativo.</strong>
@@ -133,13 +188,14 @@ $erro = $_GET["erro"] ?? "";
             </div>
 
             <a 
-                href="alternar_onboarding.php?acao=ocultar" 
+                href="alternar_onboarding.php?acao=ocultar&origem=empresa" 
                 class="btn btn-sm btn-outline-secondary"
                 onclick="return confirm('Deseja ocultar o checklist inicial do Dashboard?')"
             >
                 Ocultar checklist
             </a>
         </div>
+
     <?php endif; ?>
 
     <div class="card form-card">

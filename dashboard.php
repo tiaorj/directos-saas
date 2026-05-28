@@ -213,8 +213,8 @@ $percentualOnboarding = $totalItensOnboarding > 0
 
 $onboardingOculto = (int)($empresaOnboarding["OcultarOnboarding"] ?? 0) === 1;
 
-$mostrarOnboarding = !$onboardingOculto 
-    && $totalConcluidosOnboarding < $totalItensOnboarding;
+$onboardingCompleto = $totalConcluidosOnboarding >= $totalItensOnboarding;
+$mostrarOnboarding = !$onboardingOculto && !$onboardingCompleto;
 
 $sqlUltimas = "
     SELECT TOP 6
