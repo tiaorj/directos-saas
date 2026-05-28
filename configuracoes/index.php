@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 exigirPerfil(["Admin"]);
 
@@ -254,7 +255,7 @@ $percentualOnboarding = count($itensOnboarding) > 0
                         </div>
 
                         <a 
-                            href="../empresa/alternar_onboarding.php?acao=exibir&origem=configuracoes" 
+                            href="../empresa/alternar_onboarding.php?acao=exibir&origem=configuracoes&<?= csrfTokenUrl() ?>"
                             class="btn btn-primary w-100"
                         >
                             Reexibir checklist
@@ -269,7 +270,7 @@ $percentualOnboarding = count($itensOnboarding) > 0
                         </div>
 
                         <a 
-                            href="../empresa/alternar_onboarding.php?acao=ocultar&origem=configuracoes" 
+                            href="../empresa/alternar_onboarding.php?acao=ocultar&origem=configuracoes&<?= csrfTokenUrl() ?>"
                             class="btn btn-outline-secondary w-100"
                             onclick="return confirm('Deseja ocultar o checklist inicial do Dashboard?')"
                         >

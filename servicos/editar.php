@@ -4,6 +4,7 @@ require_once "../includes/permissoes.php";
 exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
@@ -56,6 +57,7 @@ if (!$servico) {
         <div class="card-body">
 
             <form method="post" action="atualizar.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="ServicoId" value="<?= $servico["ServicoId"] ?>">
                 <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">

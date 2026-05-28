@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 
@@ -126,7 +127,7 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                                             <?php if ((int)$servico["Ativo"] === 1): ?>
                                                 <a 
-                                                    href="excluir.php?id=<?= $servico["ServicoId"] ?>" 
+                                                    href="excluir.php?id=<?= $servico["ServicoId"] ?>&<?= csrfTokenUrl() ?>"
                                                     class="btn btn-sm btn-outline-danger"
                                                     onclick="return confirm('Deseja realmente inativar este serviço?')"
                                                 >

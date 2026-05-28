@@ -2,6 +2,8 @@
 session_start();
 
 require_once "config/conexao.php";
+require_once "includes/csrf.php";
+csrfValidarTokenPost();
 
 $email = trim($_POST["Email"] ?? "");
 $senha = $_POST["Senha"] ?? "";

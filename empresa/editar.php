@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 
@@ -173,7 +174,7 @@ $erro = $_GET["erro"] ?? "";
                 Você ocultou os primeiros passos do Dashboard. Pode reexibir quando quiser.
             </div>
 
-            <a href="alternar_onboarding.php?acao=exibir&origem=empresa" class="btn btn-sm btn-primary">
+            <a href="alternar_onboarding.php?acao=exibir&origem=empresa&<?= csrfTokenUrl() ?>" class="btn btn-sm btn-primary">
                 Reexibir checklist
             </a>
         </div>
@@ -188,7 +189,7 @@ $erro = $_GET["erro"] ?? "";
             </div>
 
             <a 
-                href="alternar_onboarding.php?acao=ocultar&origem=empresa" 
+                href="alternar_onboarding.php?acao=ocultar&origem=empresa&<?= csrfTokenUrl() ?>"
                 class="btn btn-sm btn-outline-secondary"
                 onclick="return confirm('Deseja ocultar o checklist inicial do Dashboard?')"
             >
@@ -205,6 +206,7 @@ $erro = $_GET["erro"] ?? "";
 
         <div class="card-body">
             <form method="post" action="atualizar.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="EmpresaId" value="<?= (int)$empresa["EmpresaId"] ?>">
 

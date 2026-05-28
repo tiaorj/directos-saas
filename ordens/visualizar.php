@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = (int)($_GET["id"] ?? 0);
@@ -436,14 +437,14 @@ $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["Ord
                                             </a>
 
                                             <a 
-                                                href="alternar_visibilidade_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>" 
+                                                href="alternar_visibilidade_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>&<?= csrfTokenUrl() ?>"
                                                 class="btn btn-sm btn-outline-secondary"
                                             >
                                                 <?= (int)$anexo["VisivelCliente"] === 1 ? "Ocultar" : "Liberar" ?>
                                             </a>
 
                                             <a 
-                                                href="excluir_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>" 
+                                                href="excluir_anexo.php?id=<?= (int)$anexo["AnexoId"] ?>&<?= csrfTokenUrl() ?>"
                                                 class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Deseja realmente excluir este anexo?')"
                                             >

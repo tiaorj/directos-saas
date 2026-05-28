@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 exigirPerfil(["Admin", "SuperAdmin"]);
 
@@ -60,6 +61,7 @@ if (!$usuario) {
         <div class="card-body">
 
             <form method="post" action="atualizar.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="UsuarioId" value="<?= $usuario["UsuarioId"] ?>">
                 <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">

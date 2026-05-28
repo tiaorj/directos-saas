@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once "includes/csrf.php";
 
 if (isset($_SESSION["UsuarioId"])) {
     header("Location: dashboard.php");
@@ -259,6 +260,7 @@ $erro = $_GET["erro"] ?? "";
                     <?php endif; ?>
 
                     <form method="post" action="validar_login.php">
+                        <?= csrfInput() ?>
 
                         <div class="mb-3">
                             <label class="form-label">E-mail</label>

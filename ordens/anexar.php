@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 $empresaId = $_SESSION["EmpresaId"];
 $ordemServicoId = $_GET["id"] ?? 0;
@@ -59,6 +60,7 @@ $erro = $_GET["erro"] ?? "";
 
         <div class="card-body">
             <form method="post" action="salvar_anexo.php" enctype="multipart/form-data">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="OrdemServicoId" value="<?= (int)$ordem["OrdemServicoId"] ?>">
 

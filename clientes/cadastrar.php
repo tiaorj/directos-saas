@@ -1,5 +1,6 @@
 <?php 
 require_once "../includes/proteger.php";
+require_once "../includes/csrf.php";
 require_once "../includes/header.php";
 require_once "../includes/menu.php"; 
 
@@ -27,6 +28,7 @@ $empresaId = (int)$_SESSION["EmpresaId"];
         <div class="card-body">
 
             <form method="post" action="salvar.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">
 

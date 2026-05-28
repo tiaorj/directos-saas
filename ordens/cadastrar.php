@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
+require_once "../includes/csrf.php";
 
 $empresaId = $_SESSION["EmpresaId"];
 $validacaoPlano = empresaPodeCriarOS($conn, $empresaId);
@@ -85,6 +86,7 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
         <div class="card-body">
 
             <form method="post" action="salvar.php">
+                <?= csrfInput() ?>
 
                 <div class="row">
                     <div class="form-section-title">

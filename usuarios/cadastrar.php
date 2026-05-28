@@ -2,6 +2,7 @@
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
@@ -65,6 +66,7 @@ $validacaoPlano = empresaPodeCriarUsuario($conn, $empresaId);
         <div class="card-body">
 
             <form method="post" action="salvar.php">
+                <?= csrfInput() ?>
 
                 <div class="mb-3">
                     <label class="form-label">Nome *</label>

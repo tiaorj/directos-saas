@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once "includes/csrf.php";
 
 if (isset($_SESSION["UsuarioId"])) {
     header("Location: dashboard.php");
@@ -256,6 +257,7 @@ $sucesso = $_GET["sucesso"] ?? "";
                     <?php endif; ?>
 
                     <form method="post" action="salvar_cadastro.php">
+                        <?= csrfInput() ?>
 
                         <div class="form-section-title">
                             Dados da empresa

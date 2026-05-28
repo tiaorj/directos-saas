@@ -2,6 +2,8 @@
 session_start();
 
 require_once "config/conexao.php";
+require_once "includes/csrf.php";
+csrfValidarTokenPost();
 
 $nomeFantasia = trim($_POST["NomeFantasia"] ?? "");
 $razaoSocial = trim($_POST["RazaoSocial"] ?? "");

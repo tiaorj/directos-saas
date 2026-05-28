@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 $empresaId = $_SESSION["EmpresaId"];
 
@@ -130,7 +131,7 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                                         <?php if ((int)$cliente["Ativo"] === 1): ?>
                                             <a 
-                                                href="excluir.php?id=<?= $cliente["ClienteId"] ?>" 
+                                                href="excluir.php?id=<?= $cliente["ClienteId"] ?>&<?= csrfTokenUrl() ?>"
                                                 class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Deseja realmente inativar este cliente?')"
                                             >

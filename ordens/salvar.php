@@ -4,6 +4,8 @@ require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
 require_once "../includes/planos.php";
+require_once "../includes/csrf.php";
+csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente"]);
 

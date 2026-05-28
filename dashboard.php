@@ -3,6 +3,7 @@ require_once "includes/proteger.php";
 require_once "config/conexao.php";
 require_once "includes/funcoes.php";
 require_once "includes/planos.php";
+require_once "includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $usuarioNome = $_SESSION["UsuarioNome"] ?? "Usuário";
@@ -258,7 +259,7 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
                         </span>
 
                         <a 
-                            href="empresa/alternar_onboarding.php?acao=ocultar" 
+                            href="empresa/alternar_onboarding.php?acao=ocultar&<?= csrfTokenUrl() ?>"
                             class="btn btn-sm btn-outline-secondary"
                             onclick="return confirm('Deseja ocultar este checklist do Dashboard? Você poderá reexibir depois em Minha Empresa.')"
                         >

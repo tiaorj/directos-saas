@@ -3,6 +3,7 @@ require_once "../includes/proteger.php";
 require_once "../includes/header.php";
 require_once "../includes/menu.php"; 
 require_once "../includes/permissoes.php";
+require_once "../includes/csrf.php";
 exigirPerfil(["Admin"]);
 ?>
 
@@ -26,6 +27,7 @@ exigirPerfil(["Admin"]);
         <div class="card-body">
 
             <form method="post" action="salvar.php">
+                <?= csrfInput() ?>
 
                 <div class="mb-3">
                     <label class="form-label required-label">Nome</label>

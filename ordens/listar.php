@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
+require_once "../includes/csrf.php";
 
 $podeCriarOS = usuarioTemPerfil(["Admin", "Atendente"]);
 $podeEditarOS = usuarioTemPerfil(["Admin", "Atendente"]);
@@ -376,7 +377,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <li>
                                                         <a 
                                                             class="dropdown-item text-danger" 
-                                                            href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>"
+                                                            href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>"
                                                             onclick="return confirm('Deseja realmente cancelar esta OS?')"
                                                         >
                                                             Cancelar OS

@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 
@@ -317,13 +318,18 @@ function percentualUsoPlano($total, $limite)
                                     Plano atual
                                 </button>
                             <?php else: ?>
-                                <a 
-                                    href="alterar.php?plano=<?= (int)$plano["PlanoId"] ?>" 
-                                    class="btn btn-primary w-100"
-                                    onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["Nome"]) ?>?')"
-                                >
-                                    Alterar para este plano
-                                </a>
+                                <form method="post" action="alterar.php">
+                                    <?= csrfInput() ?>
+                                    <input type="hidden" name="plano" value="<?= (int)$plano["PlanoId"] ?>">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary w-100"
+                                        onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["Nome"]) ?>?')"
+                                    >
+                                        Alterar para este plano
+                                    </button>
+                                </form>
                             <?php endif; ?>
                         </div>
 

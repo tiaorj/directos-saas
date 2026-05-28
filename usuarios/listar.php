@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 exigirPerfil(["Admin", "SuperAdmin"]);
 
@@ -138,7 +139,7 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </a>
 
                                     <?php if ((int)$usuario["UsuarioId"] !== (int)$_SESSION["UsuarioId"]): ?>
-                                        <a href="excluir.php?id=<?= $usuario["UsuarioId"] ?>" 
+                                        <a href="excluir.php?id=<?= $usuario["UsuarioId"] ?>&<?= csrfTokenUrl() ?>"
                                         class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Deseja realmente inativar este usuário?')">
                                             Inativar

@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
 
 exigirPerfil(["SuperAdmin"]);
 
@@ -266,7 +267,7 @@ $historicoAssinaturas = $stmtHistoricoAssinaturas->fetchAll(PDO::FETCH_ASSOC);
                     <div class="mt-3">
                         <?php if ((int)$empresa["Ativo"] === 1): ?>
                             <a 
-                                href="alternar_status_empresa.php?id=<?= (int)$empresa["EmpresaId"] ?>&acao=inativar" 
+                                href="alternar_status_empresa.php?id=<?= (int)$empresa["EmpresaId"] ?>&acao=inativar&<?= csrfTokenUrl() ?>"
                                 class="btn btn-sm btn-outline-danger"
                                 onclick="return confirm('Deseja realmente inativar esta empresa?')"
                             >
@@ -274,7 +275,7 @@ $historicoAssinaturas = $stmtHistoricoAssinaturas->fetchAll(PDO::FETCH_ASSOC);
                             </a>
                         <?php else: ?>
                             <a 
-                                href="alternar_status_empresa.php?id=<?= (int)$empresa["EmpresaId"] ?>&acao=ativar" 
+                                href="alternar_status_empresa.php?id=<?= (int)$empresa["EmpresaId"] ?>&acao=ativar&<?= csrfTokenUrl() ?>"
                                 class="btn btn-sm btn-success"
                             >
                                 Ativar empresa
@@ -488,6 +489,7 @@ $historicoAssinaturas = $stmtHistoricoAssinaturas->fetchAll(PDO::FETCH_ASSOC);
                 <div class="card-body">
 
                     <form method="post" action="alterar_plano_empresa.php">
+                        <?= csrfInput() ?>
 
                         <input type="hidden" name="EmpresaId" value="<?= (int)$empresa["EmpresaId"] ?>">
 

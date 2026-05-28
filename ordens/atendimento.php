@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
@@ -89,6 +90,7 @@ if (!$ordem) {
         <div class="card-body">
 
             <form method="post" action="salvar_atendimento.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="OrdemServicoId" value="<?= $ordem["OrdemServicoId"] ?>">
 

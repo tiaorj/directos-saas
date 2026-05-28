@@ -1,9 +1,11 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
+csrfValidarTokenPost();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$planoId = (int)($_GET["plano"] ?? 0);
+$planoId = (int)($_POST["plano"] ?? 0);
 
 if ($planoId <= 0) {
     header("Location: meu_plano.php?erro=Plano inválido.");

@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
@@ -57,6 +58,7 @@ if (!$cliente) {
         <div class="card-body">
 
             <form method="post" action="atualizar.php">
+                <?= csrfInput() ?>
 
                 <input type="hidden" name="ClienteId" value="<?= $cliente["ClienteId"] ?>">
                 <input type="hidden" name="EmpresaId" value="<?= $empresaId ?>">

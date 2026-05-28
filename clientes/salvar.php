@@ -1,6 +1,9 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/csrf.php";
+
+csrfValidarTokenPost();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $nome = trim($_POST["Nome"] ?? "");
