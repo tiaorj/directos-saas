@@ -131,9 +131,19 @@ function formatarLimiteAssinatura($valor)
             </p>
         </div>
 
-        <a href="empresas.php" class="btn btn-outline-secondary">
-            Voltar
-        </a>
+        <div class="d-flex gap-2">
+            <a href="metricas.php" class="btn btn-primary">
+                Métricas SaaS
+            </a>
+
+            <a href="empresas.php" class="btn btn-outline-primary">
+                Empresas
+            </a>
+
+            <a href="../dashboard.php" class="btn btn-outline-secondary">
+                Voltar
+            </a>
+        </div>
     </div>
 
     <div class="row g-3 mb-4">

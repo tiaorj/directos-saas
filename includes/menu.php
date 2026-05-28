@@ -81,6 +81,11 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
             <?php if ($usuarioPerfil === "SuperAdmin"): ?>
                 <div class="sidebar-section">Plataforma</div>
 
+                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/metricas.php">
+                    <span class="sidebar-icon">▦</span>
+                    <span>Métricas SaaS</span>
+                </a>
+
                 <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/empresas.php">
                     <span class="sidebar-icon">◆</span>
                     <span>Admin SaaS</span>
@@ -90,7 +95,7 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
                     <span class="sidebar-icon">★</span>
                     <span>Assinaturas</span>
                 </a>
-            <?php endif; ?>          
+            <?php endif; ?>        
         </nav>
 
         <div class="sidebar-footer">
