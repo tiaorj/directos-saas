@@ -5,6 +5,7 @@ require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
+exigirUsuarioDaEmpresa($conn, $id);
 
 exigirPerfil(["Admin", "SuperAdmin"]);
 

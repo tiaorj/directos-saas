@@ -90,7 +90,10 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
                     <span class="sidebar-icon">◆</span>
                     <span>Admin SaaS</span>
                 </a>
-
+                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/usuarios.php">
+                    <span class="sidebar-icon">◉</span>
+                    <span>Usuários SaaS</span>
+                </a>
                 <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/assinaturas.php">
                     <span class="sidebar-icon">★</span>
                     <span>Assinaturas</span>

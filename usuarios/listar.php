@@ -1,7 +1,7 @@
 <?php
 require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
-
+exigirPerfil(["Admin", "SuperAdmin"]);
 $empresaId = (int)$_SESSION["EmpresaId"];
 
 $sql = "
