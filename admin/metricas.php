@@ -198,7 +198,9 @@ function formatarMoedaAdmin($valor)
             <a href="assinaturas.php" class="btn btn-outline-primary">
                 Assinaturas
             </a>
-
+            <a href="auditoria.php" class="btn btn-outline-primary">
+                Auditoria
+            </a>
             <a href="../dashboard.php" class="btn btn-outline-secondary">
                 Voltar
             </a>

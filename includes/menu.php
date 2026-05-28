@@ -98,6 +98,10 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
                     <span class="sidebar-icon">★</span>
                     <span>Assinaturas</span>
                 </a>
+                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/auditoria.php">
+                    <span class="sidebar-icon">◎</span>
+                    <span>Auditoria</span>
+                </a>                
             <?php endif; ?>        
         </nav>
 
