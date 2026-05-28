@@ -213,7 +213,7 @@ try {
 
     $conn->commit();
 
-    header("Location: login.php?erro=" . urlencode("Conta criada com sucesso. Faça login para acessar o DirectOS."));
+    header("Location: cadastro_sucesso.php");
     exit;
 
 } catch (Exception $e) {

@@ -144,6 +144,73 @@ $totalOSAtivas = $totalOSAbertas + $totalOSEmAndamento + $totalOSAguardando;
 
 $planoAtual = obterPlanoEmpresa($conn, $empresaId);
 $totalOSMes = totalOSMesEmpresa($conn, $empresaId);
+$sqlEmpresaOnboarding = "
+    SELECT
+        NomeFantasia,
+        Email,
+        WhatsApp
+    FROM OS_Empresas
+    WHERE EmpresaId = :EmpresaId
+";
+
+$stmtEmpresaOnboarding = $conn->prepare($sqlEmpresaOnboarding);
+$stmtEmpresaOnboarding->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtEmpresaOnboarding->execute();
+
+$empresaOnboarding = $stmtEmpresaOnboarding->fetch(PDO::FETCH_ASSOC);
+
+$empresaCompleta = !empty($empresaOnboarding["NomeFantasia"]) 
+    && (!empty($empresaOnboarding["Email"]) || !empty($empresaOnboarding["WhatsApp"]));
+
+$temServico = (int)$totalServicosAtivos > 0;
+$temCliente = (int)$totalClientesAtivos > 0;
+$temOS = ((int)$totalOSAbertas + (int)$totalOSEmAndamento + (int)$totalOSAguardando + (int)$totalOSConcluidas + (int)$totalOSCanceladas) > 0;
+
+$itensOnboarding = [
+    [
+        "titulo" => "Complete os dados da empresa",
+        "descricao" => "Confira nome, e-mail e WhatsApp da empresa.",
+        "concluido" => $empresaCompleta,
+        "link" => "empresa/editar.php",
+        "botao" => "Minha Empresa"
+    ],
+    [
+        "titulo" => "Cadastre seu primeiro serviço",
+        "descricao" => "Informe os serviços que sua empresa oferece.",
+        "concluido" => $temServico,
+        "link" => "servicos/cadastrar.php",
+        "botao" => "Cadastrar Serviço"
+    ],
+    [
+        "titulo" => "Cadastre seu primeiro cliente",
+        "descricao" => "Crie um cliente para abrir sua primeira OS.",
+        "concluido" => $temCliente,
+        "link" => "clientes/cadastrar.php",
+        "botao" => "Cadastrar Cliente"
+    ],
+    [
+        "titulo" => "Crie sua primeira OS",
+        "descricao" => "Abra uma ordem de serviço e envie o link ao cliente.",
+        "concluido" => $temOS,
+        "link" => "ordens/cadastrar.php",
+        "botao" => "Criar OS"
+    ]
+];
+
+$totalItensOnboarding = count($itensOnboarding);
+$totalConcluidosOnboarding = 0;
+
+foreach ($itensOnboarding as $item) {
+    if ($item["concluido"]) {
+        $totalConcluidosOnboarding++;
+    }
+}
+
+$percentualOnboarding = $totalItensOnboarding > 0 
+    ? round(($totalConcluidosOnboarding / $totalItensOnboarding) * 100) 
+    : 0;
+
+$mostrarOnboarding = $totalConcluidosOnboarding < $totalItensOnboarding;
 
 $sqlUltimas = "
     SELECT TOP 6
@@ -176,6 +243,83 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
 <div class="container-fluid form-page-wide">
 
     <div class="form-header">
+        <?php if ($mostrarOnboarding): ?>
+            <div class="card form-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Primeiros passos no DirectOS</span>
+
+                    <span class="badge bg-primary">
+                        <?= (int)$percentualOnboarding ?>% concluído
+                    </span>
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted">
+                        Complete estes passos para deixar sua empresa pronta para usar o DirectOS.
+                    </p>
+
+                    <div class="progress mb-4" style="height: 12px;">
+                        <div 
+                            class="progress-bar bg-primary" 
+                            style="width: <?= (int)$percentualOnboarding ?>%;">
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+
+                        <?php foreach ($itensOnboarding as $item): ?>
+                            <div class="col-md-6">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+
+                                        <div class="d-flex justify-content-between align-items-start gap-3">
+
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <?= htmlspecialchars($item["titulo"]) ?>
+                                                </h6>
+
+                                                <p class="text-muted small mb-0">
+                                                    <?= htmlspecialchars($item["descricao"]) ?>
+                                                </p>
+                                            </div>
+
+                                            <?php if ($item["concluido"]): ?>
+                                                <span class="badge bg-success">
+                                                    Concluído
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">
+                                                    Pendente
+                                                </span>
+                                            <?php endif; ?>
+
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <?php if ($item["concluido"]): ?>
+                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                    Feito
+                                                </button>
+                                            <?php else: ?>
+                                                <a href="<?= htmlspecialchars($item["link"]) ?>" class="btn btn-sm btn-primary">
+                                                    <?= htmlspecialchars($item["botao"]) ?>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                    </div>
+
+                </div>
+            </div>
+        <?php endif; ?>        
+        
         <div>
             <h3 class="mb-1">
                 Olá, <?= htmlspecialchars($usuarioNome) ?> 👋
