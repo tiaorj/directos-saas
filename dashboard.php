@@ -148,7 +148,8 @@ $sqlEmpresaOnboarding = "
     SELECT
         NomeFantasia,
         Email,
-        WhatsApp
+        WhatsApp,
+        OcultarOnboarding
     FROM OS_Empresas
     WHERE EmpresaId = :EmpresaId
 ";
@@ -210,7 +211,10 @@ $percentualOnboarding = $totalItensOnboarding > 0
     ? round(($totalConcluidosOnboarding / $totalItensOnboarding) * 100) 
     : 0;
 
-$mostrarOnboarding = $totalConcluidosOnboarding < $totalItensOnboarding;
+$onboardingOculto = (int)($empresaOnboarding["OcultarOnboarding"] ?? 0) === 1;
+
+$mostrarOnboarding = !$onboardingOculto 
+    && $totalConcluidosOnboarding < $totalItensOnboarding;
 
 $sqlUltimas = "
     SELECT TOP 6
@@ -248,9 +252,19 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Primeiros passos no DirectOS</span>
 
-                    <span class="badge bg-primary">
-                        <?= (int)$percentualOnboarding ?>% concluído
-                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary">
+                            <?= (int)$percentualOnboarding ?>% concluído
+                        </span>
+
+                        <a 
+                            href="empresa/alternar_onboarding.php?acao=ocultar" 
+                            class="btn btn-sm btn-outline-secondary"
+                            onclick="return confirm('Deseja ocultar este checklist do Dashboard? Você poderá reexibir depois em Minha Empresa.')"
+                        >
+                            Ocultar
+                        </a>
+                    </div>
                 </div>
 
                 <div class="card-body">
@@ -319,7 +333,7 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
         <?php endif; ?>        
-        
+
         <div>
             <h3 class="mb-1">
                 Olá, <?= htmlspecialchars($usuarioNome) ?> 👋

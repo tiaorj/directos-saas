@@ -15,7 +15,8 @@ $sql = "
         WhatsApp,
         Slug,
         Ativo,
-        DataCadastro
+        DataCadastro,
+        OcultarOnboarding
     FROM OS_Empresas
     WHERE EmpresaId = :EmpresaId
 ";
@@ -110,6 +111,36 @@ $erro = $_GET["erro"] ?? "";
         </div>
 
     </div>
+
+    <?php if ((int)($empresa["OcultarOnboarding"] ?? 0) === 1): ?>
+        <div class="alert alert-info d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Checklist inicial oculto.</strong>
+                <br>
+                Você ocultou os primeiros passos do Dashboard. Pode reexibir quando quiser.
+            </div>
+
+            <a href="alternar_onboarding.php?acao=exibir" class="btn btn-sm btn-primary">
+                Reexibir checklist
+            </a>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-light border d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Checklist inicial ativo.</strong>
+                <br>
+                O Dashboard mostrará os primeiros passos enquanto houver pendências.
+            </div>
+
+            <a 
+                href="alternar_onboarding.php?acao=ocultar" 
+                class="btn btn-sm btn-outline-secondary"
+                onclick="return confirm('Deseja ocultar o checklist inicial do Dashboard?')"
+            >
+                Ocultar checklist
+            </a>
+        </div>
+    <?php endif; ?>
 
     <div class="card form-card">
         <div class="card-header">
