@@ -58,7 +58,7 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
 
             <div class="sidebar-section">Gestão</div>
 
-            <?php if ($usuarioPerfil === "Admin"): ?>
+            <?php if ($usuarioPerfil === "Admin" || $usuarioPerfil === "SuperAdmin"): ?>
                 <a class="sidebar-link" href="/sistema-os-php-sqlserver/usuarios/listar.php">
                     <span class="sidebar-icon">◉</span>
                     <span>Usuários</span>
@@ -78,6 +78,14 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
                 <span class="sidebar-icon">⚙</span>
                 <span>Configurações</span>
             </a>
+            <?php if ($usuarioPerfil === "SuperAdmin"): ?>
+                <div class="sidebar-section">Plataforma</div>
+
+                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/empresas.php">
+                    <span class="sidebar-icon">◆</span>
+                    <span>Admin SaaS</span>
+                </a>
+            <?php endif; ?>            
         </nav>
 
         <div class="sidebar-footer">
