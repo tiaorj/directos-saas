@@ -13,15 +13,19 @@ if ($email === "" || $senha === "") {
 
 $sql = "
     SELECT 
-        UsuarioId,
-        EmpresaId,
-        Nome,
-        Email,
-        SenhaHash,
-        Perfil,
-        Ativo
-    FROM OS_Usuarios
-    WHERE Email = :Email
+        u.UsuarioId,
+        u.EmpresaId,
+        u.Nome,
+        u.Email,
+        u.SenhaHash,
+        u.Perfil,
+        u.Ativo AS UsuarioAtivo,
+
+        e.NomeFantasia AS EmpresaNome,
+        e.Ativo AS EmpresaAtiva
+    FROM OS_Usuarios u
+    INNER JOIN OS_Empresas e ON e.EmpresaId = u.EmpresaId
+    WHERE u.Email = :Email
 ";
 
 $stmt = $conn->prepare($sql);
@@ -35,8 +39,13 @@ if (!$usuario) {
     exit;
 }
 
-if ((int)$usuario["Ativo"] !== 1) {
+if ((int)$usuario["UsuarioAtivo"] !== 1) {
     header("Location: login.php?erro=Usuário inativo.");
+    exit;
+}
+
+if ((int)$usuario["EmpresaAtiva"] !== 1) {
+    header("Location: login.php?erro=Empresa inativa. Entre em contato com o suporte.");
     exit;
 }
 
@@ -50,5 +59,7 @@ $_SESSION["UsuarioNome"] = $usuario["Nome"];
 $_SESSION["UsuarioEmail"] = $usuario["Email"];
 $_SESSION["UsuarioPerfil"] = $usuario["Perfil"];
 $_SESSION["EmpresaId"] = $usuario["EmpresaId"];
+$_SESSION["EmpresaNome"] = $usuario["EmpresaNome"];
+
 header("Location: dashboard.php");
 exit;
