@@ -1,14 +1,12 @@
 <?php
-require_once "../includes/proteger_admin.php";
+require_once "../includes/proteger.php";
+require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
-require_once "../includes/seguranca.php";
-
-$empresaId = (int)$_SESSION["EmpresaId"];
-$id = $_GET["id"] ?? 0;
-exigirUsuarioDaEmpresa($conn, $id);
 
 exigirPerfil(["Admin", "SuperAdmin"]);
 
+$empresaId = (int)$_SESSION["EmpresaId"];
+$id = $_GET["id"] ?? 0;
 
 if ($id <= 0) {
     die("Usuário inválido.");
