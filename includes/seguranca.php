@@ -49,6 +49,13 @@ function registroExisteNaEmpresa($conn, $tabela, $campoId, $id, $empresaId)
         bloquearAcesso("Campo inválido para validação.");
     }
 
+    $id = (int)$id;
+    $empresaId = (int)$empresaId;
+
+    if ($id <= 0 || $empresaId <= 0) {
+        return false;
+    }
+
     $sql = "
         SELECT COUNT(*)
         FROM {$tabela}
@@ -57,8 +64,8 @@ function registroExisteNaEmpresa($conn, $tabela, $campoId, $id, $empresaId)
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bindValue(":Id", (int)$id, PDO::PARAM_INT);
-    $stmt->bindValue(":EmpresaId", (int)$empresaId, PDO::PARAM_INT);
+    $stmt->bindValue(":Id", $id, PDO::PARAM_INT);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmt->execute();
 
     return (int)$stmt->fetchColumn() > 0;
@@ -112,6 +119,11 @@ function exigirUsuarioDaEmpresa($conn, $usuarioId)
 function clienteAtivoDaEmpresa($conn, $clienteId)
 {
     $empresaId = obterEmpresaIdSeguranca();
+    $clienteId = (int)$clienteId;
+
+    if ($clienteId <= 0 || $empresaId <= 0) {
+        return false;
+    }
 
     $sql = "
         SELECT COUNT(*)
@@ -122,8 +134,8 @@ function clienteAtivoDaEmpresa($conn, $clienteId)
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bindValue(":ClienteId", (int)$clienteId, PDO::PARAM_INT);
-    $stmt->bindValue(":EmpresaId", (int)$empresaId, PDO::PARAM_INT);
+    $stmt->bindValue(":ClienteId", $clienteId, PDO::PARAM_INT);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmt->execute();
 
     return (int)$stmt->fetchColumn() > 0;
@@ -132,6 +144,11 @@ function clienteAtivoDaEmpresa($conn, $clienteId)
 function servicoAtivoDaEmpresa($conn, $servicoId)
 {
     $empresaId = obterEmpresaIdSeguranca();
+    $servicoId = (int)$servicoId;
+
+    if ($servicoId <= 0 || $empresaId <= 0) {
+        return false;
+    }
 
     $sql = "
         SELECT COUNT(*)
@@ -142,8 +159,8 @@ function servicoAtivoDaEmpresa($conn, $servicoId)
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bindValue(":ServicoId", (int)$servicoId, PDO::PARAM_INT);
-    $stmt->bindValue(":EmpresaId", (int)$empresaId, PDO::PARAM_INT);
+    $stmt->bindValue(":ServicoId", $servicoId, PDO::PARAM_INT);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmt->execute();
 
     return (int)$stmt->fetchColumn() > 0;

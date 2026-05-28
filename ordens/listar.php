@@ -49,8 +49,8 @@ $sql = "
         c.Email AS ClienteEmail,
         s.Nome AS ServicoNome
     FROM OS_OrdensServico os
-    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
-    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
+    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId AND s.EmpresaId = os.EmpresaId
     WHERE os.EmpresaId = :EmpresaId
 ";
 

@@ -151,7 +151,7 @@ $sqlUltimasOS = "
         os.DataAbertura,
         c.Nome AS ClienteNome
     FROM OS_OrdensServico os
-    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
     WHERE os.EmpresaId = :EmpresaId
     ORDER BY os.OrdemServicoId DESC
 ";

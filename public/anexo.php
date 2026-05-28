@@ -18,7 +18,7 @@ $sql = "
         os.OrdemServicoId,
         os.TokenAcompanhamento
     FROM OS_OrdensServicoAnexos a
-    INNER JOIN OS_OrdensServico os ON os.OrdemServicoId = a.OrdemServicoId
+    INNER JOIN OS_OrdensServico os ON os.OrdemServicoId = a.OrdemServicoId AND os.EmpresaId = a.EmpresaId
     WHERE a.AnexoId = :AnexoId
       AND os.TokenAcompanhamento = :Token
       AND a.VisivelCliente = 1

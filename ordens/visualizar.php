@@ -25,8 +25,8 @@ $sql = "
         c.Estado AS ClienteEstado,
         s.Nome AS ServicoNome
     FROM OS_OrdensServico os
-    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
-    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
+    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId AND s.EmpresaId = os.EmpresaId
     WHERE os.OrdemServicoId = :OrdemServicoId
       AND os.EmpresaId = :EmpresaId
 ";
@@ -51,14 +51,10 @@ $sqlHistorico = "
         h.DataRegistro,
         u.Nome AS UsuarioNome
     FROM OS_Historico h
-    INNER JOIN OS_Usuarios u ON u.UsuarioId = h.UsuarioId
+    INNER JOIN OS_OrdensServico os2 ON os2.OrdemServicoId = h.OrdemServicoId
+    INNER JOIN OS_Usuarios u ON u.UsuarioId = h.UsuarioId AND u.EmpresaId = os2.EmpresaId
     WHERE h.OrdemServicoId = :OrdemServicoId
-      AND EXISTS (
-          SELECT 1
-          FROM OS_OrdensServico os2
-          WHERE os2.OrdemServicoId = h.OrdemServicoId
-            AND os2.EmpresaId = :EmpresaId
-      )
+      AND os2.EmpresaId = :EmpresaId
     ORDER BY h.DataRegistro DESC
 ";
 

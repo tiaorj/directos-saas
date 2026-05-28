@@ -2,13 +2,14 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "SuperAdmin"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$usuarioId = $_POST["UsuarioId"] ?? 0;
+$usuarioId = (int)($_POST["UsuarioId"] ?? 0);
 $nome = trim($_POST["Nome"] ?? "");
 $email = trim($_POST["Email"] ?? "");
 $senha = $_POST["Senha"] ?? "";
@@ -18,6 +19,8 @@ $ativo = $_POST["Ativo"] ?? 1;
 if ($usuarioId <= 0) {
     die("Usuário inválido.");
 }
+
+exigirUsuarioDaEmpresa($conn, $usuarioId);
 
 if ($nome === "") {
     die("O campo Nome é obrigatório.");

@@ -5,7 +5,9 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$id = $_GET["id"] ?? 0;
+$id = (int)($_GET["id"] ?? 0);
+
+exigirClienteDaEmpresa($conn, $id);
 
 $sql = "
     SELECT 

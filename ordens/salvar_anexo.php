@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
@@ -12,6 +13,8 @@ $visivelCliente = isset($_POST["VisivelCliente"]) ? 1 : 0;
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
 }
+
+exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
 $sqlOrdem = "
     SELECT OrdemServicoId

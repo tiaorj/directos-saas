@@ -3,15 +3,17 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
-$clienteId = $_POST["ClienteId"] ?? 0;
-$servicoId = $_POST["ServicoId"] !== "" ? $_POST["ServicoId"] : null;
+$ordemServicoId = (int)($_POST["OrdemServicoId"] ?? 0);
+$clienteId = (int)($_POST["ClienteId"] ?? 0);
+$servicoIdPost = $_POST["ServicoId"] ?? "";
+$servicoId = $servicoIdPost !== "" ? (int)$servicoIdPost : null;
 $titulo = trim($_POST["Titulo"] ?? "");
 $descricaoProblema = trim($_POST["DescricaoProblema"] ?? "");
 $descricaoSolucao = trim($_POST["DescricaoSolucao"] ?? "");
@@ -35,6 +37,16 @@ if ($clienteId <= 0) {
 
 if ($titulo === "") {
     die("Título é obrigatório.");
+}
+
+exigirOrdemDaEmpresa($conn, $ordemServicoId);
+
+if (!clienteAtivoDaEmpresa($conn, $clienteId)) {
+    die("Cliente invalido para esta empresa.");
+}
+
+if ($servicoId !== null && !servicoAtivoDaEmpresa($conn, $servicoId)) {
+    die("Servico invalido para esta empresa.");
 }
 
 $sqlAtual = "

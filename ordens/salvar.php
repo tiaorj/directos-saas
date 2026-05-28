@@ -4,6 +4,7 @@ require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
 require_once "../includes/planos.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
@@ -17,8 +18,9 @@ if (!$validacaoPlano["permitido"]) {
     die($validacaoPlano["mensagem"]);
 }
 
-$clienteId = $_POST["ClienteId"] ?? 0;
-$servicoId = $_POST["ServicoId"] !== "" ? $_POST["ServicoId"] : null;
+$clienteId = (int)($_POST["ClienteId"] ?? 0);
+$servicoIdPost = $_POST["ServicoId"] ?? "";
+$servicoId = $servicoIdPost !== "" ? (int)$servicoIdPost : null;
 $titulo = trim($_POST["Titulo"] ?? "");
 $descricaoProblema = trim($_POST["DescricaoProblema"] ?? "");
 $status = $_POST["Status"] ?? "Aberta";
@@ -40,6 +42,14 @@ $dataConclusao = null;
 
 if ($status === "Concluída") {
     $dataConclusao = date("Y-m-d H:i:s");
+}
+
+if (!clienteAtivoDaEmpresa($conn, $clienteId)) {
+    die("Cliente invalido para esta empresa.");
+}
+
+if ($servicoId !== null && !servicoAtivoDaEmpresa($conn, $servicoId)) {
+    die("Servico invalido para esta empresa.");
 }
 
 $sqlCliente = "

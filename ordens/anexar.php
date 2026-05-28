@@ -1,10 +1,13 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 
 $empresaId = $_SESSION["EmpresaId"];
-$ordemServicoId = $_GET["id"] ?? 0;
+$ordemServicoId = (int)($_GET["id"] ?? 0);
+
+exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");

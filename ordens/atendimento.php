@@ -1,10 +1,16 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 
+exigirPerfil(["Admin", "Atendente", "Tecnico"]);
+
 $empresaId = (int)$_SESSION["EmpresaId"];
-$id = $_GET["id"] ?? 0;
+$id = (int)($_GET["id"] ?? 0);
+
+exigirOrdemDaEmpresa($conn, $id);
 
 if ($id <= 0) {
     die("Ordem de serviço inválida.");
@@ -25,8 +31,8 @@ $sql = "
         c.Nome AS ClienteNome,
         s.Nome AS ServicoNome
     FROM OS_OrdensServico os
-    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
-    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
+    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId AND s.EmpresaId = os.EmpresaId
     WHERE os.OrdemServicoId = :OrdemServicoId AND os.EmpresaId = :EmpresaId
 ";
 

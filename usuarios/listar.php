@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 
 exigirPerfil(["Admin", "SuperAdmin"]);

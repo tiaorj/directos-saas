@@ -12,8 +12,8 @@ csrfValidarTokenGet();
 exigirPerfil(["Admin"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$id = $_GET["id"] ?? 0;
-exigirOrdemServicoDaEmpresa($conn, $id);
+$id = (int)($_GET["id"] ?? 0);
+exigirOrdemDaEmpresa($conn, $id);
 if ($id <= 0) {
     die("Ordem de serviço inválida.");
 }

@@ -33,8 +33,8 @@ $sql = "
         e.WhatsApp AS EmpresaWhatsApp,
         e.Email AS EmpresaEmail
     FROM OS_OrdensServico os
-    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
-    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
+    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId AND s.EmpresaId = os.EmpresaId
     LEFT JOIN OS_Empresas e ON e.EmpresaId = os.EmpresaId
     WHERE os.TokenAcompanhamento = :Token
 ";

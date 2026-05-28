@@ -1,12 +1,16 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
+exigirPerfil(["Admin", "Atendente", "Tecnico"]);
+
 $empresaId = (int)$_SESSION["EmpresaId"];
-$ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
+$ordemServicoId = (int)($_POST["OrdemServicoId"] ?? 0);
 $status = $_POST["Status"] ?? "Aberta";
 $descricaoSolucao = trim($_POST["DescricaoSolucao"] ?? "");
 $observacao = trim($_POST["Observacao"] ?? "");
@@ -16,6 +20,8 @@ $usuarioId = $_SESSION["UsuarioId"];
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
 }
+
+exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
 $sqlAtual = "
     SELECT 

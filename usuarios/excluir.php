@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 
@@ -10,7 +11,7 @@ csrfValidarTokenGet();
 exigirPerfil(["Admin", "SuperAdmin"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
-$id = $_GET["id"] ?? 0;
+$id = (int)($_GET["id"] ?? 0);
 
 if ($id <= 0) {
     die("Usuário inválido.");
@@ -19,6 +20,8 @@ if ($id <= 0) {
 if ((int)$id === (int)$_SESSION["UsuarioId"]) {
     die("Você não pode inativar o próprio usuário logado.");
 }
+
+exigirUsuarioDaEmpresa($conn, $id);
 
 $sql = "
     UPDATE OS_Usuarios
