@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/historico.php";
+require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $ordemServicoId = $_POST["OrdemServicoId"] ?? 0;
@@ -9,6 +10,8 @@ $status = $_POST["Status"] ?? "Aberta";
 $descricaoSolucao = trim($_POST["DescricaoSolucao"] ?? "");
 $observacao = trim($_POST["Observacao"] ?? "");
 $usuarioId = $_SESSION["UsuarioId"];
+
+exigirOrdemServicoDaEmpresa($conn, $ordemServicoId);
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");

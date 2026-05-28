@@ -3,6 +3,7 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $servicoId = $_POST["ServicoId"] ?? 0;
@@ -10,6 +11,8 @@ $nome = trim($_POST["Nome"] ?? "");
 $descricao = trim($_POST["Descricao"] ?? "");
 $valorBase = $_POST["ValorBase"] !== "" ? $_POST["ValorBase"] : null;
 $ativo = $_POST["Ativo"] ?? 1;
+
+exigirServicoDaEmpresa($conn, $servicoId);
 
 if ($servicoId <= 0) {
     die("Serviço inválido.");

@@ -1,9 +1,12 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $anexoId = (int)($_GET["id"] ?? 0);
+
+exigirAnexoDaEmpresa($conn, $anexoId);
 
 if ($anexoId <= 0) {
     die("Anexo inválido.");

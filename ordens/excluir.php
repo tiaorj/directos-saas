@@ -3,12 +3,13 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
+require_once "../includes/seguranca.php";
 
 exigirPerfil(["Admin"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
-
+exigirOrdemServicoDaEmpresa($conn, $id);
 if ($id <= 0) {
     die("Ordem de serviço inválida.");
 }

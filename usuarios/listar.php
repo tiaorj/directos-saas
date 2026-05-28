@@ -128,14 +128,15 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     ?>
                                 </td>
                                 <td>
-                                    <a href="editar.php?id=<?= $usuario["UsuarioId"] ?>" 
-                                    class="btn btn-sm btn-warning">
-                                        Editar
-                                    </a>
+                                    <div class="table-actions">
+                                        <a href="editar.php?id=<?= $usuario["UsuarioId"] ?>" 
+                                        class="btn btn-sm btn-outline-primary">
+                                            Editar
+                                        </a>
 
                                     <?php if ((int)$usuario["UsuarioId"] !== (int)$_SESSION["UsuarioId"]): ?>
                                         <a href="excluir.php?id=<?= $usuario["UsuarioId"] ?>" 
-                                        class="btn btn-sm btn-danger"
+                                        class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Deseja realmente inativar este usuário?')">
                                             Inativar
                                         </a>

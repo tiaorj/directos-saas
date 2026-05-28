@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $clienteId = $_POST["ClienteId"] ?? 0;
@@ -12,6 +13,8 @@ $endereco = trim($_POST["Endereco"] ?? "");
 $cidade = trim($_POST["Cidade"] ?? "");
 $estado = strtoupper(trim($_POST["Estado"] ?? ""));
 $ativo = $_POST["Ativo"] ?? 1;
+
+exigirClienteDaEmpresa($conn, $clienteId);
 
 if ($clienteId <= 0) {
     die("Cliente inválido.");

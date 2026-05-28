@@ -3,9 +3,12 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
+require_once "../includes/seguranca.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
+
+exigirServicoDaEmpresa($conn, $id);
 
 $sql = "
     SELECT 

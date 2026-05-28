@@ -2,11 +2,14 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
+require_once "../includes/seguranca.php";
 
 exigirPerfil(["Admin", "Atendente"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = $_GET["id"] ?? 0;
+
+exigirOrdemServicoDaEmpresa($conn, $id) ;
 
 $sql = "
     SELECT 
