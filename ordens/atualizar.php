@@ -3,7 +3,6 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
-require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
@@ -25,8 +24,6 @@ $observacao = trim($_POST["Observacao"] ?? "");
 $mostrarValorCliente = isset($_POST["MostrarValorCliente"]) ? 1 : 0;
 $mostrarSolucaoCliente = isset($_POST["MostrarSolucaoCliente"]) ? 1 : 0;
 $mostrarHistoricoCliente = isset($_POST["MostrarHistoricoCliente"]) ? 1 : 0;
-
-exigirOrdemServicoDaEmpresa($conn, $ordemServicoId);
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");

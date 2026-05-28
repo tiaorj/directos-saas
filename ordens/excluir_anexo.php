@@ -3,6 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenGet();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
@@ -50,6 +52,16 @@ $stmtDelete = $conn->prepare($sqlDelete);
 $stmtDelete->bindValue(":AnexoId", $anexoId, PDO::PARAM_INT);
 $stmtDelete->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtDelete->execute();
+
+registrarAuditoria(
+    $conn,
+    "EXCLUSAO_ANEXO_ORDEM_SERVICO",
+    "OS_OrdensServicoAnexos",
+    $anexoId,
+    "Anexo excluído.",
+    $empresaId,
+    $_SESSION["UsuarioId"]
+);
 
 header("Location: visualizar.php?id=" . $anexo["OrdemServicoId"]);
 exit;

@@ -3,6 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenPost();
 
 exigirPerfil(["SuperAdmin"]);
@@ -86,6 +88,16 @@ try {
     $stmtInserir->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmtInserir->bindValue(":PlanoId", $planoId, PDO::PARAM_INT);
     $stmtInserir->execute();
+
+    registrarAuditoria(
+        $conn,
+        "ALTERACAO_PLANO_EMPRESA",
+        "OS_Empresas",
+        $empresaId,
+        "Plano da empresa alterado para " . $plano["Nome"] . ".",
+        $empresaId,
+        null
+    );
 
     $conn->commit();
 

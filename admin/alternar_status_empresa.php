@@ -3,6 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenGet();
 
 exigirPerfil(["SuperAdmin"]);
@@ -41,6 +43,16 @@ $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $mensagem = $ativo === 1 ? "Empresa ativada com sucesso." : "Empresa inativada com sucesso.";
+
+registrarAuditoria(
+    $conn,
+    "ALTERACAO_STATUS_EMPRESA",
+    "OS_Empresas",
+    $empresaId,
+    $mensagem,
+    $empresaId,
+    null
+);
 
 header("Location: empresa.php?id=" . $empresaId . "&sucesso=" . urlencode($mensagem));
 exit;

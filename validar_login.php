@@ -3,6 +3,8 @@ session_start();
 
 require_once "config/conexao.php";
 require_once "includes/csrf.php";
+require_once "includes/auditoria.php";
+
 csrfValidarTokenPost();
 
 $email = trim($_POST["Email"] ?? "");
@@ -62,6 +64,16 @@ $_SESSION["UsuarioEmail"] = $usuario["Email"];
 $_SESSION["UsuarioPerfil"] = $usuario["Perfil"];
 $_SESSION["EmpresaId"] = $usuario["EmpresaId"];
 $_SESSION["EmpresaNome"] = $usuario["EmpresaNome"];
+
+registrarAuditoria(
+    $conn,
+    "LOGIN_SUCESSO",
+    "OS_Usuarios",
+    (int)$usuario["UsuarioId"],
+    "Usuário realizou login com sucesso.",
+    (int)$usuario["EmpresaId"],
+    (int)$usuario["UsuarioId"]
+);
 
 header("Location: dashboard.php");
 exit;

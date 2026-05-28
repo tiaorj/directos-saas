@@ -3,6 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenGet();
 
 exigirPerfil(["Admin", "SuperAdmin"]);
@@ -29,6 +31,16 @@ $stmt = $conn->prepare($sql);
 $stmt->bindValue(":UsuarioId", $id, PDO::PARAM_INT);
 $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
+
+registrarAuditoria(
+    $conn,
+    "EXCLUSAO_USUARIO",
+    "OS_Usuarios",
+    $id,
+    "Usuário excluído.",
+    $empresaId,
+    $_SESSION["UsuarioId"]
+);
 
 header("Location: listar.php");
 exit;

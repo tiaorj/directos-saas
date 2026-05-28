@@ -5,6 +5,8 @@ require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenGet();
 
 exigirPerfil(["Admin"]);
@@ -62,6 +64,16 @@ registrarHistoricoOS(
     $statusAnterior,
     "Cancelada",
     "Ordem de serviço cancelada."
+);
+
+registrarAuditoria(
+    $conn,
+    "EXCLUSAO_ORDEM_SERVICO",
+    "OS_OrdensServico",
+    $id,
+    "Ordem de serviço excluída.",
+    $_SESSION["EmpresaId"],
+    $_SESSION["UsuarioId"]
 );
 
 header("Location: listar.php");

@@ -3,6 +3,8 @@ session_start();
 
 require_once "config/conexao.php";
 require_once "includes/csrf.php";
+require_once "includes/auditoria.php";
+
 csrfValidarTokenPost();
 
 $nomeFantasia = trim($_POST["NomeFantasia"] ?? "");
@@ -212,6 +214,16 @@ try {
     $stmtAssinatura->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmtAssinatura->bindValue(":PlanoId", $planoGratuitoId, PDO::PARAM_INT);
     $stmtAssinatura->execute();
+
+    registrarAuditoria(
+        $conn,
+        "CADASTRO_PUBLICO_EMPRESA",
+        "OS_Empresas",
+        $empresaId,
+        "Empresa criada pelo cadastro público no plano gratuito.",
+        $empresaId,
+        null
+    );
 
     $conn->commit();
 
