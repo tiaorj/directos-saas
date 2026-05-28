@@ -271,7 +271,7 @@ if (isset($_SESSION["UsuarioId"])) {
                 </li>
 
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                    <a class="btn btn-light btn-sm" href="#planos">
+                    <a class="btn btn-light btn-sm" href="cadastro.php">
                         Começar agora
                     </a>
                 </li>
@@ -298,8 +298,8 @@ if (isset($_SESSION["UsuarioId"])) {
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mt-4">
-                    <a href="login.php" class="btn btn-light btn-lg">
-                        Acessar sistema
+                    <a href="cadastro.php" class="btn btn-light btn-lg">
+                        Começar grátis
                     </a>
 
                     <a href="#recursos" class="btn btn-outline-light btn-lg">
@@ -560,8 +560,8 @@ if (isset($_SESSION["UsuarioId"])) {
                             <li>Link de acompanhamento</li>
                         </ul>
 
-                        <a href="login.php" class="btn btn-outline-primary w-100 mt-auto">
-                            Começar
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-auto">
+                            Começar grátis
                         </a>
                     </div>
                 </div>
@@ -593,7 +593,7 @@ if (isset($_SESSION["UsuarioId"])) {
                             <li>Área do cliente</li>
                         </ul>
 
-                        <a href="login.php" class="btn btn-primary w-100 mt-auto">
+                        <a href="cadastro.php" class="btn btn-primary w-100 mt-auto">
                             Quero testar
                         </a>
                     </div>
@@ -622,9 +622,9 @@ if (isset($_SESSION["UsuarioId"])) {
                             <li>Suporte prioritário</li>
                         </ul>
 
-                        <a href="login.php" class="btn btn-outline-primary w-100 mt-auto">
-                            Falar sobre plano
-                        </a>
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-auto">
+                            Começar agora
+                        </a>                        
                     </div>
                 </div>
             </div>
