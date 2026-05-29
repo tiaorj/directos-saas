@@ -38,7 +38,7 @@ try {
             c.ClienteId,
             c.Nome AS ClienteNome,
             c.Telefone AS ClienteTelefone,
-            c.WhatsApp AS ClienteWhatsApp,
+            c.Telefone AS ClienteWhatsApp,
             s.Nome AS ServicoNome,
             e.EmpresaId,
             e.NomeFantasia AS EmpresaNome

@@ -14,10 +14,10 @@ exigirOrdemDaEmpresa($conn, $id);
 
 $sql = "
     SELECT 
-        OrdemServicoId,
-        CodigoOS,
-        ClienteId,
-        ServicoId,
+        os.OrdemServicoId,
+        os.CodigoOS,
+        os.ClienteId,
+        os.ServicoId,
         Titulo,
         DescricaoProblema,
         DescricaoSolucao,
@@ -30,9 +30,16 @@ $sql = "
         Observacao,
         MostrarValorCliente,
         MostrarSolucaoCliente,
-        MostrarHistoricoCliente
-    FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
+        MostrarHistoricoCliente,
+        c.Nome AS ClienteNome,
+        c.Telefone AS ClienteWhatsApp,
+        c.Telefone AS ClienteTelefone,
+        s.Nome AS ServicoNome        
+    FROM OS_OrdensServico os
+    INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
+    LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+    WHERE os.OrdemServicoId = :OrdemServicoId 
+        AND os.EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -98,6 +105,17 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
             <form method="post" action="atualizar.php">
                 <?= csrfInput() ?>
+                <input 
+                    type="hidden" 
+                    name="ClienteWhatsApp" 
+                    value="<?= htmlspecialchars($ordem["ClienteWhatsApp"] ?? "") ?>"
+                >
+
+                <input 
+                    type="hidden" 
+                    name="ClienteTelefone" 
+                    value="<?= htmlspecialchars($ordem["ClienteTelefone"] ?? "") ?>"
+                >                
 
                 <input type="hidden" name="OrdemServicoId" value="<?= $ordem["OrdemServicoId"] ?>">
 
@@ -157,7 +175,7 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                             </button>
 
                             <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
-                                Mensagem WhatsApp
+                                Gerar WhatsApp
                             </button>
                             <button type="button" class="btn btn-sm btn-primary" onclick="enviarWhatsAppN8N()">
                                 Enviar via n8n
@@ -429,7 +447,18 @@ async function executarIA(tipo) {
             <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.conteudo)}</div>
             <div class="mt-3 d-flex flex-wrap gap-2">
                 ${data.tipo === 'resumo' ? '<button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">Usar como descrição</button>' : ''}
-                ${data.tipo === 'whatsapp' ? '<button type="button" class="btn btn-sm btn-success" onclick="copiarIA()">Copiar mensagem</button>' : ''}
+                ${data.tipo === 'whatsapp' ? `
+                    <button type="button" class="btn btn-sm btn-primary" onclick="enviarWhatsAppN8N()">
+                        Enviar via n8n
+                    </button>                
+                    <button type="button" class="btn btn-sm btn-success" onclick="abrirWhatsAppIA()">
+                        Abrir WhatsApp
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="copiarIA()">
+                        Copiar mensagem
+                    </button>
+                ` : ''}
                 ${data.tipo === 'checklist' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="copiarIA()">Copiar checklist</button>' : ''}
             </div>
         `;
@@ -472,6 +501,101 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.innerText = text || '';
     return div.innerHTML;
+}
+
+function obterTelefoneClienteOS() {
+    const campoWhatsapp = document.querySelector('[name="ClienteWhatsApp"]');
+    const campoTelefone = document.querySelector('[name="ClienteTelefone"]');
+
+    let telefone = "";
+
+    if (campoWhatsapp && campoWhatsapp.value.trim() !== "") {
+        telefone = campoWhatsapp.value.trim();
+    } else if (campoTelefone && campoTelefone.value.trim() !== "") {
+        telefone = campoTelefone.value.trim();
+    }
+
+    telefone = telefone.replace(/\D/g, "");
+
+    if (telefone.length === 10 || telefone.length === 11) {
+        telefone = "55" + telefone;
+    }
+
+    return telefone;
+}
+
+function abrirWhatsAppIA() {
+    if (!window.iaConteudoGerado) {
+        alert("Nenhuma mensagem gerada pela IA.");
+        return;
+    }
+
+    const telefone = obterTelefoneClienteOS();
+    const mensagem = encodeURIComponent(window.iaConteudoGerado);
+
+    let url = "";
+
+    if (telefone !== "") {
+        url = "https://wa.me/" + telefone + "?text=" + mensagem;
+    } else {
+        url = "https://wa.me/?text=" + mensagem;
+    }
+
+    window.open(url, "_blank");
+}
+
+async function enviarWhatsAppN8N() {
+    if (!window.iaConteudoGerado) {
+        alert("Nenhuma mensagem gerada pela IA.");
+        return;
+    }
+
+    const csrf = document.querySelector('[name="csrf_token"]');
+
+    if (!csrf) {
+        alert("Token de segurança não encontrado.");
+        return;
+    }
+
+    if (!confirm("Deseja enviar esta mensagem pelo fluxo n8n?")) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("csrf_token", csrf.value);
+    formData.append("Mensagem", window.iaConteudoGerado);
+
+    <?php if (!empty($ordem["OrdemServicoId"])): ?>
+        formData.append("OrdemServicoId", "<?= (int)$ordem["OrdemServicoId"] ?>");
+    <?php endif; ?>
+
+    const campoWhatsapp = document.querySelector('[name="ClienteWhatsApp"]');
+    const campoTelefone = document.querySelector('[name="ClienteTelefone"]');
+
+    if (campoWhatsapp && campoWhatsapp.value.trim() !== "") {
+        formData.append("Telefone", campoWhatsapp.value.trim());
+    } else if (campoTelefone && campoTelefone.value.trim() !== "") {
+        formData.append("Telefone", campoTelefone.value.trim());
+    }
+
+    try {
+        const response = await fetch("enviar_whatsapp_n8n.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!data.sucesso) {
+            alert("Erro ao enviar via n8n: " + data.mensagem);
+            return;
+        }
+
+        alert("Mensagem enviada para o n8n com sucesso.");
+
+    } catch (error) {
+        alert("Não foi possível enviar a mensagem para o n8n.");
+    }
 }
 </script>
 
