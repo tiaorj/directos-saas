@@ -14,7 +14,7 @@ function usuarioTemPerfil($perfisPermitidos)
 function exigirPerfil($perfisPermitidos)
 {
     if (!usuarioTemPerfil($perfisPermitidos)) {
-        header("Location: /sistema-os-php-sqlserver/acesso_negado.php");
+        header("Location: " . $baseUrl . "/acesso_negado.php");
         exit;
     }
 }
@@ -60,7 +60,7 @@ function obterUsuarioIdSessao()
 function bloquearSuperAdminEmRotinaEmpresa()
 {
     if (usuarioEhSuperAdmin()) {
-        header("Location: /sistema-os-php-sqlserver/acesso_negado.php");
+        header("Location: " . $baseUrl . "/acesso_negado.php");
         exit;
     }
 }

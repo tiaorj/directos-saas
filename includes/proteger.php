@@ -3,20 +3,23 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . "/../config/config.php";
+$baseUrl = rtrim(APP_URL, "/");
+
 if (!isset($_SESSION["UsuarioId"])) {
-    header("Location: /sistema-os-php-sqlserver/login.php");
+    header("Location: " . $baseUrl . "/login.php");
     exit;
 }
 
 if (!isset($_SESSION["EmpresaId"]) || empty($_SESSION["EmpresaId"])) {
     session_destroy();
-    header("Location: /sistema-os-php-sqlserver/login.php?erro=Empresa não vinculada ao usuário.");
+    header("Location: " . $baseUrl . "/login.php?erro=Empresa não vinculada ao usuário.");
     exit;
 }
 
 if (!isset($_SESSION["UsuarioPerfil"]) || empty($_SESSION["UsuarioPerfil"])) {
     session_destroy();
-    header("Location: /sistema-os-php-sqlserver/login.php?erro=Perfil de usuário inválido.");
+    header("Location: " . $baseUrl . "/login.php?erro=Perfil de usuário inválido.");
     exit;
 }
 
@@ -48,13 +51,13 @@ $empresaProtegida = $stmtEmpresaProtegida->fetch(PDO::FETCH_ASSOC);
 
 if (!$empresaProtegida) {
     session_destroy();
-    header("Location: /sistema-os-php-sqlserver/login.php?erro=Empresa não encontrada.");
+    header("Location: " . $baseUrl . "/login.php?erro=Empresa não encontrada.");
     exit;
 }
 
 if ((int)$empresaProtegida["Ativo"] !== 1) {
     session_destroy();
-    header("Location: /sistema-os-php-sqlserver/login.php?erro=Empresa inativa. Entre em contato com o suporte.");
+    header("Location: " . $baseUrl . "/login.php?erro=Empresa inativa. Entre em contato com o suporte.");
     exit;
 }
 

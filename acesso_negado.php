@@ -22,11 +22,11 @@ require_once "includes/proteger.php";
                         Caso precise desse acesso, solicite a liberação para um administrador do sistema.
                     </p>
 
-                    <a href="/sistema-os-php-sqlserver/dashboard.php" class="btn btn-primary">
+                    <a href="<?= htmlspecialchars($baseUrl) ?>dashboard.php" class="btn btn-primary">
                         Voltar para o Dashboard
                     </a>
 
-                    <a href="/sistema-os-php-sqlserver/logout.php" class="btn btn-outline-secondary">
+                    <a href="<?= htmlspecialchars($baseUrl) ?>/logout.php" class="btn btn-outline-secondary">
                         Sair
                     </a>
                 </div>

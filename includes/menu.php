@@ -1,6 +1,10 @@
 <?php
+require_once __DIR__ . "/../config/config.php";
+
 $usuarioNome = $_SESSION["UsuarioNome"] ?? "Usuário";
 $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
+
+$baseUrl = rtrim(APP_URL, "/");
 ?>
 
 <div class="app-layout">
@@ -8,7 +12,7 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
     <aside class="app-sidebar">
 
         <div class="sidebar-brand">
-            <a href="/sistema-os-php-sqlserver/dashboard.php">
+            <a href="<?= htmlspecialchars($baseUrl) ?>/dashboard.php">
                 <span class="brand-icon">D</span>
                 <span>DirectOS</span>
             </a>
@@ -34,24 +38,24 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
 
             <div class="sidebar-section">Principal</div>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/dashboard.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/dashboard.php">
                 <span class="sidebar-icon">▣</span>
                 <span>Dashboard</span>
             </a>
 
             <div class="sidebar-section">Operação</div>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/ordens/listar.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/ordens/listar.php">
                 <span class="sidebar-icon">▤</span>
                 <span>Ordens de Serviço</span>
             </a>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/clientes/listar.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/clientes/listar.php">
                 <span class="sidebar-icon">●</span>
                 <span>Clientes</span>
             </a>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/servicos/listar.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/servicos/listar.php">
                 <span class="sidebar-icon">◆</span>
                 <span>Serviços</span>
             </a>
@@ -59,46 +63,46 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
             <div class="sidebar-section">Gestão</div>
 
             <?php if ($usuarioPerfil === "Admin" || $usuarioPerfil === "SuperAdmin"): ?>
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/usuarios/listar.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/usuarios/listar.php">
                     <span class="sidebar-icon">◉</span>
                     <span>Usuários</span>
                 </a>
             <?php endif; ?>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/empresa/editar.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/empresa/editar.php">
                 <span class="sidebar-icon">▥</span>
                 <span>Minha Empresa</span>
             </a>
 
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/planos/meu_plano.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/planos/meu_plano.php">
                 <span class="sidebar-icon">★</span>
                 <span>Meu Plano</span>
             </a>
-            <a class="sidebar-link" href="/sistema-os-php-sqlserver/configuracoes/index.php">
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/configuracoes/index.php">
                 <span class="sidebar-icon">⚙</span>
                 <span>Configurações</span>
             </a>
             <?php if ($usuarioPerfil === "SuperAdmin"): ?>
                 <div class="sidebar-section">Plataforma</div>
 
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/metricas.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/metricas.php">
                     <span class="sidebar-icon">▦</span>
                     <span>Métricas SaaS</span>
                 </a>
 
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/empresas.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/empresas.php">
                     <span class="sidebar-icon">◆</span>
                     <span>Admin SaaS</span>
                 </a>
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/usuarios.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/usuarios.php">
                     <span class="sidebar-icon">◉</span>
                     <span>Usuários SaaS</span>
                 </a>
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/assinaturas.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/assinaturas.php">
                     <span class="sidebar-icon">★</span>
                     <span>Assinaturas</span>
                 </a>
-                <a class="sidebar-link" href="/sistema-os-php-sqlserver/admin/auditoria.php">
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/auditoria.php">
                     <span class="sidebar-icon">◎</span>
                     <span>Auditoria</span>
                 </a>                
@@ -106,7 +110,7 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
         </nav>
 
         <div class="sidebar-footer">
-            <a href="/sistema-os-php-sqlserver/logout.php" class="sidebar-logout">
+            <a href="<?= htmlspecialchars($baseUrl) ?>/logout.php" class="sidebar-logout">
                 Sair do sistema
             </a>
         </div>
@@ -123,7 +127,7 @@ $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
 
             <div class="topbar-user">
                 <span><?= htmlspecialchars($usuarioNome) ?></span>
-                <a href="/sistema-os-php-sqlserver/logout.php" class="btn btn-sm btn-outline-secondary">
+                <a href="<?= htmlspecialchars($baseUrl) ?>/logout.php" class="btn btn-sm btn-outline-secondary">
                     Sair
                 </a>
             </div>
