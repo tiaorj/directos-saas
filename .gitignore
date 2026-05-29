@@ -1,5 +1,25 @@
-.env
-/vendor/
-*.log
+# Sistema
 .DS_Store
 Thumbs.db
+
+# VS Code
+.vscode/
+
+# Dependencias
+/vendor/
+
+# Ambiente
+.env
+config/config.local.php
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Temporarios
+*.tmp
+*.log

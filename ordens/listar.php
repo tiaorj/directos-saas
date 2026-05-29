@@ -1,6 +1,7 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../config/config.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/csrf.php";
 
@@ -14,8 +15,6 @@ $prioridadeFiltro = $_GET["prioridade"] ?? "";
 $clienteFiltro = $_GET["cliente"] ?? "";
 $dataInicioFiltro = $_GET["data_inicio"] ?? "";
 $dataFimFiltro = $_GET["data_fim"] ?? "";
-$baseUrl = "http://localhost:8080/sistema-os-php-sqlserver";
-
 $empresaId = $_SESSION["EmpresaId"];
 
 $sqlClientes = "
@@ -279,7 +278,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                                 <td>
                                     <?php
-                                        $linkCliente = $baseUrl . "/public/os.php?token=" . $ordem["TokenAcompanhamento"];
+                                        $linkCliente = APP_URL . "/public/os.php?token=" . urlencode($ordem["TokenAcompanhamento"]);
 
                                         $telefoneCliente = preg_replace('/\D/', '', $ordem["ClienteTelefone"] ?? "");
 
