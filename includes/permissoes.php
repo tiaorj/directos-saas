@@ -1,5 +1,12 @@
 <?php
 
+require_once __DIR__ . "/../config/config.php";
+
+function obterBaseUrlPermissoes()
+{
+    return rtrim(APP_URL, "/");
+}
+
 function usuarioTemPerfil($perfisPermitidos)
 {
     if (session_status() === PHP_SESSION_NONE) {
@@ -14,7 +21,7 @@ function usuarioTemPerfil($perfisPermitidos)
 function exigirPerfil($perfisPermitidos)
 {
     if (!usuarioTemPerfil($perfisPermitidos)) {
-        header("Location: " . $baseUrl . "/acesso_negado.php");
+        header("Location: " . obterBaseUrlPermissoes() . "/acesso_negado.php");
         exit;
     }
 }
@@ -60,7 +67,7 @@ function obterUsuarioIdSessao()
 function bloquearSuperAdminEmRotinaEmpresa()
 {
     if (usuarioEhSuperAdmin()) {
-        header("Location: " . $baseUrl . "/acesso_negado.php");
+        header("Location: " . obterBaseUrlPermissoes() . "/acesso_negado.php");
         exit;
     }
 }
