@@ -29,3 +29,18 @@ if (!defined('DB_PASSWORD')) {
 if (!defined('DB_TRUST_SERVER_CERTIFICATE')) {
     define('DB_TRUST_SERVER_CERTIFICATE', true);
 }
+if (!defined('IA_ATIVA')) {
+    define('IA_ATIVA', false);
+}
+
+if (!defined('IA_PROVIDER')) {
+    define('IA_PROVIDER', 'openai');
+}
+
+if (!defined('OPENAI_API_KEY')) {
+    define('OPENAI_API_KEY', 'sua_chave_openai_aqui');
+}
+
+if (!defined('OPENAI_MODEL')) {
+    define('OPENAI_MODEL', 'modelo_a_configurar');
+}

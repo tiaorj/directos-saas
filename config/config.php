@@ -33,3 +33,23 @@ if (!defined('LOG_DIR')) {
 if (!defined('PUBLIC_UPLOAD_MAX_SIZE_MB')) {
     define('PUBLIC_UPLOAD_MAX_SIZE_MB', 10);
 }
+
+if (!defined('IA_ATIVA')) {
+    define('IA_ATIVA', getenv('IA_ATIVA') === 'true');
+}
+
+if (!defined('IA_PROVIDER')) {
+    define('IA_PROVIDER', getenv('IA_PROVIDER') ?: 'openai');
+}
+
+if (!defined('OPENAI_API_KEY')) {
+    define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+}
+
+if (!defined('OPENAI_MODEL')) {
+    define('OPENAI_MODEL', getenv('OPENAI_MODEL') ?: '');
+}
+
+if (!defined('OPENAI_API_URL')) {
+    define('OPENAI_API_URL', getenv('OPENAI_API_URL') ?: 'https://api.openai.com/v1/responses');
+}

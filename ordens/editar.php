@@ -143,6 +143,15 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 <div class="mb-3">
                     <label class="form-label">Descrição do Problema</label>
                     <textarea name="DescricaoProblema" class="form-control" rows="4"><?= htmlspecialchars($ordem["DescricaoProblema"] ?? "") ?></textarea>
+                    <button 
+                        type="button" 
+                        class="btn btn-sm btn-outline-primary mb-2"
+                        onclick="gerarResumoIA()"
+                    >
+                        Gerar resumo com IA
+                    </button>
+
+                    <div id="iaResumoResultado" class="alert alert-light border d-none"></div>                    
                 </div>
 
                 <div class="mb-3">
@@ -289,6 +298,77 @@ document.getElementById("ServicoId").addEventListener("change", function () {
         campoValorPrevisto.value = valor;
     }
 });
-</script>
 
+async function gerarResumoIA() {
+    const descricao = document.querySelector('[name="DescricaoProblema"]');
+    const titulo = document.querySelector('[name="Titulo"]');
+    const csrf = document.querySelector('[name="csrf_token"]');
+    const resultado = document.getElementById('iaResumoResultado');
+
+    if (!descricao || descricao.value.trim() === '') {
+        alert('Informe a descrição do problema antes de gerar o resumo com IA.');
+        return;
+    }
+
+    if (!csrf) {
+        alert('Token de segurança não encontrado.');
+        return;
+    }
+
+    resultado.classList.remove('d-none');
+    resultado.innerHTML = 'Gerando resumo com IA...';
+
+    const formData = new FormData();
+    formData.append('csrf_token', csrf.value);
+    formData.append('DescricaoProblema', descricao.value);
+    formData.append('Titulo', titulo ? titulo.value : '');
+
+    <?php if (!empty($ordem["OrdemServicoId"])): ?>
+        formData.append('OrdemServicoId', '<?= (int)$ordem["OrdemServicoId"] ?>');
+    <?php endif; ?>
+
+    try {
+        const response = await fetch('gerar_resumo_ia.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!data.sucesso) {
+            resultado.innerHTML = '<strong>Erro:</strong> ' + data.mensagem;
+            return;
+        }
+
+        resultado.innerHTML = `
+            <strong>Resumo sugerido pela IA:</strong>
+            <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.resumo)}</div>
+            <div class="mt-3">
+                <button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">
+                    Usar como descrição
+                </button>
+            </div>
+        `;
+
+        window.ultimoResumoIA = data.resumo;
+
+    } catch (error) {
+        resultado.innerHTML = '<strong>Erro:</strong> não foi possível gerar o resumo.';
+    }
+}
+
+function usarResumoIA() {
+    const descricao = document.querySelector('[name="DescricaoProblema"]');
+
+    if (descricao && window.ultimoResumoIA) {
+        descricao.value = window.ultimoResumoIA;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.innerText = text;
+    return div.innerHTML;
+}
+</script>
 <?php require_once "../includes/footer.php"; ?>
