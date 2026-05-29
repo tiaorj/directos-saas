@@ -11,13 +11,13 @@ if (isset($_SESSION["UsuarioId"])) {
 <head>
     <meta charset="UTF-8">
 
-    <title>DirectOS - Sistema de Ordem de Serviço Online</title>
+    <title>DirectOS - Sistema de Ordem de Serviço com IA</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta 
         name="description" 
-        content="DirectOS é um sistema online para controle de ordens de serviço, clientes, serviços, anexos, WhatsApp e acompanhamento pelo cliente."
+        content="DirectOS é um sistema online de ordem de serviço com assistente IA, automação WhatsApp, n8n, clientes, serviços, anexos e acompanhamento pelo cliente."
     >
 
     <link 
@@ -30,8 +30,10 @@ if (isset($_SESSION["UsuarioId"])) {
             --dark: #111827;
             --dark-soft: #1f2937;
             --primary: #2563eb;
+            --primary-soft: rgba(37, 99, 235, 0.1);
             --bg: #f3f4f6;
             --muted: #64748b;
+            --success: #16a34a;
         }
 
         body {
@@ -122,7 +124,7 @@ if (isset($_SESSION["UsuarioId"])) {
         }
 
         .section-title {
-            max-width: 780px;
+            max-width: 820px;
             margin: 0 auto 46px;
             text-align: center;
         }
@@ -138,8 +140,17 @@ if (isset($_SESSION["UsuarioId"])) {
         }
 
         .badge-soft {
-            background: rgba(37, 99, 235, 0.1);
+            background: var(--primary-soft);
             color: var(--primary);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        .badge-soft-success {
+            background: rgba(22, 163, 74, 0.12);
+            color: var(--success);
             padding: 8px 12px;
             border-radius: 999px;
             font-weight: 800;
@@ -148,7 +159,8 @@ if (isset($_SESSION["UsuarioId"])) {
 
         .feature-card,
         .price-card,
-        .target-card {
+        .target-card,
+        .automation-card {
             border: 0;
             border-radius: 20px;
             height: 100%;
@@ -159,13 +171,51 @@ if (isset($_SESSION["UsuarioId"])) {
             width: 42px;
             height: 42px;
             border-radius: 14px;
-            background: rgba(37, 99, 235, 0.1);
+            background: var(--primary-soft);
             color: var(--primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
             margin-bottom: 14px;
+        }
+
+        .automation-section {
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 30%),
+                linear-gradient(135deg, #ffffff, #eef4ff);
+        }
+
+        .automation-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 18px;
+            min-width: 185px;
+            flex: 1;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .flow-step strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 1.35rem;
         }
 
         .target-pill {
@@ -234,6 +284,10 @@ if (isset($_SESSION["UsuarioId"])) {
             .price-card-highlight {
                 transform: none;
             }
+
+            .flow-arrow {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -255,9 +309,15 @@ if (isset($_SESSION["UsuarioId"])) {
                 <li class="nav-item">
                     <a class="nav-link" href="#recursos">Recursos</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#ia">Assistente IA</a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#automacao">Automação WhatsApp</a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#publico">Para quem é</a>
                 </li>
@@ -288,15 +348,15 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="col-lg-7">
                 <div class="hero-badge">
-                    Sistema de Ordem de Serviço com Assistente IA
+                    Sistema de Ordem de Serviço com IA + Automação WhatsApp
                 </div>
 
                 <h1>
-                    Controle suas OS com IA e deixe o cliente acompanhar tudo pelo celular.
+                    Controle suas OS com IA e envie atualizações pelo WhatsApp.
                 </h1>
 
                 <p class="lead mt-4">
-                    O DirectOS ajuda prestadores de serviço, assistências técnicas e pequenas empresas a controlar atendimentos, gerar resumos profissionais com IA, criar mensagens para WhatsApp e compartilhar o acompanhamento da OS com o cliente.
+                    O DirectOS ajuda prestadores de serviço, assistências técnicas e pequenas empresas a controlar atendimentos, gerar resumos profissionais com IA, criar mensagens para WhatsApp e enviar atualizações automáticas usando n8n e Z-API.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mt-4">
@@ -304,8 +364,8 @@ if (isset($_SESSION["UsuarioId"])) {
                         Começar grátis
                     </a>
 
-                    <a href="#recursos" class="btn btn-outline-light btn-lg">
-                        Conhecer recursos
+                    <a href="#automacao" class="btn btn-outline-light btn-lg">
+                        Ver automação
                     </a>
                 </div>
 
@@ -318,16 +378,16 @@ if (isset($_SESSION["UsuarioId"])) {
                     </div>
 
                     <div class="col-6 col-md-4">
-                        <strong>Link público</strong>
+                        <strong>Assistente IA</strong>
                         <div style="color: rgba(255,255,255,.72); font-size: .9rem;">
-                            para o cliente
+                            resumo, prioridade e checklist
                         </div>
                     </div>
 
                     <div class="col-6 col-md-4">
-                        <strong>Assistente IA</strong>
+                        <strong>WhatsApp automático</strong>
                         <div style="color: rgba(255,255,255,.72); font-size: .9rem;">
-                            resumo, prioridade e checklist
+                            via n8n + Z-API
                         </div>
                     </div>
                 </div>
@@ -362,17 +422,21 @@ if (isset($_SESSION["UsuarioId"])) {
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">Previsão</span>
-                            <strong>28/05/2026</strong>
+                            <span class="text-muted">IA</span>
+                            <strong>Resumo profissional gerado</strong>
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">IA</span>
-                            <strong> IA gerou um resumo profissional da OS</strong>
+                            <span class="text-muted">Automação</span>
+                            <strong>n8n + Z-API</strong>
                         </div>
 
-                        <div class="alert alert-primary mt-4 mb-0">
-                            Mensagem pronta para enviar ao cliente pelo WhatsApp.
+                        <div class="alert alert-primary mt-4 mb-2">
+                            Mensagem criada com IA para o cliente.
+                        </div>
+
+                        <div class="alert alert-success mb-0">
+                            Atualização enviada automaticamente pelo WhatsApp.
                         </div>
                     </div>
                 </div>
@@ -387,9 +451,11 @@ if (isset($_SESSION["UsuarioId"])) {
 
         <div class="section-title">
             <span class="badge-soft">Recursos principais</span>
+
             <h2 class="mt-3">
                 Tudo que o prestador precisa para controlar atendimentos
             </h2>
+
             <p>
                 Comece simples, organize sua rotina e entregue uma experiência mais profissional para o cliente.
             </p>
@@ -408,6 +474,7 @@ if (isset($_SESSION["UsuarioId"])) {
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4">
                 <div class="card feature-card">
                     <div class="card-body p-4">
@@ -419,6 +486,19 @@ if (isset($_SESSION["UsuarioId"])) {
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon">WA</div>
+                        <h5>WhatsApp automatizado</h5>
+                        <p class="text-muted mb-0">
+                            Envie mensagens para o cliente usando integração com n8n e Z-API.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-4">
                 <div class="card feature-card">
                     <div class="card-body p-4">
@@ -446,34 +526,10 @@ if (isset($_SESSION["UsuarioId"])) {
             <div class="col-md-4">
                 <div class="card feature-card">
                     <div class="card-body p-4">
-                        <div class="feature-icon">W</div>
-                        <h5>WhatsApp</h5>
-                        <p class="text-muted mb-0">
-                            Gere mensagens profissionais com IA e envie o link de acompanhamento para o cliente.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card feature-card">
-                    <div class="card-body p-4">
                         <div class="feature-icon">▥</div>
                         <h5>Multiempresa</h5>
                         <p class="text-muted mb-0">
                             Estrutura preparada para SaaS, com dados separados por empresa e plano.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card feature-card">
-                    <div class="card-body p-4">
-                        <div class="feature-icon">✓</div>
-                        <h5>Histórico da OS</h5>
-                        <p class="text-muted mb-0">
-                            Registre mudanças de status e acompanhe a evolução de cada atendimento.
                         </p>
                     </div>
                 </div>
@@ -588,6 +644,126 @@ if (isset($_SESSION["UsuarioId"])) {
     </div>
 </section>
 
+<section class="section automation-section" id="automacao">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="badge-soft-success">IA + Automação WhatsApp</span>
+
+            <h2 class="mt-3">
+                Mensagens inteligentes enviadas automaticamente pelo WhatsApp
+            </h2>
+
+            <p>
+                O DirectOS gera a mensagem com IA, envia para o n8n e o n8n dispara pelo WhatsApp usando Z-API. Menos trabalho manual, mais agilidade e mais transparência para o cliente.
+            </p>
+        </div>
+
+        <div class="automation-flow mb-5">
+
+            <div class="flow-step">
+                <div class="feature-icon">1</div>
+                <strong>OS atualizada</strong>
+                <p class="text-muted mb-0">
+                    O atendente ou técnico atualiza o atendimento no DirectOS.
+                </p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-step">
+                <div class="feature-icon">2</div>
+                <strong>IA gera a mensagem</strong>
+                <p class="text-muted mb-0">
+                    A IA cria um texto profissional para informar o cliente.
+                </p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-step">
+                <div class="feature-icon">3</div>
+                <strong>n8n processa</strong>
+                <p class="text-muted mb-0">
+                    O DirectOS envia os dados para um fluxo de automação no n8n.
+                </p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-step">
+                <div class="feature-icon">4</div>
+                <strong>WhatsApp enviado</strong>
+                <p class="text-muted mb-0">
+                    A Z-API dispara a mensagem para o cliente no WhatsApp.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="row g-4 align-items-center">
+
+            <div class="col-lg-6">
+                <div class="card automation-card">
+                    <div class="card-body p-4">
+                        <span class="badge-soft-success">Diferencial para o mercado</span>
+
+                        <h3 class="mt-3">
+                            Atendimento mais rápido sem depender de mensagens manuais
+                        </h3>
+
+                        <p class="text-muted">
+                            Em vez de copiar textos, abrir WhatsApp e explicar manualmente cada atualização, sua equipe pode gerar a mensagem com IA e disparar pelo fluxo automatizado.
+                        </p>
+
+                        <ul class="check-list mb-0">
+                            <li>Mensagem profissional criada com IA.</li>
+                            <li>Envio via n8n integrado ao DirectOS.</li>
+                            <li>Disparo pelo WhatsApp usando Z-API.</li>
+                            <li>Registro em auditoria para acompanhar os envios.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card hero-panel">
+                    <div class="hero-panel-header">
+                        Exemplo de mensagem enviada
+                    </div>
+
+                    <div class="hero-panel-body">
+                        <div class="alert alert-success">
+                            Olá, João! Sua ordem de serviço OS-2026-000128 está em andamento. Nossa equipe já iniciou a análise e você pode acompanhar a evolução pelo link abaixo.
+                        </div>
+
+                        <div class="fake-table-row">
+                            <span class="text-muted">Origem</span>
+                            <strong>DirectOS</strong>
+                        </div>
+
+                        <div class="fake-table-row">
+                            <span class="text-muted">Automação</span>
+                            <strong>n8n</strong>
+                        </div>
+
+                        <div class="fake-table-row">
+                            <span class="text-muted">Envio</span>
+                            <strong>Z-API / WhatsApp</strong>
+                        </div>
+
+                        <div class="alert alert-primary mt-4 mb-0">
+                            O cliente recebe a atualização no WhatsApp e acompanha a OS pelo link público.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
 <section class="section bg-white" id="publico">
     <div class="container">
         <div class="row align-items-center g-5">
@@ -645,9 +821,11 @@ if (isset($_SESSION["UsuarioId"])) {
 
         <div class="section-title">
             <span class="badge-soft">Planos</span>
+
             <h2 class="mt-3">
                 Comece simples e evolua conforme sua operação cresce
             </h2>
+
             <p>
                 Os planos já estão alinhados com a estrutura SaaS do DirectOS.
             </p>
@@ -655,92 +833,90 @@ if (isset($_SESSION["UsuarioId"])) {
 
         <div class="row g-4 align-items-stretch">
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card price-card">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <h4>Gratuito</h4>
+                    <div class="card-body p-4">
+                        <h5>Gratuito</h5>
 
-                        <div class="price my-3">
+                        <div class="price mt-3">
                             R$ 0
-                            <small class="text-muted fs-6">/mês</small>
                         </div>
 
                         <p class="text-muted">
-                            Para testar e organizar os primeiros atendimentos.
+                            Para começar e validar o uso do sistema.
                         </p>
 
-                        <ul class="check-list mb-4">
+                        <ul class="check-list">
                             <li>Até 10 OS por mês</li>
-                            <li>1 usuário</li>
                             <li>Cadastro de clientes</li>
+                            <li>Cadastro de serviços</li>
+                            <li>Área pública do cliente</li>
                             <li>Link de acompanhamento</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-auto">
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100">
                             Começar grátis
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card price-card price-card-highlight">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <span class="badge bg-primary mb-2 align-self-start">
+                    <div class="card-body p-4">
+                        <span class="badge bg-primary mb-2">
                             Mais indicado
                         </span>
 
-                        <h4>Profissional</h4>
+                        <h5>Profissional</h5>
 
-                        <div class="price my-3">
-                            R$ 49
-                            <small class="text-muted fs-6">/mês</small>
+                        <div class="price mt-3">
+                            OS ilimitadas
                         </div>
 
                         <p class="text-muted">
-                            Para prestadores que querem profissionalizar o atendimento.
+                            Para quem já tem rotina de atendimento e quer escalar.
                         </p>
 
-                        <ul class="check-list mb-4">
-                            <li>OS ilimitadas</li>
-                            <li>Até 3 usuários</li>
-                            <li>Anexos e fotos</li>
-                            <li>Envio por WhatsApp</li>
-                            <li>Área do cliente</li>
+                        <ul class="check-list">
+                            <li>Ordens de serviço ilimitadas</li>
+                            <li>Assistente IA para OS</li>
+                            <li>Mensagens WhatsApp com IA</li>
+                            <li>Automação n8n + Z-API</li>
+                            <li>Anexos e histórico</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-primary w-100 mt-auto">
-                            Quero testar
+                        <a href="cadastro.php" class="btn btn-primary w-100">
+                            Criar conta
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card price-card">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <h4>Empresa</h4>
+                    <div class="card-body p-4">
+                        <h5>Empresa</h5>
 
-                        <div class="price my-3">
-                            R$ 99
-                            <small class="text-muted fs-6">/mês</small>
+                        <div class="price mt-3">
+                            Completo
                         </div>
 
                         <p class="text-muted">
-                            Para equipes pequenas com mais controle e usuários.
+                            Para equipes com mais usuários e necessidade de gestão.
                         </p>
 
-                        <ul class="check-list mb-4">
-                            <li>OS ilimitadas</li>
+                        <ul class="check-list">
                             <li>Usuários ilimitados</li>
-                            <li>Controle avançado</li>
-                            <li>Recursos extras</li>
-                            <li>Suporte prioritário</li>
+                            <li>Recursos extras de gestão</li>
+                            <li>Administração multiempresa</li>
+                            <li>Auditoria de ações sensíveis</li>
+                            <li>Integrações e automações</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-auto">
-                            Começar agora
-                        </a>                        
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100">
+                            Começar
+                        </a>
                     </div>
                 </div>
             </div>
@@ -753,26 +929,35 @@ if (isset($_SESSION["UsuarioId"])) {
 <section class="cta-section">
     <div class="container text-center">
         <h2>
-            Transforme suas ordens de serviço em uma experiência profissional com apoio de IA.
+            Transforme suas ordens de serviço em uma experiência profissional com IA e automação.
         </h2>
 
         <p class="lead mt-3 mb-4" style="color: rgba(255,255,255,.82);">
-            Controle suas OS, gere mensagens inteligentes e envie um link para o cliente acompanhar tudo pelo celular.
+            Controle suas OS, gere mensagens inteligentes e envie atualizações pelo WhatsApp com n8n e Z-API.
         </p>
 
-        <a href="login.php" class="btn btn-light btn-lg">
-            Acessar DirectOS
+        <a href="cadastro.php" class="btn btn-light btn-lg">
+            Começar agora
         </a>
     </div>
 </section>
 
 <footer>
-    <div class="container text-center">
-        <strong>DirectOS</strong>
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+                <strong>DirectOS</strong>
+                <div>
+                    Sistema de Ordem de Serviço com IA, automação e área do cliente.
+                </div>
+            </div>
 
-        <p class="mb-0 mt-1">
-            Sistema online de Ordem de Serviço e acompanhamento do cliente.
-        </p>
+            <div>
+                <span>
+                    © <?= date("Y") ?> DirectOS. Todos os direitos reservados.
+                </span>
+            </div>
+        </div>
     </div>
 </footer>
 
