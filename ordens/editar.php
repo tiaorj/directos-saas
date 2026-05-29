@@ -140,18 +140,43 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                            value="<?= htmlspecialchars($ordem["Titulo"] ?? "") ?>">
                 </div>
 
+                <div class="card form-card mb-3">
+                    <div class="card-header">
+                        Assistente IA da OS
+                    </div>
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-3">
+                            Use a IA para gerar resumo profissional, mensagem para WhatsApp, sugestão de prioridade e checklist técnico.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
+                                Gerar resumo
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
+                                Mensagem WhatsApp
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
+                                Sugerir prioridade
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
+                                Checklist técnico
+                            </button>
+                        </div>
+
+                        <div id="iaResultado" class="alert alert-light border d-none"></div>
+
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Descrição do Problema</label>
                     <textarea name="DescricaoProblema" class="form-control" rows="4"><?= htmlspecialchars($ordem["DescricaoProblema"] ?? "") ?></textarea>
-                    <button 
-                        type="button" 
-                        class="btn btn-sm btn-outline-primary mb-2"
-                        onclick="gerarResumoIA()"
-                    >
-                        Gerar resumo com IA
-                    </button>
-
-                    <div id="iaResumoResultado" class="alert alert-light border d-none"></div>                    
                 </div>
 
                 <div class="mb-3">
@@ -299,14 +324,16 @@ document.getElementById("ServicoId").addEventListener("change", function () {
     }
 });
 
-async function gerarResumoIA() {
+async function executarIA(tipo) {
     const descricao = document.querySelector('[name="DescricaoProblema"]');
     const titulo = document.querySelector('[name="Titulo"]');
+    const prioridade = document.querySelector('[name="Prioridade"]');
+    const status = document.querySelector('[name="Status"]');
     const csrf = document.querySelector('[name="csrf_token"]');
-    const resultado = document.getElementById('iaResumoResultado');
+    const resultado = document.getElementById('iaResultado');
 
     if (!descricao || descricao.value.trim() === '') {
-        alert('Informe a descrição do problema antes de gerar o resumo com IA.');
+        alert('Informe a descrição do problema antes de usar a IA.');
         return;
     }
 
@@ -316,19 +343,39 @@ async function gerarResumoIA() {
     }
 
     resultado.classList.remove('d-none');
-    resultado.innerHTML = 'Gerando resumo com IA...';
+    resultado.innerHTML = 'Processando com IA...';
 
     const formData = new FormData();
+
     formData.append('csrf_token', csrf.value);
+    formData.append('TipoIA', tipo);
     formData.append('DescricaoProblema', descricao.value);
     formData.append('Titulo', titulo ? titulo.value : '');
+    formData.append('Prioridade', prioridade ? prioridade.value : '');
+    formData.append('Status', status ? status.value : '');
 
     <?php if (!empty($ordem["OrdemServicoId"])): ?>
         formData.append('OrdemServicoId', '<?= (int)$ordem["OrdemServicoId"] ?>');
     <?php endif; ?>
 
+    <?php if (!empty($ordem["CodigoOS"])): ?>
+        formData.append('CodigoOS', '<?= htmlspecialchars($ordem["CodigoOS"], ENT_QUOTES) ?>');
+    <?php endif; ?>
+
+    <?php if (!empty($ordem["TokenAcompanhamento"])): ?>
+        formData.append('TokenAcompanhamento', '<?= htmlspecialchars($ordem["TokenAcompanhamento"], ENT_QUOTES) ?>');
+    <?php endif; ?>
+
+    <?php if (!empty($ordem["ClienteNome"])): ?>
+        formData.append('Cliente', '<?= htmlspecialchars($ordem["ClienteNome"], ENT_QUOTES) ?>');
+    <?php endif; ?>
+
+    <?php if (!empty($ordem["ServicoNome"])): ?>
+        formData.append('Servico', '<?= htmlspecialchars($ordem["ServicoNome"], ENT_QUOTES) ?>');
+    <?php endif; ?>
+
     try {
-        const response = await fetch('gerar_resumo_ia.php', {
+        const response = await fetch('assistente_ia.php', {
             method: 'POST',
             body: formData
         });
@@ -336,39 +383,94 @@ async function gerarResumoIA() {
         const data = await response.json();
 
         if (!data.sucesso) {
-            resultado.innerHTML = '<strong>Erro:</strong> ' + data.mensagem;
+            resultado.innerHTML = '<strong>Erro:</strong> ' + escapeHtml(data.mensagem);
             return;
         }
 
+        if (data.tipo === 'prioridade') {
+            window.iaPrioridadeSugerida = data.prioridade;
+
+            resultado.innerHTML = `
+                <strong>Prioridade sugerida:</strong>
+                <div class="mt-2">
+                    <span class="badge bg-warning text-dark">${escapeHtml(data.prioridade)}</span>
+                </div>
+                <div class="mt-2">${escapeHtml(data.justificativa || '')}</div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-warning" onclick="usarPrioridadeIA()">
+                        Aplicar prioridade
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        window.iaConteudoGerado = data.conteudo;
+        window.iaTipoGerado = data.tipo;
+
+        let tituloResultado = 'Resultado da IA';
+
+        if (data.tipo === 'resumo') {
+            tituloResultado = 'Resumo sugerido pela IA';
+        }
+
+        if (data.tipo === 'whatsapp') {
+            tituloResultado = 'Mensagem sugerida para WhatsApp';
+        }
+
+        if (data.tipo === 'checklist') {
+            tituloResultado = 'Checklist técnico sugerido';
+        }
+
         resultado.innerHTML = `
-            <strong>Resumo sugerido pela IA:</strong>
-            <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.resumo)}</div>
-            <div class="mt-3">
-                <button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">
-                    Usar como descrição
-                </button>
+            <strong>${tituloResultado}:</strong>
+            <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.conteudo)}</div>
+            <div class="mt-3 d-flex flex-wrap gap-2">
+                ${data.tipo === 'resumo' ? '<button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">Usar como descrição</button>' : ''}
+                ${data.tipo === 'whatsapp' ? '<button type="button" class="btn btn-sm btn-success" onclick="copiarIA()">Copiar mensagem</button>' : ''}
+                ${data.tipo === 'checklist' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="copiarIA()">Copiar checklist</button>' : ''}
             </div>
         `;
 
-        window.ultimoResumoIA = data.resumo;
-
     } catch (error) {
-        resultado.innerHTML = '<strong>Erro:</strong> não foi possível gerar o resumo.';
+        resultado.innerHTML = '<strong>Erro:</strong> não foi possível processar a solicitação com IA.';
     }
 }
 
 function usarResumoIA() {
     const descricao = document.querySelector('[name="DescricaoProblema"]');
 
-    if (descricao && window.ultimoResumoIA) {
-        descricao.value = window.ultimoResumoIA;
+    if (descricao && window.iaConteudoGerado) {
+        descricao.value = window.iaConteudoGerado;
+    }
+}
+
+function usarPrioridadeIA() {
+    const prioridade = document.querySelector('[name="Prioridade"]');
+
+    if (prioridade && window.iaPrioridadeSugerida) {
+        prioridade.value = window.iaPrioridadeSugerida;
+    }
+}
+
+async function copiarIA() {
+    if (!window.iaConteudoGerado) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(window.iaConteudoGerado);
+        alert('Conteúdo copiado.');
+    } catch (e) {
+        alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.');
     }
 }
 
 function escapeHtml(text) {
     const div = document.createElement('div');
-    div.innerText = text;
+    div.innerText = text || '';
     return div.innerHTML;
 }
 </script>
+
 <?php require_once "../includes/footer.php"; ?>
