@@ -49,9 +49,15 @@ function n8nEnviarWhatsApp($payload)
         throw new Exception("Erro ao chamar n8n: " . $erroCurl);
     }
 
-    if ($httpCode < 200 || $httpCode >= 300) {
-        throw new Exception("n8n retornou HTTP " . $httpCode . ".");
+if ($httpCode < 200 || $httpCode >= 300) {
+    $mensagemErro = "n8n retornou HTTP " . $httpCode . ".";
+
+    if (!empty($resultado)) {
+        $mensagemErro .= " Resposta: " . substr($resultado, 0, 500);
     }
+
+    throw new Exception($mensagemErro);
+}
 
     $json = json_decode($resultado, true);
 
