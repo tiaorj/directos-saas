@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . "/../config/config.php";
+
+$baseUrl = rtrim(APP_URL, "/");
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -11,7 +16,7 @@
     >
 
     <link 
-        href="/sistema-os-php-sqlserver/assets/css/directos.css" 
+        href="<?= htmlspecialchars($baseUrl) ?>/assets/css/directos.css" 
         rel="stylesheet"
     >
 </head>
