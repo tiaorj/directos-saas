@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: directos
+    env: docker
+    plan: starter
+    autoDeploy: true
+    disk:
+      name: directos-storage
+      mountPath: /var/www/storage
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: producao
+      - key: APP_URL
+        sync: false
+      - key: DB_SERVER
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_TRUST_SERVER_CERTIFICATE
+        value: true
+      - key: UPLOAD_DIR
+        value: /var/www/storage/uploads
+      - key: LOG_DIR
+        value: /var/www/storage/logs

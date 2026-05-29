@@ -23,11 +23,11 @@ if (!defined('APP_DEBUG')) {
 }
 
 if (!defined('UPLOAD_DIR')) {
-    define('UPLOAD_DIR', __DIR__ . '/../uploads');
+    define('UPLOAD_DIR', getenv('UPLOAD_DIR') ?: __DIR__ . '/../uploads');
 }
 
 if (!defined('LOG_DIR')) {
-    define('LOG_DIR', __DIR__ . '/../logs');
+    define('LOG_DIR', getenv('LOG_DIR') ?: __DIR__ . '/../logs');
 }
 
 if (!defined('PUBLIC_UPLOAD_MAX_SIZE_MB')) {

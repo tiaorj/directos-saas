@@ -1,0 +1,12 @@
+.git
+.vscode
+.env
+config/config.local.php
+uploads/*
+!uploads/.gitkeep
+logs/*
+!logs/.gitkeep
+*.log
+*.tmp
+node_modules
+vendor

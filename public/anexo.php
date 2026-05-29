@@ -1,5 +1,6 @@
 <?php
 require_once "../config/conexao.php";
+require_once "../includes/arquivos.php";
 
 $anexoId = (int)($_GET["id"] ?? 0);
 $token = $_GET["token"] ?? "";
@@ -35,7 +36,7 @@ if (!$anexo) {
     die("Anexo não encontrado ou não liberado para visualização.");
 }
 
-$caminhoFisico = "../" . $anexo["CaminhoArquivo"];
+$caminhoFisico = caminhoUploadFisico($anexo["CaminhoArquivo"]);
 
 if (!file_exists($caminhoFisico)) {
     die("Arquivo não encontrado.");

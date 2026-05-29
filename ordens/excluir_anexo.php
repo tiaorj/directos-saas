@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/arquivos.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 
@@ -36,7 +37,7 @@ if (!$anexo) {
     die("Anexo não encontrado.");
 }
 
-$caminhoFisico = "../" . $anexo["CaminhoArquivo"];
+$caminhoFisico = caminhoUploadFisico($anexo["CaminhoArquivo"]);
 
 if (file_exists($caminhoFisico)) {
     unlink($caminhoFisico);

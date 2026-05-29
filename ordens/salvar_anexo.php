@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
+require_once "../includes/arquivos.php";
 require_once "../includes/csrf.php";
 csrfValidarTokenPost();
 
@@ -72,26 +73,14 @@ if ($tamanhoBytes > $tamanhoMaximo) {
     exit;
 }
 
-$pastaBase = "../uploads/os";
-
-if (!is_dir($pastaBase)) {
-    mkdir($pastaBase, 0777, true);
-}
-
-$pastaEmpresa = $pastaBase . "/" . $empresaId;
-
-if (!is_dir($pastaEmpresa)) {
-    mkdir($pastaEmpresa, 0777, true);
-}
-
-$pastaOS = $pastaEmpresa . "/" . $ordemServicoId;
+$pastaOS = diretorioUploadOs($empresaId, $ordemServicoId);
 
 if (!is_dir($pastaOS)) {
     mkdir($pastaOS, 0777, true);
 }
 
 $nomeArquivo = uniqid("anexo_", true) . "." . $extensao;
-$caminhoFisico = $pastaOS . "/" . $nomeArquivo;
+$caminhoFisico = $pastaOS . DIRECTORY_SEPARATOR . $nomeArquivo;
 $caminhoRelativo = "uploads/os/" . $empresaId . "/" . $ordemServicoId . "/" . $nomeArquivo;
 
 if (!move_uploaded_file($tmpName, $caminhoFisico)) {
