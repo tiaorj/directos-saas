@@ -53,3 +53,15 @@ if (!defined('OPENAI_MODEL')) {
 if (!defined('OPENAI_API_URL')) {
     define('OPENAI_API_URL', getenv('OPENAI_API_URL') ?: 'https://api.openai.com/v1/responses');
 }
+
+if (!defined('N8N_ATIVO')) {
+    define('N8N_ATIVO', getenv('N8N_ATIVO') === 'true');
+}
+
+if (!defined('N8N_WEBHOOK_WHATSAPP_URL')) {
+    define('N8N_WEBHOOK_WHATSAPP_URL', getenv('N8N_WEBHOOK_WHATSAPP_URL') ?: '');
+}
+
+if (!defined('N8N_WEBHOOK_SECRET')) {
+    define('N8N_WEBHOOK_SECRET', getenv('N8N_WEBHOOK_SECRET') ?: '');
+}

@@ -159,7 +159,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                             <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
                                 Mensagem WhatsApp
                             </button>
-
+                            <button type="button" class="btn btn-sm btn-primary" onclick="enviarWhatsAppN8N()">
+                                Enviar via n8n
+                            </button>
                             <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
                                 Sugerir prioridade
                             </button>

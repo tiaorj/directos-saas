@@ -44,3 +44,15 @@ if (!defined('OPENAI_API_KEY')) {
 if (!defined('OPENAI_MODEL')) {
     define('OPENAI_MODEL', 'modelo_a_configurar');
 }
+
+if (!defined('N8N_ATIVO')) {
+    define('N8N_ATIVO', false);
+}
+
+if (!defined('N8N_WEBHOOK_WHATSAPP_URL')) {
+    define('N8N_WEBHOOK_WHATSAPP_URL', 'https://seu-n8n/webhook/directos-whatsapp');
+}
+
+if (!defined('N8N_WEBHOOK_SECRET')) {
+    define('N8N_WEBHOOK_SECRET', 'troque_este_segredo');
+}
