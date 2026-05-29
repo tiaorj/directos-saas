@@ -109,7 +109,11 @@ $baseUrl = rtrim(APP_URL, "/");
                 <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/diagnostico.php">
                     <span class="sidebar-icon">◌</span>
                     <span>Diagnóstico</span>
-                </a>                
+                </a>         
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/configuracoes/integracoes.php">
+                    <span class="sidebar-icon">⚡</span>
+                    <span>Integrações</span>
+                </a>                       
             <?php endif; ?>        
         </nav>
 

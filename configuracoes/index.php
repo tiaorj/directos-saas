@@ -4,7 +4,7 @@ require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
 
-exigirPerfil(["Admin"]);
+exigirPerfil(["Admin", "SuperAdmin"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 
@@ -337,6 +337,22 @@ $percentualOnboarding = count($itensOnboarding) > 0
                             </p>
 
                             <a href="../usuarios/listar.php" class="btn btn-sm btn-outline-primary">
+                                Abrir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>Integrações</h6>
+
+                            <p class="text-muted small">
+                                Veja o status da IA, n8n, WhatsApp e execute testes de integração.
+                            </p>
+
+                            <a href="integracoes.php" class="btn btn-sm btn-outline-primary">
                                 Abrir
                             </a>
                         </div>
