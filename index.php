@@ -255,7 +255,9 @@ if (isset($_SESSION["UsuarioId"])) {
                 <li class="nav-item">
                     <a class="nav-link" href="#recursos">Recursos</a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="#ia">Assistente IA</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#publico">Para quem é</a>
                 </li>
@@ -286,15 +288,15 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="col-lg-7">
                 <div class="hero-badge">
-                    Sistema online de Ordem de Serviço
+                    Sistema de Ordem de Serviço com Assistente IA
                 </div>
 
                 <h1>
-                    Organize seus serviços e deixe o cliente acompanhar tudo pelo celular.
+                    Controle suas OS com IA e deixe o cliente acompanhar tudo pelo celular.
                 </h1>
 
                 <p class="lead mt-4">
-                    O DirectOS ajuda prestadores de serviço, assistências técnicas e pequenas empresas a controlar OS, clientes, anexos, histórico, WhatsApp e área do cliente em um só lugar.
+                    O DirectOS ajuda prestadores de serviço, assistências técnicas e pequenas empresas a controlar atendimentos, gerar resumos profissionais com IA, criar mensagens para WhatsApp e compartilhar o acompanhamento da OS com o cliente.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mt-4">
@@ -323,9 +325,9 @@ if (isset($_SESSION["UsuarioId"])) {
                     </div>
 
                     <div class="col-6 col-md-4">
-                        <strong>Anexos</strong>
+                        <strong>Assistente IA</strong>
                         <div style="color: rgba(255,255,255,.72); font-size: .9rem;">
-                            fotos e PDFs
+                            resumo, prioridade e checklist
                         </div>
                     </div>
                 </div>
@@ -365,12 +367,12 @@ if (isset($_SESSION["UsuarioId"])) {
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">Anexos</span>
-                            <strong>3 arquivos</strong>
+                            <span class="text-muted">IA</span>
+                            <strong> IA gerou um resumo profissional da OS</strong>
                         </div>
 
                         <div class="alert alert-primary mt-4 mb-0">
-                            Link público enviado ao cliente por WhatsApp.
+                            Mensagem pronta para enviar ao cliente pelo WhatsApp.
                         </div>
                     </div>
                 </div>
@@ -406,7 +408,17 @@ if (isset($_SESSION["UsuarioId"])) {
                     </div>
                 </div>
             </div>
-
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon">IA</div>
+                        <h5>Assistente IA</h5>
+                        <p class="text-muted mb-0">
+                            Gere resumo profissional da OS, sugestão de prioridade, checklist técnico e mensagem para WhatsApp.
+                        </p>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-4">
                 <div class="card feature-card">
                     <div class="card-body p-4">
@@ -437,7 +449,7 @@ if (isset($_SESSION["UsuarioId"])) {
                         <div class="feature-icon">W</div>
                         <h5>WhatsApp</h5>
                         <p class="text-muted mb-0">
-                            Copie ou envie o link de acompanhamento diretamente para o cliente pelo WhatsApp.
+                            Gere mensagens profissionais com IA e envie o link de acompanhamento para o cliente.
                         </p>
                     </div>
                 </div>
@@ -472,6 +484,110 @@ if (isset($_SESSION["UsuarioId"])) {
     </div>
 </section>
 
+<section class="section bg-white" id="ia">
+    <div class="container">
+
+        <div class="section-title">
+            <span class="badge-soft">Assistente IA</span>
+
+            <h2 class="mt-3">
+                Inteligência artificial para agilizar e profissionalizar suas OS
+            </h2>
+
+            <p>
+                Transforme descrições simples em textos profissionais, gere mensagens para o cliente e padronize o atendimento técnico com apoio de IA.
+            </p>
+        </div>
+
+        <div class="row g-4 align-items-center">
+
+            <div class="col-lg-6">
+                <div class="card hero-panel">
+                    <div class="hero-panel-header">
+                        Antes da IA
+                    </div>
+
+                    <div class="hero-panel-body">
+                        <p class="text-muted mb-2">
+                            Descrição digitada pelo atendente:
+                        </p>
+
+                        <div class="alert alert-light border">
+                            cliente falou que o notebook não liga, testei carregador e parece placa, vou avaliar melhor
+                        </div>
+
+                        <p class="text-muted mb-2 mt-4">
+                            Resumo sugerido pelo DirectOS IA:
+                        </p>
+
+                        <div class="alert alert-primary mb-0">
+                            Equipamento recebido com relato de falha ao ligar. Foi realizado teste inicial com carregador, sem resposta do equipamento. Há indícios de possível falha na placa principal, sendo necessária avaliação técnica complementar para confirmação do diagnóstico.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <div class="card feature-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon">1</div>
+                                <h5>Resumo profissional</h5>
+                                <p class="text-muted mb-0">
+                                    Transforme textos simples em descrições mais claras para a OS.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card feature-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon">2</div>
+                                <h5>WhatsApp com IA</h5>
+                                <p class="text-muted mb-0">
+                                    Gere mensagens prontas para atualizar o cliente sobre o andamento.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card feature-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon">3</div>
+                                <h5>Sugestão de prioridade</h5>
+                                <p class="text-muted mb-0">
+                                    A IA ajuda a indicar se a OS é baixa, normal, alta ou urgente.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card feature-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon">4</div>
+                                <h5>Checklist técnico</h5>
+                                <p class="text-muted mb-0">
+                                    Receba uma lista inicial de verificações para padronizar o atendimento.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
 <section class="section bg-white" id="publico">
     <div class="container">
         <div class="row align-items-center g-5">
@@ -484,7 +600,7 @@ if (isset($_SESSION["UsuarioId"])) {
                 </h2>
 
                 <p class="text-muted">
-                    O DirectOS foi pensado para quem precisa organizar atendimentos, reduzir mensagens repetidas e dar mais transparência ao cliente.
+                    O DirectOS foi pensado para quem precisa organizar atendimentos, reduzir mensagens repetidas, melhorar a comunicação com o cliente e usar IA para ganhar produtividade.
                 </p>
 
                 <a href="#planos" class="btn btn-primary">
@@ -637,11 +753,11 @@ if (isset($_SESSION["UsuarioId"])) {
 <section class="cta-section">
     <div class="container text-center">
         <h2>
-            Transforme o acompanhamento dos seus serviços em uma experiência profissional.
+            Transforme suas ordens de serviço em uma experiência profissional com apoio de IA.
         </h2>
 
         <p class="lead mt-3 mb-4" style="color: rgba(255,255,255,.82);">
-            Controle suas OS e envie um link para o cliente acompanhar tudo pelo celular.
+            Controle suas OS, gere mensagens inteligentes e envie um link para o cliente acompanhar tudo pelo celular.
         </p>
 
         <a href="login.php" class="btn btn-light btn-lg">
