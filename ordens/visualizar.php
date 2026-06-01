@@ -52,6 +52,18 @@ if (
     unset($_SESSION["WhatsAppAposCriarOS"]);
 }
 
+$whatsAppAposAtualizarOS = null;
+
+if (
+    isset($_SESSION["WhatsAppAposAtualizarOS"]) &&
+    (int)($_SESSION["WhatsAppAposAtualizarOS"]["OrdemServicoId"] ?? 0) === $id
+) {
+    $whatsAppAposAtualizarOS = $_SESSION["WhatsAppAposAtualizarOS"];
+    unset($_SESSION["WhatsAppAposAtualizarOS"]);
+}
+
+$whatsAppManualOS = $whatsAppAposCriarOS ?: $whatsAppAposAtualizarOS;
+
 $sqlHistorico = "
     SELECT 
         h.HistoricoId,
@@ -204,10 +216,10 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
         </div>
     <?php endif; ?>
 
-    <?php if ($whatsAppAposCriarOS): ?>
+    <?php if ($whatsAppManualOS): ?>
         <?php
-            $telefoneWhats = preg_replace('/\D/', '', $whatsAppAposCriarOS["Telefone"] ?? "");
-            $mensagemWhats = $whatsAppAposCriarOS["Mensagem"] ?? "";
+            $telefoneWhats = preg_replace('/\D/', '', $whatsAppManualOS["Telefone"] ?? "");
+            $mensagemWhats = $whatsAppManualOS["Mensagem"] ?? "";
 
             if ($telefoneWhats !== "") {
                 $urlWhatsApp = "https://wa.me/" . $telefoneWhats . "?text=" . urlencode($mensagemWhats);
@@ -221,7 +233,7 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
                 <div>
                     <strong>Mensagem de WhatsApp pronta.</strong>
                     <br>
-                    A OS foi criada com sucesso. Clique no botão para abrir o WhatsApp com a mensagem preenchida.
+                    A mensagem foi preparada com sucesso. Clique no botão para abrir o WhatsApp com a mensagem preenchida.
                 </div>
 
                 <div class="d-flex flex-wrap gap-2">

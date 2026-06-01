@@ -1,10 +1,13 @@
 <?php
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
+require_once "../config/config.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/auditoria.php";
+
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente"]);
@@ -26,6 +29,7 @@ $observacao = trim($_POST["Observacao"] ?? "");
 $mostrarValorCliente = isset($_POST["MostrarValorCliente"]) ? 1 : 0;
 $mostrarSolucaoCliente = isset($_POST["MostrarSolucaoCliente"]) ? 1 : 0;
 $mostrarHistoricoCliente = isset($_POST["MostrarHistoricoCliente"]) ? 1 : 0;
+$prepararWhatsAppAposAtualizar = (int)($_POST["PrepararWhatsAppAposAtualizar"] ?? 0) === 1;
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
@@ -42,11 +46,11 @@ if ($titulo === "") {
 exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
 if (!clienteAtivoDaEmpresa($conn, $clienteId)) {
-    die("Cliente invalido para esta empresa.");
+    die("Cliente inválido para esta empresa.");
 }
 
 if ($servicoId !== null && !servicoAtivoDaEmpresa($conn, $servicoId)) {
-    die("Servico invalido para esta empresa.");
+    die("Serviço inválido para esta empresa.");
 }
 
 $sqlAtual = "
@@ -54,7 +58,8 @@ $sqlAtual = "
         Status, 
         DataConclusao
     FROM OS_OrdensServico
-    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
+    WHERE OrdemServicoId = :OrdemServicoId 
+      AND EmpresaId = :EmpresaId
 ";
 
 $stmtAtual = $conn->prepare($sqlAtual);
@@ -96,7 +101,8 @@ $sql = "
         MostrarValorCliente = :MostrarValorCliente,
         MostrarSolucaoCliente = :MostrarSolucaoCliente,
         MostrarHistoricoCliente = :MostrarHistoricoCliente
-    WHERE OrdemServicoId = :OrdemServicoId AND EmpresaId = :EmpresaId
+    WHERE OrdemServicoId = :OrdemServicoId 
+      AND EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -120,7 +126,7 @@ $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
-$usuarioId = $_SESSION["UsuarioId"];
+$usuarioId = (int)$_SESSION["UsuarioId"];
 $statusAnterior = $ordemAtual["Status"];
 
 $descricaoHistorico = "Ordem de serviço atualizada pela edição completa.";
@@ -138,5 +144,99 @@ registrarHistoricoOS(
     $descricaoHistorico
 );
 
-header("Location: visualizar.php?id=" . $ordemServicoId);
+if ($prepararWhatsAppAposAtualizar) {
+    try {
+        $sqlDadosWhatsApp = "
+            SELECT
+                os.OrdemServicoId,
+                os.CodigoOS,
+                os.Titulo,
+                os.Status,
+                os.TokenAcompanhamento,
+                c.ClienteId,
+                c.Nome AS ClienteNome,
+                c.Telefone AS ClienteTelefone,
+                s.Nome AS ServicoNome,
+                e.EmpresaId,
+                e.NomeFantasia AS EmpresaNome
+            FROM OS_OrdensServico os
+            INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
+            LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
+            INNER JOIN OS_Empresas e ON e.EmpresaId = os.EmpresaId
+            WHERE os.OrdemServicoId = :OrdemServicoId
+              AND os.EmpresaId = :EmpresaId
+        ";
+
+        $stmtDadosWhatsApp = $conn->prepare($sqlDadosWhatsApp);
+        $stmtDadosWhatsApp->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+        $stmtDadosWhatsApp->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+        $stmtDadosWhatsApp->execute();
+
+        $ordemWhatsApp = $stmtDadosWhatsApp->fetch(PDO::FETCH_ASSOC);
+
+        if ($ordemWhatsApp) {
+            $telefone = preg_replace('/\D/', '', $ordemWhatsApp["ClienteTelefone"] ?? "");
+
+            if ($telefone !== "" && (strlen($telefone) === 10 || strlen($telefone) === 11)) {
+                $telefone = "55" . $telefone;
+            }
+
+            $codigoOS = $ordemWhatsApp["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordemServicoId, 6, "0", STR_PAD_LEFT));
+
+            $linkPublico = "";
+
+            if (!empty($ordemWhatsApp["TokenAcompanhamento"])) {
+                $linkPublico = rtrim(APP_URL, "/") . "/public/os.php?token=" . urlencode($ordemWhatsApp["TokenAcompanhamento"]);
+            }
+
+            $partesMensagem = [];
+
+            $partesMensagem[] = "Olá, " . $ordemWhatsApp["ClienteNome"] . "! Sua ordem de serviço " . $codigoOS . " recebeu uma atualização.";
+
+            if ($statusAnterior !== $status) {
+                $partesMensagem[] = "Status alterado de " . $statusAnterior . " para " . $status . ".";
+            } else {
+                $partesMensagem[] = "Status atual: " . $status . ".";
+            }
+
+            if (!empty($ordemWhatsApp["Titulo"])) {
+                $partesMensagem[] = "Atendimento: " . $ordemWhatsApp["Titulo"] . ".";
+            }
+
+            if ($linkPublico !== "") {
+                $partesMensagem[] = "Você pode acompanhar pelo link: " . $linkPublico;
+            }
+
+            $partesMensagem[] = $ordemWhatsApp["EmpresaNome"] ?? "DirectOS";
+
+            $mensagemWhatsApp = implode(" ", $partesMensagem);
+            $mensagemWhatsApp = preg_replace("/\s+/", " ", $mensagemWhatsApp);
+            $mensagemWhatsApp = trim($mensagemWhatsApp);
+
+            $_SESSION["WhatsAppAposAtualizarOS"] = [
+                "OrdemServicoId" => $ordemServicoId,
+                "Telefone" => $telefone,
+                "Mensagem" => $mensagemWhatsApp
+            ];
+
+            registrarAuditoria(
+                $conn,
+                "WHATSAPP_MANUAL_OS_ATUALIZADA",
+                "OS_OrdensServico",
+                $ordemServicoId,
+                "Mensagem de WhatsApp preparada após atualização da OS."
+            );
+        }
+    } catch (Exception $e) {
+        registrarAuditoria(
+            $conn,
+            "WHATSAPP_MANUAL_OS_ATUALIZADA_ERRO",
+            "OS_OrdensServico",
+            $ordemServicoId,
+            "Erro ao preparar mensagem WhatsApp após atualização: " . $e->getMessage()
+        );
+    }
+}
+
+header("Location: visualizar.php?id=" . $ordemServicoId . "&mensagem=" . urlencode("OS atualizada com sucesso."));
 exit;

@@ -176,10 +176,7 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
                             <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
                                 Gerar WhatsApp
-                            </button>
-                            <button type="button" class="btn btn-sm btn-primary" onclick="enviarWhatsAppN8N()">
-                                Enviar via n8n
-                            </button>
+                            </button>                           
                             <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
                                 Sugerir prioridade
                             </button>
@@ -260,6 +257,28 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <label class="form-label">Observação</label>
                     <textarea name="Observacao" class="form-control" rows="3"><?= htmlspecialchars($ordem["Observacao"] ?? "") ?></textarea>
                 </div>
+                <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="PrepararWhatsAppAposAtualizar" 
+                                value="1" 
+                                id="PrepararWhatsAppAposAtualizar"
+                            >
+
+                            <label class="form-check-label fw-semibold" for="PrepararWhatsAppAposAtualizar">
+                                Preparar mensagem de WhatsApp após salvar atualização
+                            </label>
+                        </div>
+
+                        <div class="input-help mt-2">
+                            Após salvar, o sistema abrirá a OS com uma mensagem pronta para envio manual pelo WhatsApp.
+                            Não será feito envio automático.
+                        </div>
+                    </div>
+                </div>                
                 <div class="card border-primary mb-3">
                     <div class="card-header bg-primary text-white">
                         Área do Cliente
@@ -447,10 +466,7 @@ async function executarIA(tipo) {
             <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.conteudo)}</div>
             <div class="mt-3 d-flex flex-wrap gap-2">
                 ${data.tipo === 'resumo' ? '<button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">Usar como descrição</button>' : ''}
-                ${data.tipo === 'whatsapp' ? `
-                    <button type="button" class="btn btn-sm btn-primary" onclick="enviarWhatsAppN8N()">
-                        Enviar via n8n
-                    </button>                
+                ${data.tipo === 'whatsapp' ? `                                
                     <button type="button" class="btn btn-sm btn-success" onclick="abrirWhatsAppIA()">
                         Abrir WhatsApp
                     </button>
