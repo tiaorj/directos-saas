@@ -62,7 +62,22 @@ if (
     unset($_SESSION["WhatsAppAposAtualizarOS"]);
 }
 
+$whatsAppManualAvulsoOS = null;
+
+if (
+    isset($_SESSION["WhatsAppManualOS"]) &&
+    (int)($_SESSION["WhatsAppManualOS"]["OrdemServicoId"] ?? 0) === $id
+) {
+    $whatsAppManualAvulsoOS = $_SESSION["WhatsAppManualOS"];
+    unset($_SESSION["WhatsAppManualOS"]);
+}
+
 $whatsAppManualOS = $whatsAppAposCriarOS ?: $whatsAppAposAtualizarOS;
+
+if (!$whatsAppManualOS && $whatsAppManualAvulsoOS) {
+    $whatsAppManualOS = $whatsAppManualAvulsoOS;
+}
+
 
 $sqlHistorico = "
     SELECT 
@@ -188,6 +203,9 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
         </div>
 
         <div class="form-actions" style="border-top: 0; margin-top: 0; padding-top: 0;">
+            <a href="nova_mensagem_whatsapp.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-success">
+                Nova mensagem WhatsApp
+            </a>            
             <a href="anexar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-success">
                 Anexar Arquivo
             </a>
@@ -195,7 +213,6 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
             <a href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-primary">
                 Atendimento
             </a>
-
             <a href="editar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-warning">
                 Editar
             </a>
