@@ -80,7 +80,12 @@ if (!$servico) {
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
                         <label class="form-label mb-0">Descrição</label>
 
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="gerarServicoIA('descricao')">
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-outline-primary" 
+                            data-ia-servico="descricao"
+                            onclick="gerarServicoIA('descricao')"
+                        >
                             ✨ Gerar descrição com IA
                         </button>
                     </div>
@@ -90,13 +95,23 @@ if (!$servico) {
                     <div class="input-help mt-2">
                         Use a IA para melhorar ou criar uma descrição profissional para este serviço.
                     </div>
+                    <div id="undoDescricaoServicoIA" class="mt-2 d-none">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="desfazerDescricaoServicoIA()">
+                            Desfazer descrição gerada pela IA
+                        </button>
+                    </div>                    
                 </div>
 
                 <div class="mb-3">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
                         <label class="form-label mb-0">Checklist Padrão</label>
 
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gerarServicoIA('checklist')">
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-outline-secondary" 
+                            data-ia-servico="checklist"
+                            onclick="gerarServicoIA('checklist')"
+                        >
                             🧾 Gerar checklist com IA
                         </button>
                     </div>
@@ -106,9 +121,12 @@ if (!$servico) {
                     <div class="input-help mt-2">
                         Checklist opcional para orientar o técnico durante a execução desse tipo de serviço.
                     </div>
+                    <div id="undoChecklistServicoIA" class="mt-2 d-none">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="desfazerChecklistServicoIA()">
+                            Desfazer checklist gerado pela IA
+                        </button>
+                    </div>                    
                 </div>
-
-                <div id="iaResultadoServico" class="alert alert-light border d-none"></div>
 
                 <div class="mb-3">
                     <label class="form-label">Valor Base</label>
@@ -151,12 +169,14 @@ if (!$servico) {
 </div>
 
 <script>
+let valorAnteriorDescricaoServico = "";
+let valorAnteriorChecklistServico = "";
+
 async function gerarServicoIA(tipo) {
     const nome = document.querySelector('[name="Nome"]');
     const descricao = document.querySelector('[name="Descricao"]');
     const checklist = document.querySelector('[name="ChecklistPadrao"]');
     const csrf = document.querySelector('[name="csrf_token"]');
-    const resultado = document.getElementById('iaResultadoServico');
 
     if (!nome || nome.value.trim() === '') {
         alert('Informe o nome do serviço antes de usar a IA.');
@@ -168,10 +188,18 @@ async function gerarServicoIA(tipo) {
         return;
     }
 
-    resultado.classList.remove('d-none');
-    resultado.innerHTML = tipo === 'checklist'
-        ? 'Gerando checklist com IA...'
-        : 'Gerando descrição com IA...';
+    const botaoDescricao = document.querySelector('[data-ia-servico="descricao"]');
+    const botaoChecklist = document.querySelector('[data-ia-servico="checklist"]');
+
+    const botaoAtual = tipo === 'checklist' ? botaoChecklist : botaoDescricao;
+    const textoOriginalBotao = botaoAtual ? botaoAtual.innerHTML : '';
+
+    if (botaoAtual) {
+        botaoAtual.disabled = true;
+        botaoAtual.innerHTML = tipo === 'checklist'
+            ? 'Gerando checklist...'
+            : 'Gerando descrição...';
+    }
 
     const formData = new FormData();
     formData.append('csrf_token', csrf.value);
@@ -189,62 +217,98 @@ async function gerarServicoIA(tipo) {
         const data = await response.json();
 
         if (!data.sucesso) {
-            resultado.innerHTML = '<strong>Erro:</strong> ' + escapeHtmlServico(data.mensagem);
+            alert(data.mensagem || 'Erro ao gerar conteúdo com IA.');
             return;
         }
 
-        window.servicoIAConteudo = data.conteudo;
-        window.servicoIATipo = data.tipo;
-
-        const titulo = data.tipo === 'checklist'
-            ? 'Checklist sugerido pela IA'
-            : 'Descrição sugerida pela IA';
-
-        const textoBotao = data.tipo === 'checklist'
-            ? 'Usar checklist'
-            : 'Usar descrição';
-
-        resultado.innerHTML = `
-            <strong>${titulo}:</strong>
-            <div class="mt-2" style="white-space: pre-line;">${escapeHtmlServico(data.conteudo)}</div>
-            <div class="mt-3">
-                <button type="button" class="btn btn-sm btn-primary" onclick="aplicarServicoIA()">
-                    ${textoBotao}
-                </button>
-            </div>
-        `;
-
-    } catch (error) {
-        resultado.innerHTML = '<strong>Erro:</strong> não foi possível gerar conteúdo com IA.';
-    }
-}
-
-function aplicarServicoIA() {
-    if (!window.servicoIAConteudo || !window.servicoIATipo) {
-        return;
-    }
-
-    if (window.servicoIATipo === 'checklist') {
-        const checklist = document.querySelector('[name="ChecklistPadrao"]');
-
-        if (checklist) {
-            checklist.value = window.servicoIAConteudo;
+        if (data.tipo === 'descricao') {
+            aplicarDescricaoServicoIA(data.conteudo);
+            return;
         }
 
-        return;
-    }
+        if (data.tipo === 'checklist') {
+            aplicarChecklistServicoIA(data.conteudo);
+            return;
+        }
 
-    const descricao = document.querySelector('[name="Descricao"]');
-
-    if (descricao) {
-        descricao.value = window.servicoIAConteudo;
+    } catch (error) {
+        alert('Não foi possível gerar conteúdo com IA.');
+    } finally {
+        if (botaoAtual) {
+            botaoAtual.disabled = false;
+            botaoAtual.innerHTML = textoOriginalBotao;
+        }
     }
 }
 
-function escapeHtmlServico(text) {
-    const div = document.createElement('div');
-    div.innerText = text || '';
-    return div.innerHTML;
+function aplicarDescricaoServicoIA(conteudo) {
+    const descricao = document.querySelector('[name="Descricao"]');
+    const undoDescricao = document.getElementById('undoDescricaoServicoIA');
+
+    if (!descricao) {
+        return;
+    }
+
+    valorAnteriorDescricaoServico = descricao.value;
+    descricao.value = conteudo;
+
+    if (undoDescricao) {
+        undoDescricao.classList.remove('d-none');
+    }
+
+    descricao.focus();
+}
+
+function aplicarChecklistServicoIA(conteudo) {
+    const checklist = document.querySelector('[name="ChecklistPadrao"]');
+    const undoChecklist = document.getElementById('undoChecklistServicoIA');
+
+    if (!checklist) {
+        return;
+    }
+
+    valorAnteriorChecklistServico = checklist.value;
+    checklist.value = conteudo;
+
+    if (undoChecklist) {
+        undoChecklist.classList.remove('d-none');
+    }
+
+    checklist.focus();
+}
+
+function desfazerDescricaoServicoIA() {
+    const descricao = document.querySelector('[name="Descricao"]');
+    const undoDescricao = document.getElementById('undoDescricaoServicoIA');
+
+    if (!descricao) {
+        return;
+    }
+
+    descricao.value = valorAnteriorDescricaoServico;
+
+    if (undoDescricao) {
+        undoDescricao.classList.add('d-none');
+    }
+
+    descricao.focus();
+}
+
+function desfazerChecklistServicoIA() {
+    const checklist = document.querySelector('[name="ChecklistPadrao"]');
+    const undoChecklist = document.getElementById('undoChecklistServicoIA');
+
+    if (!checklist) {
+        return;
+    }
+
+    checklist.value = valorAnteriorChecklistServico;
+
+    if (undoChecklist) {
+        undoChecklist.classList.add('d-none');
+    }
+
+    checklist.focus();
 }
 </script>
 
