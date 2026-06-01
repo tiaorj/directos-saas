@@ -81,36 +81,6 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
         <?php exit; ?>
     <?php endif; ?>
 
-    <div class="card form-card mb-4">
-        <div class="card-header">
-            Assistente IA da OS
-        </div>
-
-        <div class="card-body">
-
-            <p class="text-muted mb-3">
-                Use a IA para melhorar a descrição, sugerir prioridade e gerar um checklist técnico antes de salvar a OS.
-            </p>
-
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
-                    Gerar resumo
-                </button>
-
-                <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
-                    Sugerir prioridade
-                </button>
-
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
-                    Checklist técnico
-                </button>
-            </div>
-
-            <div id="iaResultado" class="alert alert-light border d-none"></div>
-
-        </div>
-    </div>
-
     <div class="card form-card">
         <div class="card-header">
             Dados da Ordem de Serviço
@@ -167,9 +137,28 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Descrição do Problema</label>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+                        <label class="form-label mb-0">Descrição do Problema</label>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
+                                ✨ Melhorar descrição
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
+                                🧾 Gerar checklist
+                            </button>
+                        </div>
+                    </div>
+
                     <textarea name="DescricaoProblema" class="form-control" rows="4"></textarea>
+
+                    <div class="input-help mt-2">
+                        Descreva o problema de forma simples. A IA pode transformar o texto em uma descrição mais profissional.
+                    </div>
                 </div>
+
+                <div id="iaResultado" class="alert alert-light border d-none"></div>
 
                 <div class="row">
                     <div class="form-section-title">
@@ -189,7 +178,14 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Prioridade</label>
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                            <label class="form-label mb-0">Prioridade</label>
+
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
+                                IA
+                            </button>
+                        </div>
+
                         <select name="Prioridade" class="form-control">
                             <option value="Baixa">Baixa</option>
                             <option value="Normal" selected>Normal</option>
@@ -351,7 +347,7 @@ async function executarIA(tipo) {
         let tituloResultado = 'Resultado da IA';
 
         if (data.tipo === 'resumo') {
-            tituloResultado = 'Resumo sugerido pela IA';
+            tituloResultado = 'Descrição melhorada pela IA';
         }
 
         if (data.tipo === 'checklist') {

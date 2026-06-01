@@ -7,6 +7,7 @@ require_once "../includes/historico.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
+require_once "../includes/mensagens_whatsapp.php";
 
 csrfValidarTokenPost();
 
@@ -218,6 +219,17 @@ if ($prepararWhatsAppAposAtualizar) {
                 "Telefone" => $telefone,
                 "Mensagem" => $mensagemWhatsApp
             ];
+
+            registrarMensagemWhatsAppOS(
+                $conn,
+                $empresaId,
+                $ordemServicoId,
+                $usuarioId,
+                "ATUALIZACAO_OS",
+                "MANUAL",
+                $telefone,
+                $mensagemWhatsApp
+            );
 
             registrarAuditoria(
                 $conn,

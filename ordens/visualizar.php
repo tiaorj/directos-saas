@@ -109,6 +109,29 @@ $stmtAnexos->execute();
 
 $anexos = $stmtAnexos->fetchAll(PDO::FETCH_ASSOC);
 
+$sqlMensagensWhatsApp = "
+    SELECT TOP 20
+        m.MensagemWhatsAppId,
+        m.TipoMensagem,
+        m.Origem,
+        m.Telefone,
+        m.Mensagem,
+        m.DataCadastro,
+        u.Nome AS UsuarioNome
+    FROM OS_MensagensWhatsApp m
+    LEFT JOIN OS_Usuarios u ON u.UsuarioId = m.UsuarioId
+    WHERE m.OrdemServicoId = :OrdemServicoId
+      AND m.EmpresaId = :EmpresaId
+    ORDER BY m.MensagemWhatsAppId DESC
+";
+
+$stmtMensagensWhatsApp = $conn->prepare($sqlMensagensWhatsApp);
+$stmtMensagensWhatsApp->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtMensagensWhatsApp->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtMensagensWhatsApp->execute();
+
+$mensagensWhatsApp = $stmtMensagensWhatsApp->fetchAll(PDO::FETCH_ASSOC);
+
 function formatarDataOS($data, $comHora = false)
 {
     if (empty($data)) {
@@ -546,6 +569,131 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
             <?php endif; ?>
         </div>
     </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Mensagens WhatsApp preparadas</strong>
+
+            <span class="badge bg-success">
+                <?= count($mensagensWhatsApp) ?> registro(s)
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+            <?php if (count($mensagensWhatsApp) === 0): ?>
+                <div class="empty-state">
+                    Nenhuma mensagem WhatsApp preparada para esta OS.
+                </div>
+            <?php else: ?>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-os mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Origem</th>
+                                <th>Usuário</th>
+                                <th>Telefone</th>
+                                <th>Mensagem</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php foreach ($mensagensWhatsApp as $msg): ?>
+                                <tr>
+                                    <td>
+                                        <?= !empty($msg["DataCadastro"])
+                                            ? date("d/m/Y H:i", strtotime($msg["DataCadastro"]))
+                                            : "-"
+                                        ?>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            <?= htmlspecialchars($msg["TipoMensagem"] ?? "-") ?>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <?= htmlspecialchars($msg["Origem"] ?? "-") ?>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($msg["UsuarioNome"] ?? "-") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($msg["Telefone"] ?? "-") ?>
+                                    </td>
+
+                                    <td style="min-width: 320px;">
+                                        <div style="white-space: pre-line;">
+                                            <?= nl2br(htmlspecialchars($msg["Mensagem"] ?? "")) ?>
+                                        </div>
+
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-sm btn-outline-secondary mt-2"
+                                            onclick="copiarMensagemHistoricoWhatsApp(<?= (int)$msg["MensagemWhatsAppId"] ?>)"
+                                        >
+                                            Copiar
+                                        </button>
+
+                                        <?php
+                                            $telefoneMsg = preg_replace('/\D/', '', $msg["Telefone"] ?? "");
+                                            $mensagemMsg = $msg["Mensagem"] ?? "";
+
+                                            if ($telefoneMsg !== "") {
+                                                $urlMsgWhats = "https://wa.me/" . $telefoneMsg . "?text=" . urlencode($mensagemMsg);
+                                            } else {
+                                                $urlMsgWhats = "https://wa.me/?text=" . urlencode($mensagemMsg);
+                                            }
+                                        ?>
+
+                                        <a 
+                                            href="<?= htmlspecialchars($urlMsgWhats) ?>" 
+                                            target="_blank" 
+                                            class="btn btn-sm btn-success mt-2"
+                                        >
+                                            Abrir WhatsApp
+                                        </a>
+
+                                        <textarea 
+                                            id="mensagem-whatsapp-<?= (int)$msg["MensagemWhatsAppId"] ?>" 
+                                            class="d-none"
+                                        ><?= htmlspecialchars($msg["Mensagem"] ?? "") ?></textarea>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <script>
+    function copiarMensagemHistoricoWhatsApp(id) {
+        const campo = document.getElementById("mensagem-whatsapp-" + id);
+
+        if (!campo) {
+            alert("Mensagem não encontrada.");
+            return;
+        }
+
+        navigator.clipboard.writeText(campo.value)
+            .then(function () {
+                alert("Mensagem copiada.");
+            })
+            .catch(function () {
+                alert("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.");
+            });
+    }
+    </script>
 
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white">
