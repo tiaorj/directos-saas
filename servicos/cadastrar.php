@@ -40,7 +40,7 @@ exigirPerfil(["Admin"]);
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
                         <label class="form-label mb-0">Descrição</label>
 
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="gerarDescricaoServicoIA()">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="gerarServicoIA('descricao')">
                             ✨ Gerar descrição com IA
                         </button>
                     </div>
@@ -49,6 +49,22 @@ exigirPerfil(["Admin"]);
 
                     <div class="input-help mt-2">
                         Informe o nome do serviço e use a IA para criar uma descrição profissional.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+                        <label class="form-label mb-0">Checklist Padrão</label>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gerarServicoIA('checklist')">
+                            🧾 Gerar checklist com IA
+                        </button>
+                    </div>
+
+                    <textarea name="ChecklistPadrao" class="form-control" rows="6" maxlength="2000"></textarea>
+
+                    <div class="input-help mt-2">
+                        Checklist opcional para orientar o técnico durante a execução desse tipo de serviço.
                     </div>
                 </div>
 
@@ -85,9 +101,10 @@ exigirPerfil(["Admin"]);
 </div>
 
 <script>
-async function gerarDescricaoServicoIA() {
+async function gerarServicoIA(tipo) {
     const nome = document.querySelector('[name="Nome"]');
     const descricao = document.querySelector('[name="Descricao"]');
+    const checklist = document.querySelector('[name="ChecklistPadrao"]');
     const csrf = document.querySelector('[name="csrf_token"]');
     const resultado = document.getElementById('iaResultadoServico');
 
@@ -102,13 +119,16 @@ async function gerarDescricaoServicoIA() {
     }
 
     resultado.classList.remove('d-none');
-    resultado.innerHTML = 'Gerando descrição com IA...';
+    resultado.innerHTML = tipo === 'checklist'
+        ? 'Gerando checklist com IA...'
+        : 'Gerando descrição com IA...';
 
     const formData = new FormData();
     formData.append('csrf_token', csrf.value);
-    formData.append('TipoIA', 'descricao');
+    formData.append('TipoIA', tipo);
     formData.append('Nome', nome.value);
     formData.append('Descricao', descricao ? descricao.value : '');
+    formData.append('ChecklistPadrao', checklist ? checklist.value : '');
 
     try {
         const response = await fetch('assistente_ia.php', {
@@ -123,28 +143,51 @@ async function gerarDescricaoServicoIA() {
             return;
         }
 
-        window.descricaoServicoIA = data.conteudo;
+        window.servicoIAConteudo = data.conteudo;
+        window.servicoIATipo = data.tipo;
+
+        const titulo = data.tipo === 'checklist'
+            ? 'Checklist sugerido pela IA'
+            : 'Descrição sugerida pela IA';
+
+        const textoBotao = data.tipo === 'checklist'
+            ? 'Usar checklist'
+            : 'Usar descrição';
 
         resultado.innerHTML = `
-            <strong>Descrição sugerida pela IA:</strong>
+            <strong>${titulo}:</strong>
             <div class="mt-2" style="white-space: pre-line;">${escapeHtmlServico(data.conteudo)}</div>
             <div class="mt-3">
-                <button type="button" class="btn btn-sm btn-primary" onclick="aplicarDescricaoServicoIA()">
-                    Usar descrição
+                <button type="button" class="btn btn-sm btn-primary" onclick="aplicarServicoIA()">
+                    ${textoBotao}
                 </button>
             </div>
         `;
 
     } catch (error) {
-        resultado.innerHTML = '<strong>Erro:</strong> não foi possível gerar a descrição com IA.';
+        resultado.innerHTML = '<strong>Erro:</strong> não foi possível gerar conteúdo com IA.';
     }
 }
 
-function aplicarDescricaoServicoIA() {
+function aplicarServicoIA() {
+    if (!window.servicoIAConteudo || !window.servicoIATipo) {
+        return;
+    }
+
+    if (window.servicoIATipo === 'checklist') {
+        const checklist = document.querySelector('[name="ChecklistPadrao"]');
+
+        if (checklist) {
+            checklist.value = window.servicoIAConteudo;
+        }
+
+        return;
+    }
+
     const descricao = document.querySelector('[name="Descricao"]');
 
-    if (descricao && window.descricaoServicoIA) {
-        descricao.value = window.descricaoServicoIA;
+    if (descricao) {
+        descricao.value = window.servicoIAConteudo;
     }
 }
 

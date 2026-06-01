@@ -13,8 +13,9 @@ exigirPerfil(["Admin"]);
 $tipoIA = $_POST["TipoIA"] ?? "";
 $nome = trim($_POST["Nome"] ?? "");
 $descricaoAtual = trim($_POST["Descricao"] ?? "");
+$checklistAtual = trim($_POST["ChecklistPadrao"] ?? "");
 
-if ($tipoIA !== "descricao") {
+if (!in_array($tipoIA, ["descricao", "checklist"], true)) {
     echo json_encode([
         "sucesso" => false,
         "mensagem" => "Tipo de IA inválido."
@@ -38,7 +39,8 @@ if (!defined("OPENAI_API_KEY") || trim(OPENAI_API_KEY) === "") {
     exit;
 }
 
-$prompt = "
+if ($tipoIA === "descricao") {
+    $prompt = "
 Você é um assistente para um sistema de ordem de serviço chamado DirectOS.
 
 Crie uma descrição profissional, clara e comercial para o serviço abaixo.
@@ -58,13 +60,39 @@ Nome do serviço:
 Descrição atual, se houver:
 {$descricaoAtual}
 ";
+} else {
+    $prompt = "
+Você é um assistente para um sistema de ordem de serviço chamado DirectOS.
+
+Crie um checklist técnico padrão para execução do serviço abaixo.
+
+Regras:
+- Escreva em português do Brasil.
+- Use itens objetivos.
+- Não use markdown avançado.
+- Não use emojis.
+- Não invente garantias ou promessas absolutas.
+- Gere entre 5 e 8 itens.
+- Cada item deve começar com '- '.
+- O checklist deve ajudar o técnico a padronizar o atendimento.
+
+Nome do serviço:
+{$nome}
+
+Descrição do serviço:
+{$descricaoAtual}
+
+Checklist atual, se houver:
+{$checklistAtual}
+";
+}
 
 $payload = [
     "model" => defined("OPENAI_MODEL") ? OPENAI_MODEL : "gpt-4o-mini",
     "messages" => [
         [
             "role" => "system",
-            "content" => "Você ajuda a criar textos profissionais para cadastros de serviços em um sistema SaaS de ordem de serviço."
+            "content" => "Você ajuda a criar textos profissionais e checklists técnicos para cadastros de serviços em um sistema SaaS de ordem de serviço."
         ],
         [
             "role" => "user",
@@ -72,7 +100,7 @@ $payload = [
         ]
     ],
     "temperature" => 0.4,
-    "max_tokens" => 250
+    "max_tokens" => $tipoIA === "checklist" ? 350 : 250
 ];
 
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
@@ -126,7 +154,7 @@ if ($conteudo === "") {
 
 echo json_encode([
     "sucesso" => true,
-    "tipo" => "descricao",
+    "tipo" => $tipoIA,
     "conteudo" => $conteudo
 ]);
 exit;
