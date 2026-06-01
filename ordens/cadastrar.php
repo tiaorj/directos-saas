@@ -21,7 +21,7 @@ $stmtClientes->execute();
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
 $sqlServicos = "
-    SELECT ServicoId, Nome, ValorBase
+    SELECT ServicoId, Nome, ValorBase, ChecklistPadrao
     FROM OS_Servicos
     WHERE Ativo = 1
       AND EmpresaId = :EmpresaId
@@ -119,11 +119,32 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                                     value="<?= (int)$servico["ServicoId"] ?>"
                                     data-valor="<?= htmlspecialchars($servico["ValorBase"] ?? "") ?>"
                                     data-nome="<?= htmlspecialchars($servico["Nome"] ?? "") ?>"
+                                    data-checklist="<?= htmlspecialchars($servico["ChecklistPadrao"] ?? "", ENT_QUOTES) ?>"
                                 >
                                     <?= htmlspecialchars($servico["Nome"]) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+                </div>
+
+                <div id="cardChecklistServico" class="card border-secondary mb-3 d-none">
+                    <div class="card-header bg-light">
+                        <strong>Checklist padrão do serviço selecionado</strong>
+                    </div>
+
+                    <div class="card-body">
+                        <div id="textoChecklistServico" class="mb-3" style="white-space: pre-line;"></div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarChecklistServico()">
+                                Copiar checklist
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="adicionarChecklistServicoNaObservacao()">
+                                Adicionar à observação
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -141,11 +162,21 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         <label class="form-label mb-0">Descrição do Problema</label>
 
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-primary" 
+                                data-ia-os="resumo"
+                                onclick="executarIA('resumo')"
+                            >
                                 ✨ Melhorar descrição
                             </button>
 
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-secondary" 
+                                data-ia-os="checklist"
+                                onclick="executarIA('checklist')"
+                            >
                                 🧾 Gerar checklist
                             </button>
                         </div>
@@ -156,9 +187,13 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <div class="input-help mt-2">
                         Descreva o problema de forma simples. A IA pode transformar o texto em uma descrição mais profissional.
                     </div>
-                </div>
 
-                <div id="iaResultado" class="alert alert-light border d-none"></div>
+                    <div id="undoDescricaoOSIA" class="mt-2 d-none">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="desfazerDescricaoOSIA()">
+                            Desfazer descrição gerada pela IA
+                        </button>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="form-section-title">
@@ -181,7 +216,12 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                             <label class="form-label mb-0">Prioridade</label>
 
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-warning" 
+                                data-ia-os="prioridade"
+                                onclick="executarIA('prioridade')"
+                            >
                                 IA
                             </button>
                         </div>
@@ -192,6 +232,12 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                             <option value="Alta">Alta</option>
                             <option value="Urgente">Urgente</option>
                         </select>
+
+                        <div id="undoPrioridadeOSIA" class="mt-2 d-none">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="desfazerPrioridadeOSIA()">
+                                Desfazer prioridade sugerida
+                            </button>
+                        </div>
                     </div>
 
                     <div class="col-md-4 mb-3">
@@ -217,8 +263,18 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Observação</label>
-                    <textarea name="Observacao" class="form-control" rows="3"></textarea>
+                    <label class="form-label">Observação / Checklist técnico</label>
+                    <textarea name="Observacao" class="form-control" rows="5"></textarea>
+
+                    <div class="input-help mt-2">
+                        Use este campo para observações internas, checklist técnico ou orientações do atendimento.
+                    </div>
+
+                    <div id="undoObservacaoOSIA" class="mt-2 d-none">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="desfazerObservacaoOSIA()">
+                            Desfazer alteração na observação
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card border-0 bg-light mb-3">
@@ -262,14 +318,84 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
+let valorAnteriorDescricaoOS = "";
+let valorAnteriorObservacaoOS = "";
+let valorAnteriorPrioridadeOS = "";
+
 document.getElementById("ServicoId").addEventListener("change", function () {
     var option = this.options[this.selectedIndex];
     var valor = option.getAttribute("data-valor");
+    var checklist = option.getAttribute("data-checklist") || "";
 
     if (valor !== null && valor !== "") {
         document.getElementById("ValorPrevisto").value = valor;
     }
+
+    atualizarChecklistServico(checklist);
 });
+
+function atualizarChecklistServico(checklist) {
+    const card = document.getElementById("cardChecklistServico");
+    const texto = document.getElementById("textoChecklistServico");
+
+    if (!card || !texto) {
+        return;
+    }
+
+    if (checklist.trim() === "") {
+        card.classList.add("d-none");
+        texto.innerText = "";
+        return;
+    }
+
+    texto.innerText = checklist;
+    card.classList.remove("d-none");
+}
+
+async function copiarChecklistServico() {
+    const texto = document.getElementById("textoChecklistServico");
+
+    if (!texto || texto.innerText.trim() === "") {
+        alert("Nenhum checklist disponível.");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(texto.innerText);
+        alert("Checklist copiado.");
+    } catch (e) {
+        alert("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.");
+    }
+}
+
+function adicionarChecklistServicoNaObservacao() {
+    const texto = document.getElementById("textoChecklistServico");
+    const observacao = document.querySelector('[name="Observacao"]');
+    const undo = document.getElementById("undoObservacaoOSIA");
+
+    if (!texto || texto.innerText.trim() === "") {
+        alert("Nenhum checklist disponível.");
+        return;
+    }
+
+    if (!observacao) {
+        return;
+    }
+
+    valorAnteriorObservacaoOS = observacao.value;
+
+    const bloco = "Checklist padrão do serviço:\n" + texto.innerText.trim();
+
+    observacao.value = observacao.value.trim() !== ""
+        ? observacao.value.trim() + "\n\n" + bloco
+        : bloco;
+
+    if (undo) {
+        undo.classList.remove("d-none");
+    }
+
+    observacao.focus();
+}
 
 async function executarIA(tipo) {
     const descricao = document.querySelector('[name="DescricaoProblema"]');
@@ -278,7 +404,6 @@ async function executarIA(tipo) {
     const status = document.querySelector('[name="Status"]');
     const servico = document.querySelector('[name="ServicoId"]');
     const csrf = document.querySelector('[name="csrf_token"]');
-    const resultado = document.getElementById('iaResultado');
 
     if (!descricao || descricao.value.trim() === '') {
         alert('Informe a descrição do problema antes de usar a IA.');
@@ -290,8 +415,20 @@ async function executarIA(tipo) {
         return;
     }
 
-    resultado.classList.remove('d-none');
-    resultado.innerHTML = 'Processando com IA...';
+    const botaoAtual = document.querySelector('[data-ia-os="' + tipo + '"]');
+    const textoOriginalBotao = botaoAtual ? botaoAtual.innerHTML : "";
+
+    if (botaoAtual) {
+        botaoAtual.disabled = true;
+
+        if (tipo === "resumo") {
+            botaoAtual.innerHTML = "Melhorando...";
+        } else if (tipo === "checklist") {
+            botaoAtual.innerHTML = "Gerando...";
+        } else {
+            botaoAtual.innerHTML = "Analisando...";
+        }
+    }
 
     let servicoNome = "";
 
@@ -319,88 +456,143 @@ async function executarIA(tipo) {
         const data = await response.json();
 
         if (!data.sucesso) {
-            resultado.innerHTML = '<strong>Erro:</strong> ' + escapeHtml(data.mensagem);
+            alert(data.mensagem || 'Erro ao processar IA.');
             return;
         }
 
         if (data.tipo === 'prioridade') {
-            window.iaPrioridadeSugerida = data.prioridade;
-
-            resultado.innerHTML = `
-                <strong>Prioridade sugerida:</strong>
-                <div class="mt-2">
-                    <span class="badge bg-warning text-dark">${escapeHtml(data.prioridade)}</span>
-                </div>
-                <div class="mt-2">${escapeHtml(data.justificativa || '')}</div>
-                <div class="mt-3">
-                    <button type="button" class="btn btn-sm btn-warning" onclick="usarPrioridadeIA()">
-                        Aplicar prioridade
-                    </button>
-                </div>
-            `;
+            aplicarPrioridadeOSIA(data.prioridade);
             return;
         }
 
-        window.iaConteudoGerado = data.conteudo;
-        window.iaTipoGerado = data.tipo;
-
-        let tituloResultado = 'Resultado da IA';
-
         if (data.tipo === 'resumo') {
-            tituloResultado = 'Descrição melhorada pela IA';
+            aplicarDescricaoOSIA(data.conteudo);
+            return;
         }
 
         if (data.tipo === 'checklist') {
-            tituloResultado = 'Checklist técnico sugerido';
+            aplicarChecklistOSIA(data.conteudo);
+            return;
         }
 
-        resultado.innerHTML = `
-            <strong>${tituloResultado}:</strong>
-            <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.conteudo)}</div>
-            <div class="mt-3 d-flex flex-wrap gap-2">
-                ${data.tipo === 'resumo' ? '<button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">Usar como descrição</button>' : ''}
-                ${data.tipo === 'checklist' ? '<button type="button" class="btn btn-sm btn-secondary" onclick="copiarIA()">Copiar checklist</button>' : ''}
-            </div>
-        `;
-
     } catch (error) {
-        resultado.innerHTML = '<strong>Erro:</strong> não foi possível processar a solicitação com IA.';
+        alert('Não foi possível processar a solicitação com IA.');
+    } finally {
+        if (botaoAtual) {
+            botaoAtual.disabled = false;
+            botaoAtual.innerHTML = textoOriginalBotao;
+        }
     }
 }
 
-function usarResumoIA() {
+function aplicarDescricaoOSIA(conteudo) {
     const descricao = document.querySelector('[name="DescricaoProblema"]');
+    const undo = document.getElementById("undoDescricaoOSIA");
 
-    if (descricao && window.iaConteudoGerado) {
-        descricao.value = window.iaConteudoGerado;
-    }
-}
-
-function usarPrioridadeIA() {
-    const prioridade = document.querySelector('[name="Prioridade"]');
-
-    if (prioridade && window.iaPrioridadeSugerida) {
-        prioridade.value = window.iaPrioridadeSugerida;
-    }
-}
-
-async function copiarIA() {
-    if (!window.iaConteudoGerado) {
+    if (!descricao) {
         return;
     }
 
-    try {
-        await navigator.clipboard.writeText(window.iaConteudoGerado);
-        alert('Conteúdo copiado.');
-    } catch (e) {
-        alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.');
+    valorAnteriorDescricaoOS = descricao.value;
+    descricao.value = conteudo;
+
+    if (undo) {
+        undo.classList.remove("d-none");
     }
+
+    descricao.focus();
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.innerText = text || '';
-    return div.innerHTML;
+function aplicarChecklistOSIA(conteudo) {
+    const observacao = document.querySelector('[name="Observacao"]');
+    const undo = document.getElementById("undoObservacaoOSIA");
+
+    if (!observacao) {
+        return;
+    }
+
+    valorAnteriorObservacaoOS = observacao.value;
+
+    const bloco = "Checklist técnico sugerido pela IA:\n" + conteudo;
+
+    observacao.value = observacao.value.trim() !== ""
+        ? observacao.value.trim() + "\n\n" + bloco
+        : bloco;
+
+    if (undo) {
+        undo.classList.remove("d-none");
+    }
+
+    observacao.focus();
+}
+
+function aplicarPrioridadeOSIA(prioridadeSugerida) {
+    const prioridade = document.querySelector('[name="Prioridade"]');
+    const undo = document.getElementById("undoPrioridadeOSIA");
+
+    if (!prioridade || !prioridadeSugerida) {
+        return;
+    }
+
+    valorAnteriorPrioridadeOS = prioridade.value;
+    prioridade.value = prioridadeSugerida;
+
+    if (undo) {
+        undo.classList.remove("d-none");
+    }
+
+    prioridade.focus();
+}
+
+function desfazerDescricaoOSIA() {
+    const descricao = document.querySelector('[name="DescricaoProblema"]');
+    const undo = document.getElementById("undoDescricaoOSIA");
+
+    if (!descricao) {
+        return;
+    }
+
+    descricao.value = valorAnteriorDescricaoOS;
+
+    if (undo) {
+        undo.classList.add("d-none");
+    }
+
+    descricao.focus();
+}
+
+function desfazerObservacaoOSIA() {
+    const observacao = document.querySelector('[name="Observacao"]');
+    const undo = document.getElementById("undoObservacaoOSIA");
+
+    if (!observacao) {
+        return;
+    }
+
+    observacao.value = valorAnteriorObservacaoOS;
+
+    if (undo) {
+        undo.classList.add("d-none");
+    }
+
+    observacao.focus();
+}
+
+function desfazerPrioridadeOSIA() {
+    const prioridade = document.querySelector('[name="Prioridade"]');
+    const undo = document.getElementById("undoPrioridadeOSIA");
+
+    if (!prioridade) {
+        return;
+    }
+
+    prioridade.value = valorAnteriorPrioridadeOS;
+
+    if (undo) {
+        undo.classList.add("d-none");
+    }
+
+    prioridade.focus();
 }
 </script>
 
