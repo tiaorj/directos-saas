@@ -18,28 +18,28 @@ $sql = "
         os.CodigoOS,
         os.ClienteId,
         os.ServicoId,
-        Titulo,
-        DescricaoProblema,
-        DescricaoSolucao,
-        Status,
-        Prioridade,
-        ValorPrevisto,
-        ValorFinal,
-        DataPrevisao,
-        DataConclusao,
-        Observacao,
-        MostrarValorCliente,
-        MostrarSolucaoCliente,
-        MostrarHistoricoCliente,
+        os.TokenAcompanhamento,
+        os.Titulo,
+        os.DescricaoProblema,
+        os.DescricaoSolucao,
+        os.Status,
+        os.Prioridade,
+        os.ValorPrevisto,
+        os.ValorFinal,
+        os.DataPrevisao,
+        os.DataConclusao,
+        os.Observacao,
+        os.MostrarValorCliente,
+        os.MostrarSolucaoCliente,
+        os.MostrarHistoricoCliente,
         c.Nome AS ClienteNome,
-        c.Telefone AS ClienteWhatsApp,
         c.Telefone AS ClienteTelefone,
-        s.Nome AS ServicoNome        
+        s.Nome AS ServicoNome
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId
     WHERE os.OrdemServicoId = :OrdemServicoId 
-        AND os.EmpresaId = :EmpresaId
+      AND os.EmpresaId = :EmpresaId
 ";
 
 $stmt = $conn->prepare($sql);
@@ -56,7 +56,8 @@ if (!$ordem) {
 $sqlClientes = "
     SELECT ClienteId, Nome
     FROM OS_Clientes
-    WHERE Ativo = 1 AND EmpresaId = :EmpresaId
+    WHERE Ativo = 1 
+      AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
@@ -68,7 +69,8 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 $sqlServicos = "
     SELECT ServicoId, Nome, ValorBase
     FROM OS_Servicos
-    WHERE Ativo = 1 AND EmpresaId = :EmpresaId
+    WHERE Ativo = 1 
+      AND EmpresaId = :EmpresaId
     ORDER BY Nome
 ";
 
@@ -96,6 +98,7 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
             Voltar
         </a>
     </div>
+
     <div class="card form-card">
         <div class="card-header">
             Dados da Ordem de Serviço
@@ -105,19 +108,14 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
             <form method="post" action="atualizar.php">
                 <?= csrfInput() ?>
-                <input 
-                    type="hidden" 
-                    name="ClienteWhatsApp" 
-                    value="<?= htmlspecialchars($ordem["ClienteWhatsApp"] ?? "") ?>"
-                >
 
                 <input 
                     type="hidden" 
                     name="ClienteTelefone" 
                     value="<?= htmlspecialchars($ordem["ClienteTelefone"] ?? "") ?>"
-                >                
+                >
 
-                <input type="hidden" name="OrdemServicoId" value="<?= $ordem["OrdemServicoId"] ?>">
+                <input type="hidden" name="OrdemServicoId" value="<?= (int)$ordem["OrdemServicoId"] ?>">
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -127,8 +125,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
                             <?php foreach ($clientes as $cliente): ?>
                                 <option 
-                                    value="<?= $cliente["ClienteId"] ?>"
-                                    <?= (int)$ordem["ClienteId"] === (int)$cliente["ClienteId"] ? "selected" : "" ?>>
+                                    value="<?= (int)$cliente["ClienteId"] ?>"
+                                    <?= (int)$ordem["ClienteId"] === (int)$cliente["ClienteId"] ? "selected" : "" ?>
+                                >
                                     <?= htmlspecialchars($cliente["Nome"]) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -142,9 +141,10 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
                             <?php foreach ($servicos as $servico): ?>
                                 <option 
-                                    value="<?= $servico["ServicoId"] ?>"
-                                    data-valor="<?= $servico["ValorBase"] ?>"
-                                    <?= (int)$ordem["ServicoId"] === (int)$servico["ServicoId"] ? "selected" : "" ?>>
+                                    value="<?= (int)$servico["ServicoId"] ?>"
+                                    data-valor="<?= htmlspecialchars($servico["ValorBase"] ?? "") ?>"
+                                    <?= (int)$ordem["ServicoId"] === (int)$servico["ServicoId"] ? "selected" : "" ?>
+                                >
                                     <?= htmlspecialchars($servico["Nome"]) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -154,51 +154,59 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="mb-3">
                     <label class="form-label">Título *</label>
-                    <input type="text" name="Titulo" class="form-control" required maxlength="150"
-                           value="<?= htmlspecialchars($ordem["Titulo"] ?? "") ?>">
-                </div>
-
-                <div class="card form-card mb-3">
-                    <div class="card-header">
-                        Assistente IA da OS
-                    </div>
-
-                    <div class="card-body">
-
-                        <p class="text-muted mb-3">
-                            Use a IA para gerar resumo profissional, mensagem para WhatsApp, sugestão de prioridade e checklist técnico.
-                        </p>
-
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
-                                Gerar resumo
-                            </button>
-
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
-                                Gerar WhatsApp
-                            </button>                           
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
-                                Sugerir prioridade
-                            </button>
-
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
-                                Checklist técnico
-                            </button>
-                        </div>
-
-                        <div id="iaResultado" class="alert alert-light border d-none"></div>
-
-                    </div>
+                    <input 
+                        type="text" 
+                        name="Titulo" 
+                        class="form-control" 
+                        required 
+                        maxlength="150"
+                        value="<?= htmlspecialchars($ordem["Titulo"] ?? "") ?>"
+                    >
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Descrição do Problema</label>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+                        <label class="form-label mb-0">Descrição do Problema</label>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="executarIA('resumo')">
+                                ✨ Melhorar descrição
+                            </button>
+
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="executarIA('checklist')">
+                                🧾 Gerar checklist
+                            </button>
+                        </div>
+                    </div>
+
                     <textarea name="DescricaoProblema" class="form-control" rows="4"><?= htmlspecialchars($ordem["DescricaoProblema"] ?? "") ?></textarea>
+
+                    <div class="input-help mt-2">
+                        Use a IA para transformar a descrição em um texto mais profissional ou gerar um checklist técnico.
+                    </div>
                 </div>
+
+                <div id="iaResultado" class="alert alert-light border d-none"></div>
 
                 <div class="mb-3">
                     <label class="form-label">Solução Aplicada</label>
                     <textarea name="DescricaoSolucao" class="form-control" rows="4"><?= htmlspecialchars($ordem["DescricaoSolucao"] ?? "") ?></textarea>
+                </div>
+
+                <div class="card border-success mb-3">
+                    <div class="card-header bg-success text-white">
+                        Comunicação com o cliente
+                    </div>
+
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Gere uma mensagem profissional com IA para enviar ao cliente pelo WhatsApp.
+                        </p>
+
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="executarIA('whatsapp')">
+                            💬 Gerar mensagem WhatsApp
+                        </button>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -215,7 +223,14 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Prioridade</label>
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                            <label class="form-label mb-0">Prioridade</label>
+
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="executarIA('prioridade')">
+                                IA
+                            </button>
+                        </div>
+
                         <select name="Prioridade" class="form-control">
                             <option value="Baixa" <?= $ordem["Prioridade"] === "Baixa" ? "selected" : "" ?>>Baixa</option>
                             <option value="Normal" <?= $ordem["Prioridade"] === "Normal" ? "selected" : "" ?>>Normal</option>
@@ -226,30 +241,49 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Data de Previsão</label>
-                        <input type="date" name="DataPrevisao" class="form-control"
-                               value="<?= !empty($ordem["DataPrevisao"]) ? date("Y-m-d", strtotime($ordem["DataPrevisao"])) : "" ?>">
+                        <input 
+                            type="date" 
+                            name="DataPrevisao" 
+                            class="form-control"
+                            value="<?= !empty($ordem["DataPrevisao"]) ? date("Y-m-d", strtotime($ordem["DataPrevisao"])) : "" ?>"
+                        >
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Valor Previsto</label>
-                        <input type="number" step="0.01" name="ValorPrevisto" id="ValorPrevisto" class="form-control"
-                               value="<?= $ordem["ValorPrevisto"] ?>">
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            name="ValorPrevisto" 
+                            id="ValorPrevisto" 
+                            class="form-control"
+                            value="<?= htmlspecialchars($ordem["ValorPrevisto"] ?? "") ?>"
+                        >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Valor Final</label>
-                        <input type="number" step="0.01" name="ValorFinal" class="form-control"
-                               value="<?= $ordem["ValorFinal"] ?>">
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            name="ValorFinal" 
+                            class="form-control"
+                            value="<?= htmlspecialchars($ordem["ValorFinal"] ?? "") ?>"
+                        >
                     </div>
                 </div>
 
                 <?php if (!empty($ordem["DataConclusao"])): ?>
                     <div class="mb-3">
                         <label class="form-label">Data de Conclusão</label>
-                        <input type="text" class="form-control" disabled
-                               value="<?= date("d/m/Y H:i", strtotime($ordem["DataConclusao"])) ?>">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            disabled
+                            value="<?= date("d/m/Y H:i", strtotime($ordem["DataConclusao"])) ?>"
+                        >
                     </div>
                 <?php endif; ?>
 
@@ -257,6 +291,7 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <label class="form-label">Observação</label>
                     <textarea name="Observacao" class="form-control" rows="3"><?= htmlspecialchars($ordem["Observacao"] ?? "") ?></textarea>
                 </div>
+
                 <div class="card border-0 bg-light mb-3">
                     <div class="card-body">
                         <div class="form-check">
@@ -278,7 +313,8 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                             Não será feito envio automático.
                         </div>
                     </div>
-                </div>                
+                </div>
+
                 <div class="card border-primary mb-3">
                     <div class="card-header bg-primary text-white">
                         Área do Cliente
@@ -332,18 +368,20 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-success">
                         Atualizar OS
                     </button>
-                    <a href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>" class="btn btn-info">
+
+                    <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-info">
                         Visualizar
                     </a>
+
                     <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
                         Cancelar
                     </a>
                 </div>
-
 
             </form>
 
@@ -450,7 +488,7 @@ async function executarIA(tipo) {
         let tituloResultado = 'Resultado da IA';
 
         if (data.tipo === 'resumo') {
-            tituloResultado = 'Resumo sugerido pela IA';
+            tituloResultado = 'Descrição melhorada pela IA';
         }
 
         if (data.tipo === 'whatsapp') {
@@ -466,7 +504,7 @@ async function executarIA(tipo) {
             <div class="mt-2" style="white-space: pre-line;">${escapeHtml(data.conteudo)}</div>
             <div class="mt-3 d-flex flex-wrap gap-2">
                 ${data.tipo === 'resumo' ? '<button type="button" class="btn btn-sm btn-primary" onclick="usarResumoIA()">Usar como descrição</button>' : ''}
-                ${data.tipo === 'whatsapp' ? `                                
+                ${data.tipo === 'whatsapp' ? `
                     <button type="button" class="btn btn-sm btn-success" onclick="abrirWhatsAppIA()">
                         Abrir WhatsApp
                     </button>
@@ -520,14 +558,11 @@ function escapeHtml(text) {
 }
 
 function obterTelefoneClienteOS() {
-    const campoWhatsapp = document.querySelector('[name="ClienteWhatsApp"]');
     const campoTelefone = document.querySelector('[name="ClienteTelefone"]');
 
     let telefone = "";
 
-    if (campoWhatsapp && campoWhatsapp.value.trim() !== "") {
-        telefone = campoWhatsapp.value.trim();
-    } else if (campoTelefone && campoTelefone.value.trim() !== "") {
+    if (campoTelefone && campoTelefone.value.trim() !== "") {
         telefone = campoTelefone.value.trim();
     }
 
@@ -558,60 +593,6 @@ function abrirWhatsAppIA() {
     }
 
     window.open(url, "_blank");
-}
-
-async function enviarWhatsAppN8N() {
-    if (!window.iaConteudoGerado) {
-        alert("Nenhuma mensagem gerada pela IA.");
-        return;
-    }
-
-    const csrf = document.querySelector('[name="csrf_token"]');
-
-    if (!csrf) {
-        alert("Token de segurança não encontrado.");
-        return;
-    }
-
-    if (!confirm("Deseja enviar esta mensagem pelo fluxo n8n?")) {
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("csrf_token", csrf.value);
-    formData.append("Mensagem", window.iaConteudoGerado);
-
-    <?php if (!empty($ordem["OrdemServicoId"])): ?>
-        formData.append("OrdemServicoId", "<?= (int)$ordem["OrdemServicoId"] ?>");
-    <?php endif; ?>
-
-    const campoWhatsapp = document.querySelector('[name="ClienteWhatsApp"]');
-    const campoTelefone = document.querySelector('[name="ClienteTelefone"]');
-
-    if (campoWhatsapp && campoWhatsapp.value.trim() !== "") {
-        formData.append("Telefone", campoWhatsapp.value.trim());
-    } else if (campoTelefone && campoTelefone.value.trim() !== "") {
-        formData.append("Telefone", campoTelefone.value.trim());
-    }
-
-    try {
-        const response = await fetch("enviar_whatsapp_n8n.php", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!data.sucesso) {
-            alert("Erro ao enviar via n8n: " + data.mensagem);
-            return;
-        }
-
-        alert("Mensagem enviada para o n8n com sucesso.");
-
-    } catch (error) {
-        alert("Não foi possível enviar a mensagem para o n8n.");
-    }
 }
 </script>
 

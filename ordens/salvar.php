@@ -8,6 +8,7 @@ require_once "../includes/planos.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
+require_once "../includes/mensagens_whatsapp.php";
 
 csrfValidarTokenPost();
 
@@ -203,6 +204,17 @@ if ($prepararWhatsAppAposSalvar) {
                 "Mensagem" => $mensagemWhatsApp
             ];
 
+            registrarMensagemWhatsAppOS(
+                $conn,
+                $empresaId,
+                $ordemServicoId,
+                $usuarioId,
+                "CRIACAO_OS",
+                "MANUAL",
+                $telefone,
+                $mensagemWhatsApp
+            );
+            
             registrarAuditoria(
                 $conn,
                 "WHATSAPP_MANUAL_OS_CRIADA",
