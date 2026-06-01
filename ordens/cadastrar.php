@@ -224,28 +224,30 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     <label class="form-label">Observação</label>
                     <textarea name="Observacao" class="form-control" rows="3"></textarea>
                 </div>
+
                 <div class="card border-0 bg-light mb-3">
                     <div class="card-body">
                         <div class="form-check">
                             <input 
                                 class="form-check-input" 
                                 type="checkbox" 
-                                name="EnviarWhatsAppAposSalvar" 
+                                name="PrepararWhatsAppAposSalvar" 
                                 value="1" 
-                                id="EnviarWhatsAppAposSalvar"
+                                id="PrepararWhatsAppAposSalvar"
                             >
 
-                            <label class="form-check-label fw-semibold" for="EnviarWhatsAppAposSalvar">
-                                Enviar WhatsApp ao cliente após salvar esta OS
+                            <label class="form-check-label fw-semibold" for="PrepararWhatsAppAposSalvar">
+                                Preparar mensagem de WhatsApp após salvar esta OS
                             </label>
                         </div>
 
                         <div class="input-help mt-2">
-                            O sistema enviará uma mensagem de abertura da OS usando a integração n8n/Z-API.
-                            Verifique se o cliente possui WhatsApp ou telefone cadastrado.
+                            Após salvar, o sistema abrirá a OS com uma mensagem pronta para envio manual pelo WhatsApp.
+                            Não será feito envio automático.
                         </div>
                     </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-success">
                         Salvar OS

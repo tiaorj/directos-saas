@@ -7,7 +7,6 @@ require_once "../includes/historico.php";
 require_once "../includes/planos.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
-require_once "../includes/n8n.php";
 require_once "../includes/auditoria.php";
 
 csrfValidarTokenPost();
@@ -33,7 +32,7 @@ $valorPrevisto = $_POST["ValorPrevisto"] !== "" ? $_POST["ValorPrevisto"] : null
 $valorFinal = $_POST["ValorFinal"] !== "" ? $_POST["ValorFinal"] : null;
 $dataPrevisao = $_POST["DataPrevisao"] !== "" ? $_POST["DataPrevisao"] : null;
 $observacao = trim($_POST["Observacao"] ?? "");
-$enviarWhatsAppAposSalvar = (int)($_POST["EnviarWhatsAppAposSalvar"] ?? 0) === 1;
+$prepararWhatsAppAposSalvar = (int)($_POST["PrepararWhatsAppAposSalvar"] ?? 0) === 1;
 
 if ($clienteId <= 0) {
     die("Cliente é obrigatório.");
@@ -133,11 +132,9 @@ registrarHistoricoOS(
     "Ordem de serviço criada. Código: {$codigoOS}."
 );
 
-$mensagemRedirect = "";
-
-if ($enviarWhatsAppAposSalvar) {
+if ($prepararWhatsAppAposSalvar) {
     try {
-        $sqlDadosEnvio = "
+        $sqlDadosWhatsApp = "
             SELECT
                 os.OrdemServicoId,
                 os.CodigoOS,
@@ -147,7 +144,6 @@ if ($enviarWhatsAppAposSalvar) {
                 c.ClienteId,
                 c.Nome AS ClienteNome,
                 c.Telefone AS ClienteTelefone,
-                c.Telefone AS ClienteWhatsApp,
                 s.Nome AS ServicoNome,
                 e.EmpresaId,
                 e.NomeFantasia AS EmpresaNome
@@ -159,109 +155,72 @@ if ($enviarWhatsAppAposSalvar) {
               AND os.EmpresaId = :EmpresaId
         ";
 
-        $stmtDadosEnvio = $conn->prepare($sqlDadosEnvio);
-        $stmtDadosEnvio->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
-        $stmtDadosEnvio->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
-        $stmtDadosEnvio->execute();
+        $stmtDadosWhatsApp = $conn->prepare($sqlDadosWhatsApp);
+        $stmtDadosWhatsApp->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+        $stmtDadosWhatsApp->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+        $stmtDadosWhatsApp->execute();
 
-        $ordem = $stmtDadosEnvio->fetch(PDO::FETCH_ASSOC);
+        $ordemWhatsApp = $stmtDadosWhatsApp->fetch(PDO::FETCH_ASSOC);
 
-        if (!$ordem) {
-            throw new Exception("OS criada, mas não foi possível carregar dados para envio.");
+        if ($ordemWhatsApp) {
+            $telefone = preg_replace('/\D/', '', $ordemWhatsApp["ClienteTelefone"] ?? "");
+
+            if ($telefone !== "" && (strlen($telefone) === 10 || strlen($telefone) === 11)) {
+                $telefone = "55" . $telefone;
+            }
+
+            $linkPublico = "";
+
+            if (!empty($ordemWhatsApp["TokenAcompanhamento"])) {
+                $linkPublico = rtrim(APP_URL, "/") . "/public/os.php?token=" . urlencode($ordemWhatsApp["TokenAcompanhamento"]);
+            }
+
+            $partesMensagem = [];
+
+            $partesMensagem[] = "Olá, " . $ordemWhatsApp["ClienteNome"] . "! Sua ordem de serviço " . $codigoOS . " foi registrada com sucesso.";
+
+            if (!empty($ordemWhatsApp["Titulo"])) {
+                $partesMensagem[] = "Atendimento: " . $ordemWhatsApp["Titulo"] . ".";
+            }
+
+            if (!empty($ordemWhatsApp["Status"])) {
+                $partesMensagem[] = "Status atual: " . $ordemWhatsApp["Status"] . ".";
+            }
+
+            if ($linkPublico !== "") {
+                $partesMensagem[] = "Você pode acompanhar pelo link: " . $linkPublico;
+            }
+
+            $partesMensagem[] = $ordemWhatsApp["EmpresaNome"] ?? "DirectOS";
+
+            $mensagemWhatsApp = implode(" ", $partesMensagem);
+            $mensagemWhatsApp = preg_replace("/\s+/", " ", $mensagemWhatsApp);
+            $mensagemWhatsApp = trim($mensagemWhatsApp);
+
+            $_SESSION["WhatsAppAposCriarOS"] = [
+                "OrdemServicoId" => $ordemServicoId,
+                "Telefone" => $telefone,
+                "Mensagem" => $mensagemWhatsApp
+            ];
+
+            registrarAuditoria(
+                $conn,
+                "WHATSAPP_MANUAL_OS_CRIADA",
+                "OS_OrdensServico",
+                $ordemServicoId,
+                "Mensagem de WhatsApp preparada após criação da OS."
+            );
         }
-
-        $telefone = $ordem["ClienteWhatsApp"] ?? "";
-
-        if (trim($telefone) === "") {
-            $telefone = $ordem["ClienteTelefone"] ?? "";
-        }
-
-        $telefoneNormalizado = normalizarTelefoneWhatsApp($telefone);
-
-        if ($telefoneNormalizado === "") {
-            throw new Exception("OS criada, mas cliente não possui WhatsApp/telefone cadastrado.");
-        }
-
-        $linkPublico = "";
-
-        if (!empty($ordem["TokenAcompanhamento"])) {
-            $linkPublico = rtrim(APP_URL, "/") . "/public/os.php?token=" . urlencode($ordem["TokenAcompanhamento"]);
-        }
-
-        $mensagemWhatsApp = "Olá, " . $ordem["ClienteNome"] . "! Sua ordem de serviço " . $codigoOS . " foi registrada com sucesso.";
-
-        if (!empty($ordem["Titulo"])) {
-            $mensagemWhatsApp .= "\n\nAtendimento: " . $ordem["Titulo"];
-        }
-
-        if (!empty($ordem["Status"])) {
-            $mensagemWhatsApp .= "\nStatus atual: " . $ordem["Status"];
-        }
-
-        if ($linkPublico !== "") {
-            $mensagemWhatsApp .= "\n\nVocê pode acompanhar pelo link:\n" . $linkPublico;
-        }
-
-        $mensagemWhatsApp .= "\n\n" . ($ordem["EmpresaNome"] ?? "DirectOS");
-
-        $payload = [
-            "origem" => "DirectOS",
-            "evento" => "whatsapp_os_criada",
-            "empresa" => [
-                "id" => (int)$ordem["EmpresaId"],
-                "nome" => $ordem["EmpresaNome"]
-            ],
-            "usuario" => [
-                "id" => (int)($_SESSION["UsuarioId"] ?? 0),
-                "nome" => $_SESSION["UsuarioNome"] ?? "",
-                "email" => $_SESSION["UsuarioEmail"] ?? ""
-            ],
-            "cliente" => [
-                "id" => (int)$ordem["ClienteId"],
-                "nome" => $ordem["ClienteNome"],
-                "telefone" => $telefoneNormalizado
-            ],
-            "os" => [
-                "id" => (int)$ordem["OrdemServicoId"],
-                "codigo" => $ordem["CodigoOS"],
-                "titulo" => $ordem["Titulo"],
-                "status" => $ordem["Status"],
-                "servico" => $ordem["ServicoNome"],
-                "link_publico" => $linkPublico
-            ],
-            "whatsapp" => [
-                "telefone" => $telefoneNormalizado,
-                "mensagem" => $mensagemWhatsApp
-            ],
-            "data_envio" => date("c")
-        ];
-
-        n8nEnviarWhatsApp($payload);
-
-        registrarAuditoria(
-            $conn,
-            "N8N_WHATSAPP_OS_CRIADA",
-            "OS_OrdensServico",
-            $ordemServicoId,
-            "Mensagem de abertura da OS enviada via n8n."
-        );
-
-        $mensagemRedirect = "OS criada e WhatsApp enviado com sucesso.";
-
     } catch (Exception $e) {
         registrarAuditoria(
             $conn,
-            "N8N_WHATSAPP_OS_CRIADA_ERRO",
+            "WHATSAPP_MANUAL_OS_CRIADA_ERRO",
             "OS_OrdensServico",
             $ordemServicoId,
-            "Erro ao enviar WhatsApp após criar OS: " . $e->getMessage()
+            "Erro ao preparar mensagem WhatsApp: " . $e->getMessage()
         );
-
-        $mensagemRedirect = "OS criada, mas o WhatsApp não foi enviado: " . $e->getMessage();
     }
-} else {
-    $mensagemRedirect = "OS criada com sucesso.";
 }
 
-header("Location: visualizar.php?id=" . $ordemServicoId . "&mensagem=" . urlencode($mensagemRedirect));
+header("Location: visualizar.php?id=" . $ordemServicoId . "&mensagem=" . urlencode("OS criada com sucesso."));
 exit;

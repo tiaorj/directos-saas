@@ -7,11 +7,11 @@ require_once "../includes/csrf.php";
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = (int)($_GET["id"] ?? 0);
 
-exigirOrdemDaEmpresa($conn, $id);
-
 if ($id <= 0) {
     die("Ordem de serviço inválida.");
 }
+
+exigirOrdemDaEmpresa($conn, $id);
 
 $sql = "
     SELECT 
@@ -40,6 +40,16 @@ $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$ordem) {
     die("Ordem de serviço não encontrada.");
+}
+
+$whatsAppAposCriarOS = null;
+
+if (
+    isset($_SESSION["WhatsAppAposCriarOS"]) &&
+    (int)($_SESSION["WhatsAppAposCriarOS"]["OrdemServicoId"] ?? 0) === $id
+) {
+    $whatsAppAposCriarOS = $_SESSION["WhatsAppAposCriarOS"];
+    unset($_SESSION["WhatsAppAposCriarOS"]);
 }
 
 $sqlHistorico = "
@@ -145,6 +155,8 @@ function classePrioridadeOS($prioridade)
 }
 
 $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT));
+
+$mensagemUrl = trim($_GET["mensagem"] ?? "");
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -185,6 +197,71 @@ $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["Ord
             </a>
         </div>
     </div>
+
+    <?php if ($mensagemUrl !== ""): ?>
+        <div class="alert alert-success">
+            <?= htmlspecialchars($mensagemUrl) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($whatsAppAposCriarOS): ?>
+        <?php
+            $telefoneWhats = preg_replace('/\D/', '', $whatsAppAposCriarOS["Telefone"] ?? "");
+            $mensagemWhats = $whatsAppAposCriarOS["Mensagem"] ?? "";
+
+            if ($telefoneWhats !== "") {
+                $urlWhatsApp = "https://wa.me/" . $telefoneWhats . "?text=" . urlencode($mensagemWhats);
+            } else {
+                $urlWhatsApp = "https://wa.me/?text=" . urlencode($mensagemWhats);
+            }
+        ?>
+
+        <div class="alert alert-success border-0 shadow-sm">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <strong>Mensagem de WhatsApp pronta.</strong>
+                    <br>
+                    A OS foi criada com sucesso. Clique no botão para abrir o WhatsApp com a mensagem preenchida.
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a 
+                        href="<?= htmlspecialchars($urlWhatsApp) ?>" 
+                        target="_blank" 
+                        class="btn btn-success"
+                    >
+                        Abrir WhatsApp
+                    </a>
+
+                    <button 
+                        type="button" 
+                        class="btn btn-outline-secondary"
+                        onclick="copiarMensagemWhatsAppCriacao()"
+                    >
+                        Copiar mensagem
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-3 p-3 bg-light rounded border" style="white-space: pre-line;">
+                <?= htmlspecialchars($mensagemWhats) ?>
+            </div>
+        </div>
+
+        <script>
+        function copiarMensagemWhatsAppCriacao() {
+            const mensagem = <?= json_encode($mensagemWhats, JSON_UNESCAPED_UNICODE) ?>;
+
+            navigator.clipboard.writeText(mensagem)
+                .then(function () {
+                    alert("Mensagem copiada.");
+                })
+                .catch(function () {
+                    alert("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.");
+                });
+        }
+        </script>
+    <?php endif; ?>
 
     <div class="row g-3 mb-4">
 
