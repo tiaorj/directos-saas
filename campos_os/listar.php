@@ -28,22 +28,34 @@ $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $campos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$mensagem = trim($_GET["mensagem"] ?? "");
 ?>
 
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
 <div class="container-fluid form-page-wide">
-
+    <?php if ($mensagem !== ""): ?>
+        <div class="alert alert-success">
+            <?= htmlspecialchars($mensagem) ?>
+        </div>
+    <?php endif; ?>
     <div class="form-header">
         <div>
             <h3 class="mb-1">Campos Personalizados da OS</h3>
             <p>Configure campos extras para adaptar a ordem de serviço ao seu tipo de negócio.</p>
         </div>
 
-        <a href="cadastrar.php" class="btn btn-success">
-            Novo Campo
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="modelos.php" class="btn btn-outline-primary">
+                Modelos prontos
+            </a>
+
+            <a href="cadastrar.php" class="btn btn-success">
+                Novo Campo
+            </a>
+        </div>
     </div>
 
     <div class="card shadow-sm">
