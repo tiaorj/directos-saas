@@ -59,10 +59,15 @@ $baseUrl = rtrim(APP_URL, "/");
                 <span class="sidebar-icon">◆</span>
                 <span>Serviços</span>
             </a>
-<a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/relatorios/ordens.php">
-    <span class="sidebar-icon">▧</span>
-    <span>Relatórios</span>
-</a>
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/relatorios/ordens.php">
+                <span class="sidebar-icon">▧</span>
+                <span>Relatórios</span>
+            </a>
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/relatorios/financeiro.php">
+                <span class="sidebar-icon">$</span>
+                <span>Financeiro</span>
+            </a>
+
             <div class="sidebar-section">Gestão</div>
 
             <?php if ($usuarioPerfil === "Admin" || $usuarioPerfil === "SuperAdmin"): ?>
