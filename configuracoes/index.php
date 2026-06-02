@@ -14,6 +14,7 @@ $sqlEmpresa = "
         NomeFantasia,
         Email,
         WhatsApp,
+        Segmento,
         OcultarOnboarding
     FROM OS_Empresas
     WHERE EmpresaId = :EmpresaId
@@ -67,6 +68,19 @@ $onboardingConcluido = $empresaCompleta
     && $totalOrdensServico > 0;
 
 $onboardingOculto = (int)($empresa["OcultarOnboarding"] ?? 0) === 1;
+
+$nomesSegmentos = [
+    "" => "Não definido",
+    "oficina" => "Oficina Mecânica",
+    "informatica" => "Informática / Assistência Técnica",
+    "ar_condicionado" => "Refrigeração / Ar-condicionado",
+    "eletronica" => "Eletrônica",
+    "servicos_gerais" => "Serviços Gerais",
+    "personalizado" => "Personalizado"
+];
+
+$segmentoEmpresa = $empresa["Segmento"] ?? "";
+$segmentoEmpresaNome = $nomesSegmentos[$segmentoEmpresa] ?? "Não definido";
 
 $itensOnboarding = [
     [
@@ -131,6 +145,22 @@ $percentualOnboarding = count($itensOnboarding) > 0
 
                     <a href="../empresa/editar.php" class="small text-decoration-none">
                         Editar dados da empresa
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6>Segmento da Empresa</h6>
+
+                    <p class="text-muted small">
+                        Defina o tipo de negócio e aplique modelos recomendados de campos da OS.
+                    </p>
+
+                    <a href="segmento.php" class="btn btn-sm btn-outline-primary">
+                        Abrir
                     </a>
                 </div>
             </div>
@@ -314,6 +344,22 @@ $percentualOnboarding = count($itensOnboarding) > 0
                 <div class="col-md-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
+                            <h6>Segmento da Empresa</h6>
+
+                            <p class="text-muted small">
+                                Defina o tipo de negócio e aplique modelos recomendados de campos da OS.
+                            </p>
+
+                            <a href="segmento.php" class="btn btn-sm btn-outline-primary">
+                                Abrir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
                             <h6>Meu Plano</h6>
 
                             <p class="text-muted small">
@@ -353,6 +399,22 @@ $percentualOnboarding = count($itensOnboarding) > 0
                             </p>
 
                             <a href="integracoes.php" class="btn btn-sm btn-outline-primary">
+                                Abrir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>Campos da OS</h6>
+
+                            <p class="text-muted small">
+                                Crie campos personalizados e aplique modelos por segmento.
+                            </p>
+
+                            <a href="../campos_os/listar.php" class="btn btn-sm btn-outline-primary">
                                 Abrir
                             </a>
                         </div>
