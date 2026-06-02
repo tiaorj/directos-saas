@@ -3,6 +3,7 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/campos_os.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $id = (int)($_GET["id"] ?? 0);
@@ -146,6 +147,8 @@ $stmtMensagensWhatsApp->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmtMensagensWhatsApp->execute();
 
 $mensagensWhatsApp = $stmtMensagensWhatsApp->fetchAll(PDO::FETCH_ASSOC);
+
+$camposPersonalizadosValoresOS = buscarCamposPersonalizadosComValoresOS($conn, $empresaId, $id);
 
 function formatarDataOS($data, $comHora = false)
 {
@@ -452,6 +455,36 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
         </div>
 
     </div>
+
+    <?php if (count($camposPersonalizadosValoresOS) > 0): ?>
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white">
+                <strong>Campos personalizados</strong>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <?php foreach ($camposPersonalizadosValoresOS as $campo): ?>
+                        <div class="<?= ($campo["TipoCampo"] ?? "") === "textarea" ? "col-md-12" : "col-md-6" ?> mb-3">
+                            <div class="small text-muted">
+                                <?= htmlspecialchars($campo["Rotulo"] ?? "") ?>
+                            </div>
+
+                            <strong>
+                                <?php if (($campo["TipoCampo"] ?? "") === "textarea"): ?>
+                                    <?= nl2br(htmlspecialchars($campo["Valor"] ?? "-")) ?>
+                                <?php elseif (($campo["TipoCampo"] ?? "") === "data" && !empty($campo["Valor"])): ?>
+                                    <?= date("d/m/Y", strtotime($campo["Valor"])) ?>
+                                <?php else: ?>
+                                    <?= htmlspecialchars($campo["Valor"] ?? "-") ?>
+                                <?php endif; ?>
+                            </strong>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white">

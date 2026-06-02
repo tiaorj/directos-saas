@@ -4,6 +4,7 @@ require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/campos_os.php";
 
 exigirPerfil(["Admin", "Atendente"]);
 
@@ -48,6 +49,9 @@ $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
 $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, $empresaId, true);
+$valoresCamposPersonalizadosOS = buscarValoresCamposPersonalizadosOS($conn, $empresaId, $id);
 
 if (!$ordem) {
     die("Ordem de serviço não encontrada.");
@@ -154,6 +158,8 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
 
+                <?php renderizarCamposPersonalizadosOS($camposPersonalizadosOS, $valoresCamposPersonalizadosOS); ?>
+                
                 <div id="cardChecklistServico" class="card border-secondary mb-3 d-none">
                     <div class="card-header bg-light">
                         <strong>Checklist padrão do serviço selecionado</strong>

@@ -8,6 +8,7 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 require_once "../includes/mensagens_whatsapp.php";
+require_once "../includes/campos_os.php";
 
 csrfValidarTokenPost();
 
@@ -31,6 +32,9 @@ $mostrarValorCliente = isset($_POST["MostrarValorCliente"]) ? 1 : 0;
 $mostrarSolucaoCliente = isset($_POST["MostrarSolucaoCliente"]) ? 1 : 0;
 $mostrarHistoricoCliente = isset($_POST["MostrarHistoricoCliente"]) ? 1 : 0;
 $prepararWhatsAppAposAtualizar = (int)($_POST["PrepararWhatsAppAposAtualizar"] ?? 0) === 1;
+
+$camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, $empresaId, true);
+validarCamposPersonalizadosOS($camposPersonalizadosOS, $_POST);
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");

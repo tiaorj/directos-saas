@@ -9,12 +9,17 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 require_once "../includes/mensagens_whatsapp.php";
+require_once "../includes/campos_os.php";
+
 
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
+
+$camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, $empresaId, true);
+validarCamposPersonalizadosOS($camposPersonalizadosOS, $_POST);
 
 $validacaoPlano = empresaPodeCriarOS($conn, $empresaId);
 
@@ -109,6 +114,14 @@ $stmt->execute();
 
 $ordemServicoId = (int)$conn->lastInsertId();
 $usuarioId = (int)$_SESSION["UsuarioId"];
+
+salvarValoresCamposPersonalizadosOS(
+    $conn,
+    $empresaId,
+    $ordemServicoId,
+    $camposPersonalizadosOS,
+    $_POST
+);
 
 $anoAtual = date("Y");
 $codigoOS = "OS-" . $anoAtual . "-" . str_pad($ordemServicoId, 6, "0", STR_PAD_LEFT);

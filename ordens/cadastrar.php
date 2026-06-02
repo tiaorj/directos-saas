@@ -3,9 +3,12 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
 require_once "../includes/csrf.php";
+require_once "../includes/campos_os.php";
 
 $empresaId = $_SESSION["EmpresaId"];
 $validacaoPlano = empresaPodeCriarOS($conn, $empresaId);
+
+$camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, (int)$empresaId, true);
 
 $sqlClientes = "
     SELECT ClienteId, Nome
@@ -151,7 +154,9 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                 <div class="form-section-title">
                     Detalhes da Solicitação
                 </div>
-
+                
+                <?php renderizarCamposPersonalizadosOS($camposPersonalizadosOS); ?>
+                
                 <div class="mb-3">
                     <label class="form-label">Título *</label>
                     <input type="text" name="Titulo" class="form-control" required maxlength="150">
