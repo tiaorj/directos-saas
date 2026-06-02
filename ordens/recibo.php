@@ -66,14 +66,44 @@ if (!$ordem) {
     die("Ordem de serviço não encontrada.");
 }
 
+$sqlRecebimentos = "
+    SELECT
+        RecebimentoId,
+        ValorRecebido,
+        FormaPagamento,
+        DataRecebimento,
+        Observacao,
+        DataCadastro
+    FROM OS_Recebimentos
+    WHERE OrdemServicoId = :OrdemServicoId
+      AND EmpresaId = :EmpresaId
+    ORDER BY DataRecebimento ASC, RecebimentoId ASC
+";
+
+$stmtRecebimentos = $conn->prepare($sqlRecebimentos);
+$stmtRecebimentos->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtRecebimentos->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtRecebimentos->execute();
+
+$recebimentos = $stmtRecebimentos->fetchAll(PDO::FETCH_ASSOC);
+
 $codigoOS = $ordem["CodigoOS"] ?? formatarCodigoOS($ordem["OrdemServicoId"], null, $ordem["DataAbertura"] ?? null);
 
-$valorPago = (float)($ordem["ValorPago"] ?? 0);
 $valorFinal = (float)($ordem["ValorFinal"] ?? 0);
 $valorPrevisto = (float)($ordem["ValorPrevisto"] ?? 0);
-
 $valorReferencia = $valorFinal > 0 ? $valorFinal : $valorPrevisto;
-$saldo = $valorReferencia - $valorPago;
+
+$totalRecebido = 0;
+
+foreach ($recebimentos as $recebimento) {
+    $totalRecebido += (float)($recebimento["ValorRecebido"] ?? 0);
+}
+
+if ($totalRecebido <= 0) {
+    $totalRecebido = (float)($ordem["ValorPago"] ?? 0);
+}
+
+$saldo = $valorReferencia - $totalRecebido;
 
 if ($saldo < 0) {
     $saldo = 0;
@@ -109,7 +139,7 @@ function dataRecibo($data)
         }
 
         .recibo {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto;
             background: #fff;
             border: 1px solid #ddd;
@@ -186,10 +216,39 @@ function dataRecibo($data)
             color: #198754;
         }
 
+        .valor-saldo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d39e00;
+        }
+
         .texto-recibo {
             line-height: 1.6;
             font-size: 16px;
             margin: 25px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #eee;
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .text-end {
+            text-align: right;
         }
 
         .assinaturas {
@@ -207,7 +266,7 @@ function dataRecibo($data)
         }
 
         .acoes {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto 20px auto;
             display: flex;
             justify-content: flex-end;
@@ -230,6 +289,16 @@ function dataRecibo($data)
             background: #0d6efd;
             color: #fff;
             border-color: #0d6efd;
+        }
+
+        .alerta {
+            background: #fff8e1;
+            border: 1px solid #ffe08a;
+            color: #7a5b00;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            font-size: 14px;
         }
 
         @media print {
@@ -280,7 +349,7 @@ function dataRecibo($data)
 
         <div class="dados-recibo">
             <p><strong>Recibo da OS:</strong> <?= htmlspecialchars($codigoOS) ?></p>
-            <p><strong>Data:</strong> <?= date("d/m/Y") ?></p>
+            <p><strong>Data de emissão:</strong> <?= date("d/m/Y") ?></p>
             <p><strong>Status financeiro:</strong> <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?></p>
         </div>
     </div>
@@ -288,6 +357,12 @@ function dataRecibo($data)
     <div class="titulo">
         <h2>RECIBO DE PAGAMENTO</h2>
     </div>
+
+    <?php if (count($recebimentos) === 0 && $totalRecebido <= 0): ?>
+        <div class="alerta">
+            Esta OS ainda não possui recebimentos registrados.
+        </div>
+    <?php endif; ?>
 
     <div class="box">
         <h3>Cliente</h3>
@@ -347,40 +422,32 @@ function dataRecibo($data)
 
     <p class="texto-recibo">
         Recebemos de <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
-        o valor de <strong><?= dinheiroRecibo($valorPago) ?></strong>,
+        o valor total de <strong><?= dinheiroRecibo($totalRecebido) ?></strong>,
         referente à ordem de serviço <strong><?= htmlspecialchars($codigoOS) ?></strong>,
         pelo serviço <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>.
     </p>
 
     <div class="box">
-        <h3>Informações financeiras</h3>
+        <h3>Resumo financeiro</h3>
 
         <div class="grid">
             <div class="item">
-                <small>Valor do serviço</small>
+                <small>Valor da OS</small>
                 <strong><?= dinheiroRecibo($valorReferencia) ?></strong>
             </div>
 
             <div class="item">
-                <small>Valor pago</small>
+                <small>Total recebido</small>
                 <div class="valor-destaque">
-                    <?= dinheiroRecibo($valorPago) ?>
+                    <?= dinheiroRecibo($totalRecebido) ?>
                 </div>
             </div>
 
             <div class="item">
                 <small>Saldo restante</small>
-                <strong><?= dinheiroRecibo($saldo) ?></strong>
-            </div>
-
-            <div class="item">
-                <small>Forma de pagamento</small>
-                <strong><?= htmlspecialchars($ordem["FormaPagamento"] ?? "Não informado") ?></strong>
-            </div>
-
-            <div class="item">
-                <small>Data de pagamento</small>
-                <strong><?= dataRecibo($ordem["DataPagamento"] ?? null) ?></strong>
+                <div class="<?= $saldo > 0 ? "valor-saldo" : "valor-destaque" ?>">
+                    <?= dinheiroRecibo($saldo) ?>
+                </div>
             </div>
 
             <div class="item">
@@ -390,9 +457,56 @@ function dataRecibo($data)
         </div>
     </div>
 
+    <div class="box">
+        <h3>Recebimentos registrados</h3>
+
+        <?php if (count($recebimentos) === 0): ?>
+            <p>Nenhum recebimento detalhado registrado.</p>
+        <?php else: ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Forma</th>
+                        <th>Observação</th>
+                        <th class="text-end">Valor</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach ($recebimentos as $recebimento): ?>
+                        <tr>
+                            <td><?= dataRecibo($recebimento["DataRecebimento"] ?? null) ?></td>
+
+                            <td>
+                                <?= htmlspecialchars($recebimento["FormaPagamento"] ?? "Não informado") ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($recebimento["Observacao"] ?? "-") ?>
+                            </td>
+
+                            <td class="text-end">
+                                <strong><?= dinheiroRecibo($recebimento["ValorRecebido"] ?? 0) ?></strong>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Total recebido</th>
+                        <th class="text-end"><?= dinheiroRecibo($totalRecebido) ?></th>
+                    </tr>
+                </tfoot>
+            </table>
+        <?php endif; ?>
+    </div>
+
     <?php if (!empty($ordem["ObservacaoFinanceira"])): ?>
         <div class="box">
-            <h3>Observação financeira</h3>
+            <h3>Observação financeira geral</h3>
+
             <div style="white-space: pre-line;">
                 <?= nl2br(htmlspecialchars($ordem["ObservacaoFinanceira"])) ?>
             </div>
