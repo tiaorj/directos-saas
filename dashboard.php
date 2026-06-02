@@ -150,6 +150,7 @@ $sqlEmpresaOnboarding = "
         NomeFantasia,
         Email,
         WhatsApp,
+        Segmento,
         OcultarOnboarding
     FROM OS_Empresas
     WHERE EmpresaId = :EmpresaId
@@ -167,6 +168,40 @@ $empresaCompleta = !empty($empresaOnboarding["NomeFantasia"])
 $temServico = (int)$totalServicosAtivos > 0;
 $temCliente = (int)$totalClientesAtivos > 0;
 $temOS = ((int)$totalOSAbertas + (int)$totalOSEmAndamento + (int)$totalOSAguardando + (int)$totalOSConcluidas + (int)$totalOSCanceladas) > 0;
+
+$totalCamposPersonalizadosOS = buscarValorEmpresa($conn, "
+    SELECT COUNT(*)
+    FROM OS_CamposPersonalizados
+    WHERE EmpresaId = :EmpresaId
+      AND Ativo = 1
+", $empresaId);
+
+$nomesSegmentosDashboard = [
+    "" => "Não definido",
+    "oficina" => "Oficina Mecânica",
+    "informatica" => "Informática / Assistência Técnica",
+    "ar_condicionado" => "Refrigeração / Ar-condicionado",
+    "eletronica" => "Eletrônica",
+    "servicos_gerais" => "Serviços Gerais",
+    "personalizado" => "Personalizado"
+];
+
+$modelosSegmentosDashboard = [
+    "oficina" => "oficina",
+    "informatica" => "informatica",
+    "ar_condicionado" => "ar_condicionado",
+    "eletronica" => "eletronica",
+    "servicos_gerais" => "servicos_gerais"
+];
+
+$segmentoEmpresaDashboard = $empresaOnboarding["Segmento"] ?? "";
+$segmentoEmpresaDashboardNome = $nomesSegmentosDashboard[$segmentoEmpresaDashboard] ?? "Não definido";
+$modeloRecomendadoDashboard = $modelosSegmentosDashboard[$segmentoEmpresaDashboard] ?? "";
+
+$empresaSemSegmento = $segmentoEmpresaDashboard === "" || $segmentoEmpresaDashboard === null;
+$empresaSemCamposPersonalizados = (int)$totalCamposPersonalizadosOS === 0;
+
+$mostrarAlertaPersonalizacaoOS = $empresaSemSegmento || $empresaSemCamposPersonalizados;
 
 $itensOnboarding = [
     [
@@ -350,6 +385,98 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
         </a>
     </div>
 
+    <?php if ($mostrarAlertaPersonalizacaoOS): ?>
+        <div class="card shadow-sm border-primary mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-primary">Configuração recomendada</span>
+
+                            <?php if (!$empresaSemSegmento): ?>
+                                <span class="badge bg-light text-dark border">
+                                    <?= htmlspecialchars($segmentoEmpresaDashboardNome) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($empresaSemSegmento): ?>
+                            <h5 class="mb-1">
+                                Personalize o DirectOS para o seu tipo de negócio
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Defina o segmento da empresa para o sistema sugerir campos de OS mais adequados, como placa, equipamento, número de série, BTUs ou dados do atendimento.
+                            </p>
+
+                        <?php elseif ($empresaSemCamposPersonalizados && $modeloRecomendadoDashboard !== ""): ?>
+                            <h5 class="mb-1">
+                                Aplique os campos recomendados para <?= htmlspecialchars($segmentoEmpresaDashboardNome) ?>
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Seu segmento já está definido. Agora você pode aplicar um modelo pronto para adaptar a tela de OS ao seu negócio.
+                            </p>
+
+                        <?php elseif ($empresaSemCamposPersonalizados): ?>
+                            <h5 class="mb-1">
+                                Crie campos personalizados para suas ordens de serviço
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Sua empresa usa o segmento <?= htmlspecialchars($segmentoEmpresaDashboardNome) ?>. Crie campos extras para capturar informações importantes na OS.
+                            </p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <?php if ($empresaSemSegmento): ?>
+                            <a href="configuracoes/segmento.php" class="btn btn-primary">
+                                Definir segmento
+                            </a>
+
+                            <a href="campos_os/modelos.php" class="btn btn-outline-primary">
+                                Ver modelos
+                            </a>
+
+                        <?php elseif ($empresaSemCamposPersonalizados && $modeloRecomendadoDashboard !== ""): ?>
+                            <a 
+                                href="campos_os/aplicar_modelo.php?modelo=<?= urlencode($modeloRecomendadoDashboard) ?>&<?= csrfTokenUrl() ?>" 
+                                class="btn btn-primary"
+                                onclick="return confirm('Deseja aplicar o modelo recomendado? Campos já existentes com o mesmo nome técnico não serão duplicados.')"
+                            >
+                                Aplicar modelo recomendado
+                            </a>
+
+                            <a href="campos_os/listar.php" class="btn btn-outline-primary">
+                                Campos da OS
+                            </a>
+
+                        <?php else: ?>
+                            <a href="campos_os/listar.php" class="btn btn-primary">
+                                Criar campos da OS
+                            </a>
+
+                            <a href="campos_os/modelos.php" class="btn btn-outline-primary">
+                                Ver modelos
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+      <?php if (!$mostrarAlertaPersonalizacaoOS): ?>
+        <div class="alert alert-light border mb-4">
+            <strong>OS personalizada:</strong>
+            sua empresa está configurada como 
+            <strong><?= htmlspecialchars($segmentoEmpresaDashboardNome) ?></strong>
+            e possui 
+            <strong><?= (int)$totalCamposPersonalizadosOS ?></strong>
+            campo(s) personalizado(s) ativo(s).
+        </div>
+    <?php endif; ?>
+          
     <div class="row g-3 mb-4">
 
         <div class="col-md-3">
