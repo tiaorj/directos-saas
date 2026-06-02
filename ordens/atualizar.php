@@ -131,6 +131,14 @@ $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
 $stmt->execute();
 
+salvarValoresCamposPersonalizadosOS(
+    $conn,
+    $empresaId,
+    $ordemServicoId,
+    $camposPersonalizadosOS,
+    $_POST
+);
+
 $usuarioId = (int)$_SESSION["UsuarioId"];
 $statusAnterior = $ordemAtual["Status"];
 
