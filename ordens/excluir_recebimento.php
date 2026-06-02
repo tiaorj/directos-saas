@@ -5,76 +5,60 @@ require_once "../includes/permissoes.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 
-csrfValidarTokenPost();
+csrfValidarTokenGet();
 
 exigirPerfil(["Admin", "Atendente"]);
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $usuarioId = (int)($_SESSION["UsuarioId"] ?? 0);
 
-$ordemServicoId = (int)($_POST["OrdemServicoId"] ?? 0);
-$valorRecebido = $_POST["ValorRecebido"] !== "" ? $_POST["ValorRecebido"] : null;
-$formaPagamento = trim($_POST["FormaPagamento"] ?? "");
-$dataRecebimento = trim($_POST["DataRecebimento"] ?? "");
-$observacao = trim($_POST["Observacao"] ?? "");
+$recebimentoId = (int)($_GET["id"] ?? 0);
+$ordemServicoId = (int)($_GET["os"] ?? 0);
 
-if ($ordemServicoId <= 0) {
-    die("Ordem de serviço inválida.");
+if ($recebimentoId <= 0 || $ordemServicoId <= 0) {
+    die("Recebimento inválido.");
 }
 
 exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
-if ($valorRecebido === null || !is_numeric($valorRecebido)) {
-    die("Valor recebido inválido.");
-}
-
-if ((float)$valorRecebido <= 0) {
-    die("Valor recebido deve ser maior que zero.");
-}
-
-if ($dataRecebimento === "") {
-    die("Data de recebimento é obrigatória.");
-}
-
-if ($formaPagamento === "") {
-    $formaPagamento = null;
-}
-
 try {
     $conn->beginTransaction();
 
-    $sqlInsert = "
-        INSERT INTO OS_Recebimentos
-        (
-            EmpresaId,
-            OrdemServicoId,
-            UsuarioId,
+    $sqlRecebimento = "
+        SELECT
+            RecebimentoId,
             ValorRecebido,
-            FormaPagamento,
-            DataRecebimento,
-            Observacao
-        )
-        VALUES
-        (
-            :EmpresaId,
-            :OrdemServicoId,
-            :UsuarioId,
-            :ValorRecebido,
-            :FormaPagamento,
-            :DataRecebimento,
-            :Observacao
-        )
+            FormaPagamento
+        FROM OS_Recebimentos
+        WHERE RecebimentoId = :RecebimentoId
+          AND OrdemServicoId = :OrdemServicoId
+          AND EmpresaId = :EmpresaId
     ";
 
-    $stmtInsert = $conn->prepare($sqlInsert);
-    $stmtInsert->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
-    $stmtInsert->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
-    $stmtInsert->bindValue(":UsuarioId", $usuarioId > 0 ? $usuarioId : null, $usuarioId > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
-    $stmtInsert->bindValue(":ValorRecebido", $valorRecebido);
-    $stmtInsert->bindValue(":FormaPagamento", $formaPagamento, $formaPagamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmtInsert->bindValue(":DataRecebimento", $dataRecebimento);
-    $stmtInsert->bindValue(":Observacao", $observacao);
-    $stmtInsert->execute();
+    $stmtRecebimento = $conn->prepare($sqlRecebimento);
+    $stmtRecebimento->bindValue(":RecebimentoId", $recebimentoId, PDO::PARAM_INT);
+    $stmtRecebimento->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+    $stmtRecebimento->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtRecebimento->execute();
+
+    $recebimento = $stmtRecebimento->fetch(PDO::FETCH_ASSOC);
+
+    if (!$recebimento) {
+        throw new Exception("Recebimento não encontrado.");
+    }
+
+    $sqlDelete = "
+        DELETE FROM OS_Recebimentos
+        WHERE RecebimentoId = :RecebimentoId
+          AND OrdemServicoId = :OrdemServicoId
+          AND EmpresaId = :EmpresaId
+    ";
+
+    $stmtDelete = $conn->prepare($sqlDelete);
+    $stmtDelete->bindValue(":RecebimentoId", $recebimentoId, PDO::PARAM_INT);
+    $stmtDelete->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+    $stmtDelete->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtDelete->execute();
 
     $sqlResumo = "
         SELECT
@@ -114,6 +98,25 @@ try {
         $statusFinanceiro = "Parcial";
     }
 
+    $sqlUltimaForma = "
+        SELECT TOP 1 FormaPagamento
+        FROM OS_Recebimentos
+        WHERE OrdemServicoId = :OrdemServicoId
+          AND EmpresaId = :EmpresaId
+        ORDER BY DataRecebimento DESC, RecebimentoId DESC
+    ";
+
+    $stmtUltimaForma = $conn->prepare($sqlUltimaForma);
+    $stmtUltimaForma->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
+    $stmtUltimaForma->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtUltimaForma->execute();
+
+    $ultimaFormaPagamento = $stmtUltimaForma->fetchColumn();
+
+    if ($ultimaFormaPagamento === false) {
+        $ultimaFormaPagamento = null;
+    }
+
     $sqlUpdateOS = "
         UPDATE OS_OrdensServico
         SET
@@ -128,20 +131,14 @@ try {
     $stmtUpdateOS = $conn->prepare($sqlUpdateOS);
     $stmtUpdateOS->bindValue(":ValorPago", $totalRecebido);
     $stmtUpdateOS->bindValue(":StatusFinanceiro", $statusFinanceiro);
-    $stmtUpdateOS->bindValue(":FormaPagamento", $formaPagamento, $formaPagamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmtUpdateOS->bindValue(":DataPagamento", $resumo["UltimaDataRecebimento"] ?? $dataRecebimento);
+    $stmtUpdateOS->bindValue(":FormaPagamento", $ultimaFormaPagamento, $ultimaFormaPagamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmtUpdateOS->bindValue(":DataPagamento", $resumo["UltimaDataRecebimento"] ?? null, empty($resumo["UltimaDataRecebimento"]) ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmtUpdateOS->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
     $stmtUpdateOS->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmtUpdateOS->execute();
 
     if ($usuarioId > 0) {
-        $descricaoHistorico = "Recebimento registrado. Valor: R$ " . number_format((float)$valorRecebido, 2, ",", ".") . ".";
-
-        if ($formaPagamento !== null) {
-            $descricaoHistorico .= " Forma de pagamento: {$formaPagamento}.";
-        }
-
-        $descricaoHistorico .= " Status financeiro: {$statusFinanceiro}.";
+        $descricaoHistorico = "Recebimento excluído. Valor removido: R$ " . number_format((float)$recebimento["ValorRecebido"], 2, ",", ".") . ". Status financeiro recalculado: {$statusFinanceiro}.";
 
         $sqlHistorico = "
             INSERT INTO OS_Historico
@@ -175,7 +172,7 @@ try {
 
     $conn->commit();
 
-    header("Location: recebimento.php?id=" . $ordemServicoId . "&mensagem=" . urlencode("Recebimento registrado com sucesso."));
+    header("Location: recebimento.php?id=" . $ordemServicoId . "&mensagem=" . urlencode("Recebimento excluído e total recalculado."));
     exit;
 
 } catch (Exception $e) {
@@ -184,8 +181,8 @@ try {
     }
 
     if (defined("APP_DEBUG") && APP_DEBUG) {
-        die("Erro ao registrar recebimento: " . $e->getMessage());
+        die("Erro ao excluir recebimento: " . $e->getMessage());
     }
 
-    die("Erro ao registrar recebimento.");
+    die("Erro ao excluir recebimento.");
 }

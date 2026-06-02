@@ -29,6 +29,7 @@ $sql = "
         os.ValorPago,
         os.DataPagamento,
         os.ObservacaoFinanceira,
+        os.DataAbertura,
         c.Nome AS ClienteNome,
         s.Nome AS ServicoNome
     FROM OS_OrdensServico os
@@ -53,6 +54,31 @@ if (!$ordem) {
     die("Ordem de serviço não encontrada.");
 }
 
+$sqlRecebimentos = "
+    SELECT
+        r.RecebimentoId,
+        r.ValorRecebido,
+        r.FormaPagamento,
+        r.DataRecebimento,
+        r.Observacao,
+        r.DataCadastro,
+        u.Nome AS UsuarioNome
+    FROM OS_Recebimentos r
+    LEFT JOIN OS_Usuarios u 
+        ON u.UsuarioId = r.UsuarioId
+       AND u.EmpresaId = r.EmpresaId
+    WHERE r.OrdemServicoId = :OrdemServicoId
+      AND r.EmpresaId = :EmpresaId
+    ORDER BY r.DataRecebimento DESC, r.RecebimentoId DESC
+";
+
+$stmtRecebimentos = $conn->prepare($sqlRecebimentos);
+$stmtRecebimentos->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmtRecebimentos->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtRecebimentos->execute();
+
+$recebimentos = $stmtRecebimentos->fetchAll(PDO::FETCH_ASSOC);
+
 $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT));
 
 $valorReferencia = (float)($ordem["ValorFinal"] ?? 0);
@@ -61,27 +87,65 @@ if ($valorReferencia <= 0) {
     $valorReferencia = (float)($ordem["ValorPrevisto"] ?? 0);
 }
 
-$valorPagoAtual = (float)($ordem["ValorPago"] ?? 0);
-$saldoAtual = $valorReferencia - $valorPagoAtual;
+$totalRecebido = 0;
+
+foreach ($recebimentos as $recebimento) {
+    $totalRecebido += (float)($recebimento["ValorRecebido"] ?? 0);
+}
+
+$saldoAtual = $valorReferencia - $totalRecebido;
 
 if ($saldoAtual < 0) {
     $saldoAtual = 0;
+}
+
+$mensagem = trim($_GET["mensagem"] ?? "");
+
+function dinheiroRecebimento($valor)
+{
+    return "R$ " . number_format((float)$valor, 2, ",", ".");
+}
+
+function dataRecebimento($data)
+{
+    if (empty($data)) {
+        return "-";
+    }
+
+    return date("d/m/Y", strtotime($data));
+}
+
+function classeStatusFinanceiroRecebimento($status)
+{
+    if ($status === "Pago") {
+        return "bg-success";
+    }
+
+    if ($status === "Parcial") {
+        return "bg-warning text-dark";
+    }
+
+    if ($status === "Cancelado") {
+        return "bg-danger";
+    }
+
+    return "bg-secondary";
 }
 ?>
 
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container-fluid form-page">
+<div class="container-fluid form-page-wide">
 
     <div class="form-header">
         <div>
             <h3 class="mb-1">
-                Registrar Recebimento
+                Recebimentos da OS <?= htmlspecialchars($codigoOS) ?>
             </h3>
 
             <p>
-                OS <?= htmlspecialchars($codigoOS) ?> · <?= htmlspecialchars($ordem["Titulo"] ?? "") ?>
+                <?= htmlspecialchars($ordem["Titulo"] ?? "") ?>
             </p>
         </div>
 
@@ -90,154 +154,233 @@ if ($saldoAtual < 0) {
         </a>
     </div>
 
-    <div class="card form-card mb-3">
-        <div class="card-header">
-            Resumo da OS
+    <?php if ($mensagem !== ""): ?>
+        <div class="alert alert-success">
+            <?= htmlspecialchars($mensagem) ?>
         </div>
+    <?php endif; ?>
 
-        <div class="card-body">
-            <div class="row">
+    <div class="row g-3 mb-4">
 
-                <div class="col-md-6 mb-3">
-                    <div class="small text-muted">Cliente</div>
-                    <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Valor da OS</div>
+                    <h4 class="mb-0 mt-2">
+                        <?= dinheiroRecebimento($valorReferencia) ?>
+                    </h4>
                 </div>
-
-                <div class="col-md-6 mb-3">
-                    <div class="small text-muted">Serviço</div>
-                    <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Valor previsto</div>
-                    <strong>R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?></strong>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Valor final</div>
-                    <strong>R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?></strong>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Valor pago</div>
-                    <strong class="text-success">
-                        R$ <?= number_format($valorPagoAtual, 2, ",", ".") ?>
-                    </strong>
-                </div>
-
-                <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Saldo estimado</div>
-                    <strong class="<?= $saldoAtual > 0 ? "text-warning" : "text-success" ?>">
-                        R$ <?= number_format($saldoAtual, 2, ",", ".") ?>
-                    </strong>
-                </div>
-
             </div>
         </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 border border-success">
+                <div class="card-body">
+                    <div class="small text-muted">Total recebido</div>
+                    <h4 class="mb-0 mt-2 text-success">
+                        <?= dinheiroRecebimento($totalRecebido) ?>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 border border-warning">
+                <div class="card-body">
+                    <div class="small text-muted">Saldo</div>
+                    <h4 class="mb-0 mt-2 <?= $saldoAtual > 0 ? "text-warning" : "text-success" ?>">
+                        <?= dinheiroRecebimento($saldoAtual) ?>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Status financeiro</div>
+
+                    <span class="badge <?= classeStatusFinanceiroRecebimento($ordem["StatusFinanceiro"] ?? "Pendente") ?> mt-2">
+                        <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
+                    </span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="card form-card">
-        <div class="card-header">
-            Dados do Recebimento
-        </div>
+    <div class="row g-3">
 
-        <div class="card-body">
+        <div class="col-lg-5">
+            <div class="card form-card">
+                <div class="card-header">
+                    Novo recebimento
+                </div>
 
-            <form method="post" action="salvar_recebimento.php">
-                <?= csrfInput() ?>
+                <div class="card-body">
 
-                <input type="hidden" name="OrdemServicoId" value="<?= (int)$ordem["OrdemServicoId"] ?>">
+                    <form method="post" action="salvar_recebimento.php">
+                        <?= csrfInput() ?>
 
-                <div class="row">
+                        <input type="hidden" name="OrdemServicoId" value="<?= (int)$ordem["OrdemServicoId"] ?>">
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Status Financeiro</label>
-                        <?php $statusFinanceiroAtual = $ordem["StatusFinanceiro"] ?? "Pendente"; ?>
+                        <div class="mb-3">
+                            <label class="form-label">Valor recebido *</label>
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                name="ValorRecebido" 
+                                class="form-control"
+                                required
+                                value="<?= $saldoAtual > 0 ? htmlspecialchars(number_format($saldoAtual, 2, ".", "")) : "" ?>"
+                            >
 
-                        <select name="StatusFinanceiro" class="form-control" required>
-                            <option value="Pendente" <?= $statusFinanceiroAtual === "Pendente" ? "selected" : "" ?>>
-                                Pendente
-                            </option>
-
-                            <option value="Parcial" <?= $statusFinanceiroAtual === "Parcial" ? "selected" : "" ?>>
-                                Parcial
-                            </option>
-
-                            <option value="Pago" <?= $statusFinanceiroAtual === "Pago" ? "selected" : "" ?>>
-                                Pago
-                            </option>
-
-                            <option value="Cancelado" <?= $statusFinanceiroAtual === "Cancelado" ? "selected" : "" ?>>
-                                Cancelado
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Forma de Pagamento</label>
-                        <?php $formaPagamentoAtual = $ordem["FormaPagamento"] ?? ""; ?>
-
-                        <select name="FormaPagamento" class="form-control">
-                            <option value="">Não informado</option>
-                            <option value="Dinheiro" <?= $formaPagamentoAtual === "Dinheiro" ? "selected" : "" ?>>Dinheiro</option>
-                            <option value="Pix" <?= $formaPagamentoAtual === "Pix" ? "selected" : "" ?>>Pix</option>
-                            <option value="Cartão de crédito" <?= $formaPagamentoAtual === "Cartão de crédito" ? "selected" : "" ?>>Cartão de crédito</option>
-                            <option value="Cartão de débito" <?= $formaPagamentoAtual === "Cartão de débito" ? "selected" : "" ?>>Cartão de débito</option>
-                            <option value="Boleto" <?= $formaPagamentoAtual === "Boleto" ? "selected" : "" ?>>Boleto</option>
-                            <option value="Transferência" <?= $formaPagamentoAtual === "Transferência" ? "selected" : "" ?>>Transferência</option>
-                            <option value="Outro" <?= $formaPagamentoAtual === "Outro" ? "selected" : "" ?>>Outro</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Valor Pago</label>
-                        <input 
-                            type="number" 
-                            step="0.01" 
-                            name="ValorPago" 
-                            class="form-control"
-                            value="<?= htmlspecialchars($ordem["ValorPago"] ?? "") ?>"
-                        >
-
-                        <div class="input-help mt-2">
-                            Informe o total já recebido nesta OS.
+                            <div class="input-help mt-2">
+                                Informe o valor deste pagamento. O sistema somará todos os recebimentos da OS.
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Data de Pagamento</label>
-                        <input 
-                            type="date" 
-                            name="DataPagamento" 
-                            class="form-control"
-                            value="<?= !empty($ordem["DataPagamento"]) ? date("Y-m-d", strtotime($ordem["DataPagamento"])) : date("Y-m-d") ?>"
-                        >
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Forma de pagamento</label>
 
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Observação Financeira</label>
-                        <textarea 
-                            name="ObservacaoFinanceira" 
-                            class="form-control" 
-                            rows="4"
-                        ><?= htmlspecialchars($ordem["ObservacaoFinanceira"] ?? "") ?></textarea>
-                    </div>
+                            <select name="FormaPagamento" class="form-control">
+                                <option value="">Não informado</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Cartão de crédito">Cartão de crédito</option>
+                                <option value="Cartão de débito">Cartão de débito</option>
+                                <option value="Boleto">Boleto</option>
+                                <option value="Transferência">Transferência</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Data do recebimento *</label>
+                            <input 
+                                type="date" 
+                                name="DataRecebimento" 
+                                class="form-control"
+                                required
+                                value="<?= date("Y-m-d") ?>"
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observação</label>
+                            <textarea 
+                                name="Observacao" 
+                                class="form-control" 
+                                rows="4"
+                                placeholder="Ex.: pagamento parcial, sinal, restante no cartão..."
+                            ></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">
+                                Registrar Recebimento
+                            </button>
+
+                            <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
 
                 </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-success">
-                        Salvar Recebimento
-                    </button>
-
-                    <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
-                        Cancelar
-                    </a>
-                </div>
-
-            </form>
-
+            </div>
         </div>
+
+        <div class="col-lg-7">
+            <div class="card form-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Histórico de recebimentos</span>
+
+                    <span class="badge bg-primary">
+                        <?= count($recebimentos) ?> lançamento(s)
+                    </span>
+                </div>
+
+                <div class="card-body p-0">
+
+                    <?php if (count($recebimentos) === 0): ?>
+                        <div class="empty-state">
+                            Nenhum recebimento registrado para esta OS.
+                        </div>
+                    <?php else: ?>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle table-os mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Valor</th>
+                                        <th>Forma</th>
+                                        <th>Usuário</th>
+                                        <th>Observação</th>
+                                        <th width="90">Ação</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php foreach ($recebimentos as $recebimento): ?>
+                                        <tr>
+                                            <td>
+                                                <?= dataRecebimento($recebimento["DataRecebimento"] ?? null) ?>
+
+                                                <div class="os-subtitle">
+                                                    <?= !empty($recebimento["DataCadastro"])
+                                                        ? date("d/m/Y H:i", strtotime($recebimento["DataCadastro"]))
+                                                        : ""
+                                                    ?>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <strong class="text-success">
+                                                    <?= dinheiroRecebimento($recebimento["ValorRecebido"] ?? 0) ?>
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($recebimento["FormaPagamento"] ?? "Não informado") ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($recebimento["UsuarioNome"] ?? "-") ?>
+                                            </td>
+
+                                            <td>
+                                                <?php if (!empty($recebimento["Observacao"])): ?>
+                                                    <span style="white-space: pre-line;">
+                                                        <?= nl2br(htmlspecialchars($recebimento["Observacao"])) ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
+
+                                            <td>
+                                                <a 
+                                                    href="excluir_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>&os=<?= (int)$ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Deseja excluir este recebimento? O total pago da OS será recalculado.')"
+                                                >
+                                                    Excluir
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
