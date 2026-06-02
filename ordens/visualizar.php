@@ -261,6 +261,9 @@ function classeStatusFinanceiroOS($status)
             <a href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-primary">
                 Atendimento
             </a>
+            <a href="recebimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-success">
+                Recebimento
+            </a>            
             <a href="editar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-warning">
                 Editar
             </a>
