@@ -318,7 +318,7 @@ function classeStatusFinanceiroRecebimento($status)
                                         <th>Forma</th>
                                         <th>Usuário</th>
                                         <th>Observação</th>
-                                        <th width="90">Ação</th>
+                                        <th width="170">Ação</th>
                                     </tr>
                                 </thead>
 
@@ -361,13 +361,23 @@ function classeStatusFinanceiroRecebimento($status)
                                             </td>
 
                                             <td>
-                                                <a 
-                                                    href="excluir_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>&os=<?= (int)$ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>" 
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Deseja excluir este recebimento? O total pago da OS será recalculado.')"
-                                                >
-                                                    Excluir
-                                                </a>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <a 
+                                                        href="recibo_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>" 
+                                                        class="btn btn-sm btn-outline-success"
+                                                        target="_blank"
+                                                    >
+                                                        Recibo
+                                                    </a>
+
+                                                    <a 
+                                                        href="excluir_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>&os=<?= (int)$ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>" 
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Deseja excluir este recebimento? O total pago da OS será recalculado.')"
+                                                    >
+                                                        Excluir
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
