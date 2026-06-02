@@ -205,6 +205,36 @@ function dinheiroResumo($resumo, $campo)
 {
     return number_format((float)($resumo[$campo] ?? 0), 2, ",", ".");
 }
+
+$dadosGraficoStatus = [
+    [
+        "status" => "Aberta",
+        "total" => valorResumo($resumo, "TotalAbertas"),
+        "classe" => "bg-primary"
+    ],
+    [
+        "status" => "Em andamento",
+        "total" => valorResumo($resumo, "TotalEmAndamento"),
+        "classe" => "bg-warning"
+    ],
+    [
+        "status" => "Aguardando",
+        "total" => valorResumo($resumo, "TotalAguardando"),
+        "classe" => "bg-secondary"
+    ],
+    [
+        "status" => "Concluída",
+        "total" => valorResumo($resumo, "TotalConcluidas"),
+        "classe" => "bg-success"
+    ],
+    [
+        "status" => "Cancelada",
+        "total" => valorResumo($resumo, "TotalCanceladas"),
+        "classe" => "bg-danger"
+    ],
+];
+
+$totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -402,6 +432,59 @@ function dinheiroResumo($resumo, $campo)
 
     </div>
 
+    <div class="card form-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Distribuição por status</span>
+
+            <span class="badge bg-primary">
+                <?= valorResumo($resumo, "TotalOS") ?> OS
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            <?php if (valorResumo($resumo, "TotalOS") === 0): ?>
+                <div class="empty-state">
+                    Nenhuma OS encontrada para montar o gráfico.
+                </div>
+            <?php else: ?>
+
+                <div class="row g-3">
+                    <?php foreach ($dadosGraficoStatus as $item): ?>
+                        <?php
+                            $percentual = round(((int)$item["total"] / $totalGraficoStatus) * 100);
+                        ?>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong><?= htmlspecialchars($item["status"]) ?></strong>
+
+                                    <span class="badge <?= htmlspecialchars($item["classe"]) ?>">
+                                        <?= (int)$item["total"] ?>
+                                    </span>
+                                </div>
+
+                                <div class="progress mb-2" style="height: 12px;">
+                                    <div 
+                                        class="progress-bar <?= htmlspecialchars($item["classe"]) ?>" 
+                                        style="width: <?= (int)$percentual ?>%;">
+                                    </div>
+                                </div>
+
+                                <div class="small text-muted">
+                                    <?= (int)$percentual ?>% do total filtrado
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+            <?php endif; ?>
+
+        </div>
+    </div>
+        
     <div class="card form-card">
         <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
             <span>Ordens encontradas</span>
