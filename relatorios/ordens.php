@@ -184,6 +184,79 @@ foreach ($servicosResumo as $servicoResumo) {
     }
 }
 
+$sqlMensal = "
+    SELECT
+        FORMAT(os.DataAbertura, 'yyyy-MM') AS AnoMes,
+        FORMAT(os.DataAbertura, 'MM/yyyy') AS MesLabel,
+        COUNT(*) AS TotalCriadas,
+        SUM(CASE WHEN os.Status = 'Concluída' THEN 1 ELSE 0 END) AS TotalConcluidas,
+        ISNULL(SUM(CASE WHEN os.Status = 'Concluída' THEN os.ValorFinal ELSE 0 END), 0) AS ValorFinalizado
+    FROM OS_OrdensServico os
+    WHERE os.EmpresaId = :EmpresaId
+      AND os.DataAbertura >= DATEADD(MONTH, -5, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))
+    GROUP BY 
+        FORMAT(os.DataAbertura, 'yyyy-MM'),
+        FORMAT(os.DataAbertura, 'MM/yyyy')
+    ORDER BY AnoMes
+";
+
+$stmtMensal = $conn->prepare($sqlMensal);
+$stmtMensal->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtMensal->execute();
+
+$dadosMensaisBanco = $stmtMensal->fetchAll(PDO::FETCH_ASSOC);
+
+$dadosMensaisIndexados = [];
+
+foreach ($dadosMensaisBanco as $linha) {
+    $dadosMensaisIndexados[$linha["AnoMes"]] = $linha;
+}
+
+$dadosMensais = [];
+
+for ($i = 5; $i >= 0; $i--) {
+    $dataMes = new DateTime("first day of this month");
+    $dataMes->modify("-{$i} months");
+
+    $anoMes = $dataMes->format("Y-m");
+    $mesLabel = $dataMes->format("m/Y");
+
+    if (isset($dadosMensaisIndexados[$anoMes])) {
+        $dadosMensais[] = [
+            "AnoMes" => $anoMes,
+            "MesLabel" => $dadosMensaisIndexados[$anoMes]["MesLabel"],
+            "TotalCriadas" => (int)$dadosMensaisIndexados[$anoMes]["TotalCriadas"],
+            "TotalConcluidas" => (int)$dadosMensaisIndexados[$anoMes]["TotalConcluidas"],
+            "ValorFinalizado" => (float)$dadosMensaisIndexados[$anoMes]["ValorFinalizado"]
+        ];
+    } else {
+        $dadosMensais[] = [
+            "AnoMes" => $anoMes,
+            "MesLabel" => $mesLabel,
+            "TotalCriadas" => 0,
+            "TotalConcluidas" => 0,
+            "ValorFinalizado" => 0
+        ];
+    }
+}
+
+$maiorTotalMensal = 1;
+$maiorValorMensal = 1;
+
+foreach ($dadosMensais as $linha) {
+    if ((int)$linha["TotalCriadas"] > $maiorTotalMensal) {
+        $maiorTotalMensal = (int)$linha["TotalCriadas"];
+    }
+
+    if ((int)$linha["TotalConcluidas"] > $maiorTotalMensal) {
+        $maiorTotalMensal = (int)$linha["TotalConcluidas"];
+    }
+
+    if ((float)$linha["ValorFinalizado"] > $maiorValorMensal) {
+        $maiorValorMensal = (float)$linha["ValorFinalizado"];
+    }
+}
+
 function classeStatusRelatorio($status)
 {
     if ($status === "Aberta") {
@@ -519,6 +592,94 @@ $totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
         </div>
     </div>
 
+    <div class="card form-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Evolução mensal de OS</span>
+
+            <span class="badge bg-primary">
+                Últimos 6 meses
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+                <?php foreach ($dadosMensais as $mes): ?>
+                    <?php
+                        $percentualCriadas = $maiorTotalMensal > 0
+                            ? round(((int)$mes["TotalCriadas"] / $maiorTotalMensal) * 100)
+                            : 0;
+
+                        $percentualConcluidas = $maiorTotalMensal > 0
+                            ? round(((int)$mes["TotalConcluidas"] / $maiorTotalMensal) * 100)
+                            : 0;
+
+                        $percentualValor = $maiorValorMensal > 0
+                            ? round(((float)$mes["ValorFinalizado"] / $maiorValorMensal) * 100)
+                            : 0;
+                    ?>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="border rounded-3 p-3 h-100 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <strong><?= htmlspecialchars($mes["MesLabel"]) ?></strong>
+
+                                <span class="badge bg-secondary">
+                                    <?= (int)$mes["TotalCriadas"] ?> OS
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>Criadas</span>
+                                    <strong><?= (int)$mes["TotalCriadas"] ?></strong>
+                                </div>
+
+                                <div class="progress" style="height: 10px;">
+                                    <div 
+                                        class="progress-bar bg-primary" 
+                                        style="width: <?= (int)$percentualCriadas ?>%;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>Concluídas</span>
+                                    <strong><?= (int)$mes["TotalConcluidas"] ?></strong>
+                                </div>
+
+                                <div class="progress" style="height: 10px;">
+                                    <div 
+                                        class="progress-bar bg-success" 
+                                        style="width: <?= (int)$percentualConcluidas ?>%;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>Valor finalizado</span>
+                                    <strong>
+                                        R$ <?= number_format((float)$mes["ValorFinalizado"], 2, ",", ".") ?>
+                                    </strong>
+                                </div>
+
+                                <div class="progress" style="height: 10px;">
+                                    <div 
+                                        class="progress-bar bg-warning" 
+                                        style="width: <?= (int)$percentualValor ?>%;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+        </div>
+    </div>
+        
     <div class="row g-3 mb-4">
 
         <div class="col-lg-5">
@@ -647,7 +808,7 @@ $totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
         </div>
 
     </div>
-        
+
     <div class="card form-card">
         <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
             <span>Ordens encontradas</span>
