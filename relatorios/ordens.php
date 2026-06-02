@@ -150,6 +150,40 @@ foreach ($params as $chave => $param) {
 $stmtOrdens->execute();
 $ordens = $stmtOrdens->fetchAll(PDO::FETCH_ASSOC);
 
+$sqlServicosResumo = "
+    SELECT TOP 10
+        ISNULL(s.Nome, 'Não informado') AS ServicoNome,
+        COUNT(*) AS TotalOS,
+        SUM(CASE WHEN os.Status = 'Concluída' THEN 1 ELSE 0 END) AS TotalConcluidas,
+        SUM(CASE WHEN os.Status = 'Cancelada' THEN 1 ELSE 0 END) AS TotalCanceladas,
+        ISNULL(SUM(CASE WHEN os.Status <> 'Cancelada' THEN os.ValorPrevisto ELSE 0 END), 0) AS ValorPrevisto,
+        ISNULL(SUM(CASE WHEN os.Status = 'Concluída' THEN os.ValorFinal ELSE 0 END), 0) AS ValorFinalizado
+    FROM OS_OrdensServico os
+    LEFT JOIN OS_Servicos s 
+        ON s.ServicoId = os.ServicoId 
+       AND s.EmpresaId = os.EmpresaId
+    WHERE {$where}
+    GROUP BY ISNULL(s.Nome, 'Não informado')
+    ORDER BY COUNT(*) DESC, ISNULL(s.Nome, 'Não informado')
+";
+
+$stmtServicosResumo = $conn->prepare($sqlServicosResumo);
+
+foreach ($params as $chave => $param) {
+    $stmtServicosResumo->bindValue($chave, $param[0], $param[1]);
+}
+
+$stmtServicosResumo->execute();
+$servicosResumo = $stmtServicosResumo->fetchAll(PDO::FETCH_ASSOC);
+
+$totalMaiorServico = 1;
+
+foreach ($servicosResumo as $servicoResumo) {
+    if ((int)$servicoResumo["TotalOS"] > $totalMaiorServico) {
+        $totalMaiorServico = (int)$servicoResumo["TotalOS"];
+    }
+}
+
 function classeStatusRelatorio($status)
 {
     if ($status === "Aberta") {
@@ -483,6 +517,135 @@ $totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
             <?php endif; ?>
 
         </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-lg-5">
+            <div class="card form-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Serviços mais executados</span>
+
+                    <span class="badge bg-primary">
+                        Top <?= count($servicosResumo) ?>
+                    </span>
+                </div>
+
+                <div class="card-body">
+
+                    <?php if (count($servicosResumo) === 0): ?>
+                        <div class="empty-state">
+                            Nenhum serviço encontrado para os filtros selecionados.
+                        </div>
+                    <?php else: ?>
+
+                        <?php foreach ($servicosResumo as $item): ?>
+                            <?php
+                                $totalServico = (int)($item["TotalOS"] ?? 0);
+                                $percentualBarra = $totalMaiorServico > 0
+                                    ? round(($totalServico / $totalMaiorServico) * 100)
+                                    : 0;
+                            ?>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong>
+                                        <?= htmlspecialchars($item["ServicoNome"] ?? "Não informado") ?>
+                                    </strong>
+
+                                    <span class="badge bg-secondary">
+                                        <?= $totalServico ?> OS
+                                    </span>
+                                </div>
+
+                                <div class="progress" style="height: 12px;">
+                                    <div 
+                                        class="progress-bar bg-primary" 
+                                        style="width: <?= (int)$percentualBarra ?>%;">
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                    <?php endif; ?>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card form-card h-100">
+                <div class="card-header">
+                    Resumo por serviço
+                </div>
+
+                <div class="card-body p-0">
+
+                    <?php if (count($servicosResumo) === 0): ?>
+                        <div class="empty-state">
+                            Nenhum resumo por serviço disponível.
+                        </div>
+                    <?php else: ?>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle table-os mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Serviço</th>
+                                        <th>Total</th>
+                                        <th>Concluídas</th>
+                                        <th>Canceladas</th>
+                                        <th>Valor Previsto</th>
+                                        <th>Valor Finalizado</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php foreach ($servicosResumo as $item): ?>
+                                        <tr>
+                                            <td>
+                                                <strong>
+                                                    <?= htmlspecialchars($item["ServicoNome"] ?? "Não informado") ?>
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    <?= (int)($item["TotalOS"] ?? 0) ?>
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <?= (int)($item["TotalConcluidas"] ?? 0) ?>
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="badge bg-danger">
+                                                    <?= (int)($item["TotalCanceladas"] ?? 0) ?>
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                R$ <?= number_format((float)($item["ValorPrevisto"] ?? 0), 2, ",", ".") ?>
+                                            </td>
+
+                                            <td>
+                                                R$ <?= number_format((float)($item["ValorFinalizado"] ?? 0), 2, ",", ".") ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+            </div>
+        </div>
+
     </div>
         
     <div class="card form-card">
