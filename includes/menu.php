@@ -83,6 +83,7 @@ $baseUrl = rtrim(APP_URL, "/");
                 <span>Configurações</span>
             </a>
             <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/campos_os/listar.php">
+                <span class="sidebar-icon">☰</span>
                 Campos da OS
             </a>            
             <?php if ($usuarioPerfil === "SuperAdmin"): ?>
