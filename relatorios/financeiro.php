@@ -280,9 +280,18 @@ function classeStatusFinanceiro($status)
             <p>Analise valores previstos, finalizados e pendências financeiras das ordens de serviço.</p>
         </div>
 
-        <a href="../dashboard.php" class="btn btn-outline-secondary">
-            Voltar
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a 
+                href="financeiro_exportar_csv.php?<?= htmlspecialchars(http_build_query($_GET)) ?>" 
+                class="btn btn-outline-success"
+            >
+                Exportar CSV
+            </a>
+
+            <a href="../dashboard.php" class="btn btn-outline-secondary">
+                Voltar
+            </a>
+        </div>
     </div>
 
     <div class="card form-card mb-4">
@@ -424,7 +433,7 @@ function classeStatusFinanceiro($status)
         </div>
     </div>
 </div>
-    
+
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
