@@ -1,0 +1,415 @@
+<?php
+require_once "../includes/proteger.php";
+require_once "../config/conexao.php";
+require_once "../includes/permissoes.php";
+require_once "../includes/seguranca.php";
+require_once "../includes/funcoes.php";
+
+exigirPerfil(["Admin", "Atendente"]);
+
+$empresaId = (int)$_SESSION["EmpresaId"];
+$id = (int)($_GET["id"] ?? 0);
+
+if ($id <= 0) {
+    die("Ordem de serviço inválida.");
+}
+
+exigirOrdemDaEmpresa($conn, $id);
+
+$sql = "
+    SELECT
+        os.OrdemServicoId,
+        os.CodigoOS,
+        os.Titulo,
+        os.Status,
+        os.ValorPrevisto,
+        os.ValorFinal,
+        os.StatusFinanceiro,
+        os.FormaPagamento,
+        os.ValorPago,
+        os.DataPagamento,
+        os.ObservacaoFinanceira,
+        os.DataAbertura,
+        os.DataConclusao,
+        c.Nome AS ClienteNome,
+        c.Documento AS ClienteDocumento,
+        c.Telefone AS ClienteTelefone,
+        c.Email AS ClienteEmail,
+        c.Endereco AS ClienteEndereco,
+        c.Cidade AS ClienteCidade,
+        c.Estado AS ClienteEstado,
+        s.Nome AS ServicoNome,
+        e.NomeFantasia AS EmpresaNome,
+        e.Email AS EmpresaEmail,
+        e.WhatsApp AS EmpresaWhatsApp
+    FROM OS_OrdensServico os
+    INNER JOIN OS_Clientes c 
+        ON c.ClienteId = os.ClienteId 
+       AND c.EmpresaId = os.EmpresaId
+    LEFT JOIN OS_Servicos s 
+        ON s.ServicoId = os.ServicoId 
+       AND s.EmpresaId = os.EmpresaId
+    INNER JOIN OS_Empresas e
+        ON e.EmpresaId = os.EmpresaId
+    WHERE os.OrdemServicoId = :OrdemServicoId
+      AND os.EmpresaId = :EmpresaId
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bindValue(":OrdemServicoId", $id, PDO::PARAM_INT);
+$stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmt->execute();
+
+$ordem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$ordem) {
+    die("Ordem de serviço não encontrada.");
+}
+
+$codigoOS = $ordem["CodigoOS"] ?? formatarCodigoOS($ordem["OrdemServicoId"], null, $ordem["DataAbertura"] ?? null);
+
+$valorPago = (float)($ordem["ValorPago"] ?? 0);
+$valorFinal = (float)($ordem["ValorFinal"] ?? 0);
+$valorPrevisto = (float)($ordem["ValorPrevisto"] ?? 0);
+
+$valorReferencia = $valorFinal > 0 ? $valorFinal : $valorPrevisto;
+$saldo = $valorReferencia - $valorPago;
+
+if ($saldo < 0) {
+    $saldo = 0;
+}
+
+function dinheiroRecibo($valor)
+{
+    return "R$ " . number_format((float)$valor, 2, ",", ".");
+}
+
+function dataRecibo($data)
+{
+    if (empty($data)) {
+        return "-";
+    }
+
+    return date("d/m/Y", strtotime($data));
+}
+?>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo - <?= htmlspecialchars($codigoOS) ?></title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .recibo {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 35px;
+            border-radius: 8px;
+        }
+
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 2px solid #222;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .empresa h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .empresa p,
+        .dados-recibo p {
+            margin: 4px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .titulo {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .titulo h2 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .box {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .box h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 25px;
+        }
+
+        .item small {
+            display: block;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .item strong {
+            font-size: 15px;
+        }
+
+        .valor-destaque {
+            font-size: 30px;
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .texto-recibo {
+            line-height: 1.6;
+            font-size: 16px;
+            margin: 25px 0;
+        }
+
+        .assinaturas {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            margin-top: 60px;
+        }
+
+        .assinatura {
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            font-size: 14px;
+        }
+
+        .acoes {
+            max-width: 850px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: 1px solid #ccc;
+            color: #222;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .acoes {
+                display: none;
+            }
+
+            .recibo {
+                border: none;
+                border-radius: 0;
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="acoes">
+    <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn">
+        Voltar
+    </a>
+
+    <button onclick="window.print()" class="btn btn-primary">
+        Imprimir / Salvar PDF
+    </button>
+</div>
+
+<div class="recibo">
+
+    <div class="topo">
+        <div class="empresa">
+            <h1><?= htmlspecialchars($ordem["EmpresaNome"] ?? "DirectOS") ?></h1>
+
+            <?php if (!empty($ordem["EmpresaEmail"])): ?>
+                <p>E-mail: <?= htmlspecialchars($ordem["EmpresaEmail"]) ?></p>
+            <?php endif; ?>
+
+            <?php if (!empty($ordem["EmpresaWhatsApp"])): ?>
+                <p>WhatsApp: <?= htmlspecialchars($ordem["EmpresaWhatsApp"]) ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="dados-recibo">
+            <p><strong>Recibo da OS:</strong> <?= htmlspecialchars($codigoOS) ?></p>
+            <p><strong>Data:</strong> <?= date("d/m/Y") ?></p>
+            <p><strong>Status financeiro:</strong> <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?></p>
+        </div>
+    </div>
+
+    <div class="titulo">
+        <h2>RECIBO DE PAGAMENTO</h2>
+    </div>
+
+    <div class="box">
+        <h3>Cliente</h3>
+
+        <div class="grid">
+            <div class="item">
+                <small>Nome</small>
+                <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Documento</small>
+                <strong><?= htmlspecialchars($ordem["ClienteDocumento"] ?? "-") ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Telefone</small>
+                <strong><?= htmlspecialchars($ordem["ClienteTelefone"] ?? "-") ?></strong>
+            </div>
+
+            <div class="item">
+                <small>E-mail</small>
+                <strong><?= htmlspecialchars($ordem["ClienteEmail"] ?? "-") ?></strong>
+            </div>
+
+            <div class="item" style="grid-column: span 2;">
+                <small>Endereço</small>
+                <strong>
+                    <?= htmlspecialchars($ordem["ClienteEndereco"] ?? "") ?>
+                    <?= htmlspecialchars($ordem["ClienteCidade"] ?? "") ?>
+                    <?= htmlspecialchars($ordem["ClienteEstado"] ?? "") ?>
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3>Serviço</h3>
+
+        <div class="grid">
+            <div class="item">
+                <small>Serviço</small>
+                <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>
+            </div>
+
+            <div class="item">
+                <small>OS</small>
+                <strong><?= htmlspecialchars($codigoOS) ?></strong>
+            </div>
+
+            <div class="item" style="grid-column: span 2;">
+                <small>Título</small>
+                <strong><?= htmlspecialchars($ordem["Titulo"] ?? "-") ?></strong>
+            </div>
+        </div>
+    </div>
+
+    <p class="texto-recibo">
+        Recebemos de <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+        o valor de <strong><?= dinheiroRecibo($valorPago) ?></strong>,
+        referente à ordem de serviço <strong><?= htmlspecialchars($codigoOS) ?></strong>,
+        pelo serviço <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>.
+    </p>
+
+    <div class="box">
+        <h3>Informações financeiras</h3>
+
+        <div class="grid">
+            <div class="item">
+                <small>Valor do serviço</small>
+                <strong><?= dinheiroRecibo($valorReferencia) ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Valor pago</small>
+                <div class="valor-destaque">
+                    <?= dinheiroRecibo($valorPago) ?>
+                </div>
+            </div>
+
+            <div class="item">
+                <small>Saldo restante</small>
+                <strong><?= dinheiroRecibo($saldo) ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Forma de pagamento</small>
+                <strong><?= htmlspecialchars($ordem["FormaPagamento"] ?? "Não informado") ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Data de pagamento</small>
+                <strong><?= dataRecibo($ordem["DataPagamento"] ?? null) ?></strong>
+            </div>
+
+            <div class="item">
+                <small>Status financeiro</small>
+                <strong><?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?></strong>
+            </div>
+        </div>
+    </div>
+
+    <?php if (!empty($ordem["ObservacaoFinanceira"])): ?>
+        <div class="box">
+            <h3>Observação financeira</h3>
+            <div style="white-space: pre-line;">
+                <?= nl2br(htmlspecialchars($ordem["ObservacaoFinanceira"])) ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <div class="assinaturas">
+        <div class="assinatura">
+            <?= htmlspecialchars($ordem["EmpresaNome"] ?? "Empresa") ?>
+        </div>
+
+        <div class="assinatura">
+            <?= htmlspecialchars($ordem["ClienteNome"] ?? "Cliente") ?>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
