@@ -27,6 +27,11 @@ $sql = "
         os.Prioridade,
         os.ValorPrevisto,
         os.ValorFinal,
+        os.StatusFinanceiro,
+        os.FormaPagamento,
+        os.ValorPago,
+        os.DataPagamento,
+        os.ObservacaoFinanceira,
         os.DataPrevisao,
         os.DataConclusao,
         os.Observacao,
@@ -346,7 +351,95 @@ $servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
                         >
                     </div>
                 </div>
+                
+                <div class="card border-success mb-3">
+                    <div class="card-header bg-success text-white">
+                        Controle Financeiro
+                    </div>
 
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status Financeiro</label>
+                                <select name="StatusFinanceiro" class="form-control">
+                                    <?php
+                                        $statusFinanceiroAtual = $ordem["StatusFinanceiro"] ?? "Pendente";
+                                    ?>
+
+                                    <option value="Pendente" <?= $statusFinanceiroAtual === "Pendente" ? "selected" : "" ?>>
+                                        Pendente
+                                    </option>
+
+                                    <option value="Parcial" <?= $statusFinanceiroAtual === "Parcial" ? "selected" : "" ?>>
+                                        Parcial
+                                    </option>
+
+                                    <option value="Pago" <?= $statusFinanceiroAtual === "Pago" ? "selected" : "" ?>>
+                                        Pago
+                                    </option>
+
+                                    <option value="Cancelado" <?= $statusFinanceiroAtual === "Cancelado" ? "selected" : "" ?>>
+                                        Cancelado
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Forma de Pagamento</label>
+                                <select name="FormaPagamento" class="form-control">
+                                    <?php
+                                        $formaPagamentoAtual = $ordem["FormaPagamento"] ?? "";
+                                    ?>
+
+                                    <option value="">Não informado</option>
+                                    <option value="Dinheiro" <?= $formaPagamentoAtual === "Dinheiro" ? "selected" : "" ?>>Dinheiro</option>
+                                    <option value="Pix" <?= $formaPagamentoAtual === "Pix" ? "selected" : "" ?>>Pix</option>
+                                    <option value="Cartão de crédito" <?= $formaPagamentoAtual === "Cartão de crédito" ? "selected" : "" ?>>Cartão de crédito</option>
+                                    <option value="Cartão de débito" <?= $formaPagamentoAtual === "Cartão de débito" ? "selected" : "" ?>>Cartão de débito</option>
+                                    <option value="Boleto" <?= $formaPagamentoAtual === "Boleto" ? "selected" : "" ?>>Boleto</option>
+                                    <option value="Transferência" <?= $formaPagamentoAtual === "Transferência" ? "selected" : "" ?>>Transferência</option>
+                                    <option value="Outro" <?= $formaPagamentoAtual === "Outro" ? "selected" : "" ?>>Outro</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Valor Pago</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01" 
+                                    name="ValorPago" 
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($ordem["ValorPago"] ?? "") ?>"
+                                >
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Data de Pagamento</label>
+                                <input 
+                                    type="date" 
+                                    name="DataPagamento" 
+                                    class="form-control"
+                                    value="<?= !empty($ordem["DataPagamento"]) ? date("Y-m-d", strtotime($ordem["DataPagamento"])) : "" ?>"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label">Observação Financeira</label>
+                            <textarea 
+                                name="ObservacaoFinanceira" 
+                                class="form-control" 
+                                rows="3"
+                            ><?= htmlspecialchars($ordem["ObservacaoFinanceira"] ?? "") ?></textarea>
+
+                            <div class="input-help mt-2">
+                                Use para registrar informações de pagamento, combinados, pendências ou observações internas.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
                 <?php if (!empty($ordem["DataConclusao"])): ?>
                     <div class="mb-3">
                         <label class="form-label">Data de Conclusão</label>

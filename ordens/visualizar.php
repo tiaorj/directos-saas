@@ -24,7 +24,12 @@ $sql = "
         c.Endereco AS ClienteEndereco,
         c.Cidade AS ClienteCidade,
         c.Estado AS ClienteEstado,
-        s.Nome AS ServicoNome
+        s.Nome AS ServicoNome,
+        os.StatusFinanceiro,
+        os.FormaPagamento,
+        os.ValorPago,
+        os.DataPagamento,
+        os.ObservacaoFinanceira
     FROM OS_OrdensServico os
     INNER JOIN OS_Clientes c ON c.ClienteId = os.ClienteId AND c.EmpresaId = os.EmpresaId
     LEFT JOIN OS_Servicos s ON s.ServicoId = os.ServicoId AND s.EmpresaId = os.EmpresaId
@@ -210,6 +215,23 @@ function classePrioridadeOS($prioridade)
 $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT));
 
 $mensagemUrl = trim($_GET["mensagem"] ?? "");
+
+function classeStatusFinanceiroOS($status)
+{
+    if ($status === "Pago") {
+        return "bg-success";
+    }
+
+    if ($status === "Parcial") {
+        return "bg-warning text-dark";
+    }
+
+    if ($status === "Cancelado") {
+        return "bg-danger";
+    }
+
+    return "bg-secondary";
+}
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -371,7 +393,59 @@ $mensagemUrl = trim($_GET["mensagem"] ?? "");
     </div>
 
     <div class="row g-3">
+    </div>
 
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <strong>Controle Financeiro</strong>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="small text-muted">Status financeiro</div>
+
+                    <span class="badge <?= classeStatusFinanceiroOS($ordem["StatusFinanceiro"] ?? "Pendente") ?>">
+                        <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
+                    </span>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="small text-muted">Forma de pagamento</div>
+                    <strong><?= htmlspecialchars($ordem["FormaPagamento"] ?? "Não informado") ?></strong>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="small text-muted">Valor pago</div>
+                    <strong>
+                        R$ <?= number_format((float)($ordem["ValorPago"] ?? 0), 2, ",", ".") ?>
+                    </strong>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="small text-muted">Data de pagamento</div>
+                    <strong>
+                        <?= !empty($ordem["DataPagamento"])
+                            ? date("d/m/Y", strtotime($ordem["DataPagamento"]))
+                            : "-"
+                        ?>
+                    </strong>
+                </div>
+
+                <?php if (!empty($ordem["ObservacaoFinanceira"])): ?>
+                    <div class="col-md-12">
+                        <div class="small text-muted">Observação financeira</div>
+
+                        <div style="white-space: pre-line;">
+                            <?= nl2br(htmlspecialchars($ordem["ObservacaoFinanceira"])) ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
         <div class="col-lg-6">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white">

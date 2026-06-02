@@ -116,7 +116,20 @@ $sqlResumo = "
             WHEN os.Status = 'Concluída' AND os.ValorFinal IS NOT NULL
             THEN os.ValorFinal 
             ELSE NULL 
-        END) AS TicketMedioConcluido
+        END) AS TicketMedioConcluido,
+        ISNULL(SUM(ISNULL(os.ValorPago, 0)), 0) AS ValorRecebido,
+
+        ISNULL(SUM(
+            CASE 
+                WHEN os.StatusFinanceiro IN ('Pendente', 'Parcial')
+                THEN ISNULL(os.ValorFinal, ISNULL(os.ValorPrevisto, 0)) - ISNULL(os.ValorPago, 0)
+                ELSE 0
+            END
+        ), 0) AS ValorAReceber,
+
+        SUM(CASE WHEN os.StatusFinanceiro = 'Pago' THEN 1 ELSE 0 END) AS TotalPagas,
+        SUM(CASE WHEN os.StatusFinanceiro = 'Parcial' THEN 1 ELSE 0 END) AS TotalParciais,
+        SUM(CASE WHEN os.StatusFinanceiro = 'Pendente' THEN 1 ELSE 0 END) AS TotalPendentesFinanceiro        
     FROM OS_OrdensServico os
     WHERE {$where}
 ";
@@ -368,6 +381,50 @@ function classeStatusFinanceiro($status)
 
     <div class="row g-3 mb-4">
 
+<div class="col-md-3">
+    <div class="card shadow-sm h-100 border border-success">
+        <div class="card-body">
+            <div class="small text-muted">Valor recebido</div>
+            <h3 class="mb-0 mt-2 text-success">
+                R$ <?= dinheiroFinanceiro($resumo["ValorRecebido"] ?? 0) ?>
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <div class="card shadow-sm h-100 border border-warning">
+        <div class="card-body">
+            <div class="small text-muted">Valor a receber</div>
+            <h3 class="mb-0 mt-2 text-warning">
+                R$ <?= dinheiroFinanceiro($resumo["ValorAReceber"] ?? 0) ?>
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <div class="card shadow-sm h-100">
+        <div class="card-body">
+            <div class="small text-muted">Pagas</div>
+            <h3 class="mb-0 mt-2 text-success">
+                <?= inteiroFinanceiro($resumo["TotalPagas"] ?? 0) ?>
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <div class="card shadow-sm h-100">
+        <div class="card-body">
+            <div class="small text-muted">Pendentes financeiro</div>
+            <h3 class="mb-0 mt-2 text-warning">
+                <?= inteiroFinanceiro($resumo["TotalPendentesFinanceiro"] ?? 0) ?>
+            </h3>
+        </div>
+    </div>
+</div>
+    
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">

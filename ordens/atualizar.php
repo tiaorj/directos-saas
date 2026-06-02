@@ -36,6 +36,26 @@ $prepararWhatsAppAposAtualizar = (int)($_POST["PrepararWhatsAppAposAtualizar"] ?
 $camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, $empresaId, true);
 validarCamposPersonalizadosOS($camposPersonalizadosOS, $_POST);
 
+$statusFinanceiro = trim($_POST["StatusFinanceiro"] ?? "Pendente");
+$formaPagamento = trim($_POST["FormaPagamento"] ?? "");
+$valorPago = $_POST["ValorPago"] !== "" ? $_POST["ValorPago"] : null;
+$dataPagamento = trim($_POST["DataPagamento"] ?? "");
+$observacaoFinanceira = trim($_POST["ObservacaoFinanceira"] ?? "");
+
+$statusFinanceiroPermitidos = ["Pendente", "Parcial", "Pago", "Cancelado"];
+
+if (!in_array($statusFinanceiro, $statusFinanceiroPermitidos, true)) {
+    $statusFinanceiro = "Pendente";
+}
+
+if ($dataPagamento === "") {
+    $dataPagamento = null;
+}
+
+if ($formaPagamento === "") {
+    $formaPagamento = null;
+}
+
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
 }
@@ -100,13 +120,18 @@ $sql = "
         Prioridade = :Prioridade,
         ValorPrevisto = :ValorPrevisto,
         ValorFinal = :ValorFinal,
+        StatusFinanceiro = :StatusFinanceiro,
+        FormaPagamento = :FormaPagamento,
+        ValorPago = :ValorPago,
+        DataPagamento = :DataPagamento,
+        ObservacaoFinanceira = :ObservacaoFinanceira,
         DataPrevisao = :DataPrevisao,
         DataConclusao = :DataConclusao,
         Observacao = :Observacao,
         MostrarValorCliente = :MostrarValorCliente,
         MostrarSolucaoCliente = :MostrarSolucaoCliente,
         MostrarHistoricoCliente = :MostrarHistoricoCliente
-    WHERE OrdemServicoId = :OrdemServicoId 
+    WHERE OrdemServicoId = :OrdemServicoId
       AND EmpresaId = :EmpresaId
 ";
 
@@ -129,6 +154,11 @@ $stmt->bindValue(":MostrarSolucaoCliente", $mostrarSolucaoCliente, PDO::PARAM_IN
 $stmt->bindValue(":MostrarHistoricoCliente", $mostrarHistoricoCliente, PDO::PARAM_INT);
 $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
 $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmt->bindValue(":StatusFinanceiro", $statusFinanceiro);
+$stmt->bindValue(":FormaPagamento", $formaPagamento, $formaPagamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+$stmt->bindValue(":ValorPago", $valorPago, $valorPago === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+$stmt->bindValue(":DataPagamento", $dataPagamento, $dataPagamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+$stmt->bindValue(":ObservacaoFinanceira", $observacaoFinanceira);
 $stmt->execute();
 
 salvarValoresCamposPersonalizadosOS(
