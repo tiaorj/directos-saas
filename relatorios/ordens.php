@@ -403,12 +403,21 @@ function dinheiroResumo($resumo, $campo)
     </div>
 
     <div class="card form-card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
             <span>Ordens encontradas</span>
 
-            <span class="badge bg-primary">
-                <?= count($ordens) ?> registro(s)
-            </span>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge bg-primary">
+                    <?= count($ordens) ?> registro(s)
+                </span>
+
+                <a 
+                    href="ordens_exportar_csv.php?<?= htmlspecialchars(http_build_query($_GET)) ?>" 
+                    class="btn btn-sm btn-outline-success"
+                >
+                    Exportar CSV
+                </a>
+            </div>
         </div>
 
         <div class="card-body p-0">
