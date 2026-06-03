@@ -21,6 +21,7 @@ Preparar o DirectOS para publicação, apresentação comercial e primeiros test
 * [ ] Testar login no Render
 * [ ] Testar logout no Render
 * [ ] Remover arquivos temporários, testes ou `phpinfo.php`, se existirem
+* [x] Confirmar versão do PHP no Render: PHP 8.3.31
 * [ ] Confirmar versão do PHP local
 * [ ] Confirmar versão do PHP no Render
 * [ ] Confirmar `composer.json` com PHP 8.3
@@ -195,15 +196,15 @@ Preparar o DirectOS para publicação, apresentação comercial e primeiros test
 
 ## 10. Ambiente Demo
 
-* [ ] Criar empresa demo
-* [ ] Criar usuário demo
-* [ ] Criar clientes fictícios
-* [ ] Criar serviços fictícios
-* [ ] Criar OS em status variados
-* [ ] Criar recebimentos fictícios
-* [ ] Criar campos personalizados por segmento
-* [ ] Criar relatórios com dados suficientes
-* [ ] Bloquear ou limitar ações destrutivas no usuário demo
+* [X] Criar empresa demo
+* [X] Criar usuário demo
+* [X] Criar clientes fictícios
+* [X] Criar serviços fictícios
+* [X] Criar OS em status variados
+* [X] Criar recebimentos fictícios
+* [X] Criar campos personalizados por segmento
+* [X] Criar relatórios com dados suficientes
+* [] Bloquear ou limitar ações destrutivas no usuário demo
 
 ---
 
