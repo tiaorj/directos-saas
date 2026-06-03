@@ -30,7 +30,7 @@ $sqlPlanos = "
 $stmtPlanos = $conn->prepare($sqlPlanos);
 $stmtPlanos->execute();
 
-$planos = $stmtPlanos->fetchAll(PDO::FETCH_ASSOC);
+$planosBanco = $stmtPlanos->fetchAll(PDO::FETCH_ASSOC);
 
 $sucesso = $_GET["sucesso"] ?? "";
 $erro = $_GET["erro"] ?? "";
@@ -52,6 +52,112 @@ function percentualUsoPlano($total, $limite)
 
     return min(100, round(((int)$total / (int)$limite) * 100));
 }
+
+function montarPlanoComercial($planoBanco, $indice)
+{
+    $modelos = [
+        [
+            "NomeComercial" => "Starter",
+            "DescricaoComercial" => "Para prestadores individuais ou pequenos negócios começando a organizar ordens de serviço.",
+            "ValorComercial" => 39.00,
+            "LimiteOSMesComercial" => 30,
+            "LimiteUsuariosComercial" => 1,
+            "Destaque" => false,
+            "Tag" => "Entrada",
+            "Recursos" => [
+                "Até 30 OS por mês",
+                "1 usuário",
+                "Cadastro de clientes",
+                "Cadastro de serviços",
+                "Controle básico de OS",
+                "Status e prioridades",
+                "Financeiro básico",
+                "Recibo da OS"
+            ]
+        ],
+        [
+            "NomeComercial" => "Profissional",
+            "DescricaoComercial" => "Para pequenas empresas que já possuem rotina de atendimento e precisam de mais organização.",
+            "ValorComercial" => 79.00,
+            "LimiteOSMesComercial" => 150,
+            "LimiteUsuariosComercial" => 3,
+            "Destaque" => true,
+            "Tag" => "Mais indicado",
+            "Recursos" => [
+                "Até 150 OS por mês",
+                "Até 3 usuários",
+                "Assistente IA",
+                "Checklist padrão por serviço",
+                "Campos personalizados",
+                "Área do cliente por link",
+                "Recebimentos parciais",
+                "Recibo geral e por pagamento",
+                "WhatsApp assistido",
+                "Relatórios operacionais",
+                "Relatório financeiro",
+                "Exportação CSV"
+            ]
+        ],
+        [
+            "NomeComercial" => "Empresa",
+            "DescricaoComercial" => "Para empresas com maior volume de OS ou mais usuários no atendimento.",
+            "ValorComercial" => 149.00,
+            "LimiteOSMesComercial" => null,
+            "LimiteUsuariosComercial" => 10,
+            "Destaque" => false,
+            "Tag" => "Operação completa",
+            "Recursos" => [
+                "OS ilimitadas",
+                "Até 10 usuários",
+                "Todos os recursos do Profissional",
+                "Segmento da empresa",
+                "Modelos prontos por segmento",
+                "Relatórios completos",
+                "Suporte inicial para implantação",
+                "Evolução futura para automação com n8n"
+            ]
+        ]
+    ];
+
+    $modelo = $modelos[$indice] ?? $modelos[count($modelos) - 1];
+
+    $planoBanco["NomeExibicao"] = $modelo["NomeComercial"];
+    $planoBanco["DescricaoExibicao"] = $modelo["DescricaoComercial"];
+    $planoBanco["ValorExibicao"] = $modelo["ValorComercial"];
+    $planoBanco["LimiteOSMesExibicao"] = $modelo["LimiteOSMesComercial"];
+    $planoBanco["LimiteUsuariosExibicao"] = $modelo["LimiteUsuariosComercial"];
+    $planoBanco["RecursosExibicao"] = $modelo["Recursos"];
+    $planoBanco["Destaque"] = $modelo["Destaque"];
+    $planoBanco["Tag"] = $modelo["Tag"];
+
+    return $planoBanco;
+}
+
+$planos = [];
+
+foreach ($planosBanco as $indice => $planoBanco) {
+    $planos[] = montarPlanoComercial($planoBanco, $indice);
+}
+
+$planoAtualComercial = null;
+
+if ($planoAtual) {
+    foreach ($planos as $plano) {
+        if ((int)$plano["PlanoId"] === (int)$planoAtual["PlanoId"]) {
+            $planoAtualComercial = $plano;
+            break;
+        }
+    }
+
+    if (!$planoAtualComercial) {
+        $planoAtualComercial = $planoAtual;
+        $planoAtualComercial["NomeExibicao"] = $planoAtual["Nome"] ?? "Plano atual";
+        $planoAtualComercial["DescricaoExibicao"] = $planoAtual["Descricao"] ?? "";
+        $planoAtualComercial["ValorExibicao"] = (float)($planoAtual["ValorMensal"] ?? 0);
+        $planoAtualComercial["LimiteOSMesExibicao"] = $planoAtual["LimiteOSMes"] ?? null;
+        $planoAtualComercial["LimiteUsuariosExibicao"] = $planoAtual["LimiteUsuarios"] ?? null;
+    }
+}
 ?>
 
 <?php require_once "../includes/header.php"; ?>
@@ -61,7 +167,8 @@ function percentualUsoPlano($total, $limite)
 
     <div class="form-header">
         <div>
-            <h3 class="mb-1">Meu Plano</h3>
+            <h3 class="mb-1">Meu plano</h3>
+
             <p>
                 Acompanhe o plano da empresa, limites de uso e recursos disponíveis no DirectOS.
             </p>
@@ -84,10 +191,10 @@ function percentualUsoPlano($total, $limite)
         </div>
     <?php endif; ?>
 
-    <?php if ($planoAtual): ?>
+    <?php if ($planoAtualComercial): ?>
         <?php
-            $limiteOS = $planoAtual["LimiteOSMes"];
-            $limiteUsuarios = $planoAtual["LimiteUsuarios"];
+            $limiteOS = $planoAtualComercial["LimiteOSMesExibicao"] ?? null;
+            $limiteUsuarios = $planoAtualComercial["LimiteUsuariosExibicao"] ?? null;
 
             $percentualOS = percentualUsoPlano($totalMes, $limiteOS);
             $percentualUsuarios = percentualUsoPlano($totalUsuarios, $limiteUsuarios);
@@ -96,12 +203,12 @@ function percentualUsoPlano($total, $limite)
         <div class="row g-3 mb-4">
 
             <div class="col-md-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 border-start border-4 border-primary">
                     <div class="card-body">
                         <div class="small text-muted">Plano atual</div>
 
                         <h4 class="mb-1 mt-2 text-primary">
-                            <?= htmlspecialchars($planoAtual["Nome"]) ?>
+                            <?= htmlspecialchars($planoAtualComercial["NomeExibicao"]) ?>
                         </h4>
 
                         <span class="badge bg-success">
@@ -117,7 +224,7 @@ function percentualUsoPlano($total, $limite)
                         <div class="small text-muted">Valor mensal</div>
 
                         <h4 class="mb-0 mt-2">
-                            R$ <?= number_format((float)$planoAtual["ValorMensal"], 2, ",", ".") ?>
+                            R$ <?= number_format((float)$planoAtualComercial["ValorExibicao"], 2, ",", ".") ?>
                         </h4>
                     </div>
                 </div>
@@ -242,7 +349,10 @@ function percentualUsoPlano($total, $limite)
     <div class="form-header mb-3">
         <div>
             <h4 class="mb-1">Planos disponíveis</h4>
-            <p>Compare os recursos disponíveis e escolha o plano mais adequado para a operação da empresa.</p>
+
+            <p>
+                Compare os recursos disponíveis e escolha o plano mais adequado para a operação da empresa.
+            </p>
         </div>
     </div>
 
@@ -250,30 +360,39 @@ function percentualUsoPlano($total, $limite)
 
         <?php foreach ($planos as $plano): ?>
             <?php
-                $ehAtual = $planoAtual && (int)$planoAtual["PlanoId"] === (int)$plano["PlanoId"];
-                $valorMensal = (float)$plano["ValorMensal"];
+                $ehAtual = $planoAtualComercial && (int)$planoAtualComercial["PlanoId"] === (int)$plano["PlanoId"];
+                $valorMensal = (float)$plano["ValorExibicao"];
+                $classeCard = $plano["Destaque"] ? "border border-primary border-2" : "";
             ?>
 
             <div class="col-lg-4">
-                <div class="card shadow-sm h-100 <?= $ehAtual ? "border border-primary border-2" : "" ?>">
+                <div class="card shadow-sm h-100 <?= $classeCard ?>">
                     <div class="card-body d-flex flex-column">
 
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h4 class="mb-1">
-                                    <?= htmlspecialchars($plano["Nome"]) ?>
+                                    <?= htmlspecialchars($plano["NomeExibicao"]) ?>
                                 </h4>
 
-                                <?php if ($ehAtual): ?>
-                                    <span class="badge bg-primary">
-                                        Plano atual
-                                    </span>
-                                <?php endif; ?>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php if ($ehAtual): ?>
+                                        <span class="badge bg-primary">
+                                            Plano atual
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($plano["Tag"])): ?>
+                                        <span class="badge bg-light text-dark border">
+                                            <?= htmlspecialchars($plano["Tag"]) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
 
                         <p class="text-muted">
-                            <?= htmlspecialchars($plano["Descricao"] ?? "") ?>
+                            <?= htmlspecialchars($plano["DescricaoExibicao"] ?? "") ?>
                         </p>
 
                         <div class="mb-3">
@@ -287,29 +406,9 @@ function percentualUsoPlano($total, $limite)
                         </div>
 
                         <ul class="mb-4 ps-3">
-                            <?php if ($plano["LimiteOSMes"] === null || $plano["LimiteOSMes"] === ""): ?>
-                                <li>OS ilimitadas por mês</li>
-                            <?php else: ?>
-                                <li>Até <?= (int)$plano["LimiteOSMes"] ?> OS por mês</li>
-                            <?php endif; ?>
-
-                            <?php if ($plano["LimiteUsuarios"] === null || $plano["LimiteUsuarios"] === ""): ?>
-                                <li>Usuários ilimitados</li>
-                            <?php else: ?>
-                                <li>Até <?= (int)$plano["LimiteUsuarios"] ?> usuário(s)</li>
-                            <?php endif; ?>
-
-                            <?php if ((int)$plano["PermiteAnexos"] === 1): ?>
-                                <li>Anexos e fotos</li>
-                            <?php endif; ?>
-
-                            <?php if ((int)$plano["PermiteAreaCliente"] === 1): ?>
-                                <li>Área do cliente por link</li>
-                            <?php endif; ?>
-
-                            <?php if ((int)$plano["PermiteWhatsapp"] === 1): ?>
-                                <li>WhatsApp assistido</li>
-                            <?php endif; ?>
+                            <?php foreach ($plano["RecursosExibicao"] as $recurso): ?>
+                                <li><?= htmlspecialchars($recurso) ?></li>
+                            <?php endforeach; ?>
                         </ul>
 
                         <div class="mt-auto">
@@ -320,12 +419,13 @@ function percentualUsoPlano($total, $limite)
                             <?php else: ?>
                                 <form method="post" action="alterar.php">
                                     <?= csrfInput() ?>
+
                                     <input type="hidden" name="plano" value="<?= (int)$plano["PlanoId"] ?>">
 
                                     <button
                                         type="submit"
-                                        class="btn btn-primary w-100"
-                                        onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["Nome"]) ?>?')"
+                                        class="btn <?= $plano["Destaque"] ? "btn-primary" : "btn-outline-primary" ?> w-100"
+                                        onclick="return confirm('Deseja alterar para o plano <?= htmlspecialchars($plano["NomeExibicao"]) ?>?')"
                                     >
                                         Alterar para este plano
                                     </button>
