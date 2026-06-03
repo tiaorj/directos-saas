@@ -156,7 +156,7 @@ $percentualOnboarding = count($itensOnboarding) > 0
                     <h6>Segmento da Empresa</h6>
 
                     <p class="text-muted small">
-                        Defina o tipo de negócio e aplique modelos recomendados de campos da OS.
+                        Defina o tipo de negócio e aplique modelos recomendados de Campos personalizados.
                     </p>
 
                     <a href="segmento.php" class="btn btn-sm btn-outline-primary">
@@ -347,7 +347,7 @@ $percentualOnboarding = count($itensOnboarding) > 0
                             <h6>Segmento da Empresa</h6>
 
                             <p class="text-muted small">
-                                Defina o tipo de negócio e aplique modelos recomendados de campos da OS.
+                                Defina o tipo de negócio e aplique modelos recomendados de Campos personalizados.
                             </p>
 
                             <a href="segmento.php" class="btn btn-sm btn-outline-primary">
@@ -408,7 +408,7 @@ $percentualOnboarding = count($itensOnboarding) > 0
                 <div class="col-md-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
-                            <h6>Campos da OS</h6>
+                            <h6>Campos personalizados</h6>
 
                             <p class="text-muted small">
                                 Crie campos personalizados e aplique modelos por segmento.

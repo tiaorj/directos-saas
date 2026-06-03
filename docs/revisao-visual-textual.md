@@ -36,7 +36,7 @@ Revisar o DirectOS para deixá-lo com aparência, linguagem e experiência de pr
 ## 3. Menu Lateral
 
 - [ ] Padronizar nomes
-- [ ] Avaliar se "Campos da OS" deve ficar em Configurações ou no menu principal
+- [ ] Avaliar se "Campos personalizados" deve ficar em Configurações ou no menu principal
 - [ ] Avaliar se "Financeiro" e "Relatórios" estão claros
 - [ ] Verificar ordem dos menus
 - [ ] Verificar ícones

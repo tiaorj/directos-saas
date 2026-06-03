@@ -102,7 +102,7 @@ Preparar o DirectOS para publicação, apresentação comercial e primeiros test
 ## 4. Personalização por Segmento
 
 * [ ] Configurar segmento da empresa
-* [ ] Aplicar modelo pronto de campos da OS
+* [ ] Aplicar modelo pronto de Campos personalizados
 * [ ] Criar campo personalizado manualmente
 * [ ] Editar campo personalizado
 * [ ] Inativar campo personalizado

@@ -3,6 +3,7 @@ require_once __DIR__ . "/../config/config.php";
 
 $usuarioNome = $_SESSION["UsuarioNome"] ?? "Usuário";
 $usuarioPerfil = $_SESSION["UsuarioPerfil"] ?? "";
+$empresaNome = $_SESSION["EmpresaNome"] ?? "Sistema de Ordem de Serviço";
 
 $baseUrl = rtrim(APP_URL, "/");
 ?>
@@ -93,7 +94,7 @@ $baseUrl = rtrim(APP_URL, "/");
             </a>
             <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/campos_os/listar.php">
                 <span class="sidebar-icon">☰</span>
-                Campos da OS
+                Campos personalizados
             </a>            
             <?php if ($usuarioPerfil === "SuperAdmin"): ?>
                 <div class="sidebar-section">Plataforma</div>
@@ -143,7 +144,9 @@ $baseUrl = rtrim(APP_URL, "/");
         <header class="app-topbar">
             <div>
                 <strong>DirectOS</strong>
-                <span class="text-muted ms-2">Sistema de Ordem de Serviço</span>
+                <span class="text-muted ms-2">
+                    <?= htmlspecialchars($empresaNome) ?>
+                </span>
             </div>
 
             <div class="topbar-user">

@@ -383,20 +383,21 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
             </h3>
 
             <p>
-                Veja o resumo da operação, acompanhe ordens de serviço e acesse ações rápidas.
+                Acompanhe suas ordens de serviço, clientes, prazos e resultados financeiros em um só lugar.
             </p>
         </div>
 
         <a href="ordens/cadastrar.php" class="btn btn-primary">
-            + Nova OS
+            + Criar nova OS
         </a>
     </div>
     <?php if (usuarioDemo()): ?>
         <div class="alert alert-info border mb-4">
             <strong>Ambiente de demonstração:</strong>
-            você pode navegar, visualizar relatórios e abrir recibos. Algumas ações de alteração ou exclusão estão bloqueadas para preservar os dados demo.
+            você pode navegar pelo DirectOS, visualizar ordens de serviço, relatórios, financeiro e recibos.
+            Algumas ações de cadastro, edição e exclusão estão bloqueadas para preservar os dados de exemplo.
         </div>
-    <?php endif; ?>   
+    <?php endif; ?>  
     <?php if ($mostrarAlertaPersonalizacaoOS): ?>
         <div class="card shadow-sm border-primary mb-4">
             <div class="card-body">
@@ -461,12 +462,12 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
                             </a>
 
                             <a href="campos_os/listar.php" class="btn btn-outline-primary">
-                                Campos da OS
+                                Campos personalizados
                             </a>
 
                         <?php else: ?>
                             <a href="campos_os/listar.php" class="btn btn-primary">
-                                Criar campos da OS
+                                Criar Campos personalizados
                             </a>
 
                             <a href="campos_os/modelos.php" class="btn btn-outline-primary">
@@ -478,12 +479,12 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     <?php endif; ?>
-      <?php if (!$mostrarAlertaPersonalizacaoOS): ?>
+    <?php if (!$mostrarAlertaPersonalizacaoOS): ?>
         <div class="alert alert-light border mb-4">
             <strong>OS personalizada:</strong>
-            sua empresa está configurada como 
+            sua empresa está configurada para 
             <strong><?= htmlspecialchars($segmentoEmpresaDashboardNome) ?></strong>
-            e possui 
+            com 
             <strong><?= (int)$totalCamposPersonalizadosOS ?></strong>
             campo(s) personalizado(s) ativo(s).
         </div>
@@ -494,14 +495,14 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="small text-muted">OS Ativas</div>
+                    <div class="small text-muted">OS em aberto</div>
 
                     <h3 class="mb-1 mt-2 text-primary">
                         <?= (int)$totalOSAtivas ?>
                     </h3>
 
                     <div class="input-help">
-                        Abertas, em andamento ou aguardando.
+                        Ordens que ainda precisam de acompanhamento.
                     </div>
                 </div>
             </div>
@@ -510,7 +511,7 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="small text-muted">Clientes Ativos</div>
+                    <div class="small text-muted">Clientes cadastrados</div>
 
                     <h3 class="mb-1 mt-2">
                         <?= (int)$totalClientesAtivos ?>
@@ -526,14 +527,14 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="small text-muted">Valor Previsto</div>
+                    <div class="small text-muted">Valor previsto</div>
 
                     <h3 class="mb-1 mt-2">
                         R$ <?= number_format((float)$valorPrevisto, 2, ",", ".") ?>
                     </h3>
 
                     <div class="input-help">
-                        OS não canceladas.
+                        Total estimado em ordens não canceladas.
                     </div>
                 </div>
             </div>
@@ -542,14 +543,14 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="small text-muted">Valor Finalizado</div>
+                    <div class="small text-muted">Valor finalizado</div>
 
                     <h3 class="mb-1 mt-2">
                         R$ <?= number_format((float)$valorFinalizado, 2, ",", ".") ?>
                     </h3>
 
                     <div class="input-help">
-                        OS concluídas.
+                        Total registrado em ordens concluídas.
                     </div>
                 </div>
             </div>

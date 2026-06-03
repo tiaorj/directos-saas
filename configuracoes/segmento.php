@@ -166,7 +166,7 @@ $modeloRecomendado = $segmentos[$segmentoAtual]["modelo"] ?? "";
                         </a>
 
                         <a href="../campos_os/listar.php" class="btn btn-outline-secondary">
-                            Ver campos da OS
+                            Ver Campos personalizados
                         </a>
                     </div>
                 </div>
