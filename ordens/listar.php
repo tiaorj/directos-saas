@@ -97,29 +97,36 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once "../includes/header.php"; ?>
 <?php require_once "../includes/menu.php"; ?>
 
-<div class="container-fluid">
+<div class="container-fluid form-page-wide">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="form-header">
         <div>
             <h3 class="mb-1">Ordens de Serviço</h3>
-            <p class="text-muted mb-0">
-                Acompanhe, filtre e gerencie as ordens de serviço da empresa.
+
+            <p>
+                Acompanhe atendimentos, prazos, valores e status das ordens de serviço.
             </p>
         </div>
 
         <?php if ($podeCriarOS): ?>
             <a href="cadastrar.php" class="btn btn-primary">
-                + Nova OS
+                + Criar nova OS
             </a>
         <?php endif; ?>
     </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <strong>Filtros</strong>
+    <div class="card form-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Filtros da consulta</span>
+
+            <?php if ($statusFiltro !== "" || $prioridadeFiltro !== "" || $clienteFiltro !== "" || $dataInicioFiltro !== "" || $dataFimFiltro !== ""): ?>
+                <span class="badge bg-primary">
+                    Filtros ativos
+                </span>
+            <?php endif; ?>
         </div>
 
-        <div class="section-card-body">
+        <div class="card-body">
             <form method="get" action="listar.php">
 
                 <div class="row">
@@ -176,13 +183,13 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                value="<?= htmlspecialchars($dataFimFiltro) ?>">
                     </div>
 
-                    <div class="col-md-6 mb-3 filter-actions">
+                    <div class="col-md-6 mb-3 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary">
-                            Filtrar
+                            Aplicar filtros
                         </button>
 
                         <a href="listar.php" class="btn btn-outline-secondary">
-                            Limpar
+                            Limpar filtros
                         </a>
                     </div>
                 </div>
@@ -191,16 +198,16 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <strong>Resultado</strong>
+    <div class="card form-card">
+        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <span>Ordens encontradas</span>
 
             <span class="badge bg-primary">
                 <?= count($ordens) ?> registro(s)
             </span>
         </div>
 
-        <div class="section-card-body p-0">
+        <div class="card-body p-0">
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-os">
@@ -217,27 +224,47 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </thead>
 
                     <tbody>
-                        <?php if (count($ordens) === 0): ?>
-                            <tr>
-                                <td colspan="10" class="text-center">
-                                    Nenhuma ordem de serviço encontrada.
-                                </td>
-                            </tr>
-                        <?php endif; ?>
+                    <?php if (count($ordens) === 0): ?>
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    Nenhuma ordem de serviço encontrada para os filtros selecionados.
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
 
                         <?php foreach ($ordens as $ordem): ?>
                             <tr>
                                 <td>
-                                    
-                                    <span class="os-code">
+                                    <strong class="os-code">
                                         <?= htmlspecialchars($ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT))) ?>
-                                        
-                                    </span>                                    
+                                    </strong>
+
+                                    <div class="os-subtitle">
+                                        <?= htmlspecialchars($ordem["Titulo"] ?? "") ?>
+                                    </div>
                                 </td>
 
-                                <td><?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "") ?></strong>
 
-                                <td><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></td>
+                                    <?php if (!empty($ordem["ClienteTelefone"])): ?>
+                                        <div class="os-subtitle">
+                                            <?= htmlspecialchars($ordem["ClienteTelefone"]) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?>
+
+                                    <?php if (!empty($ordem["Prioridade"])): ?>
+                                        <div class="os-subtitle">
+                                            Prioridade: <?= htmlspecialchars($ordem["Prioridade"]) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>                                
                                 
                                 <td>
                                     <?php
@@ -248,6 +275,8 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             $classeStatus = "bg-primary";
                                         } elseif ($status === "Em andamento") {
                                             $classeStatus = "bg-warning text-dark";
+                                        } elseif ($status === "Aguardando cliente" || $status === "Aguardando peça") {
+                                            $classeStatus = "bg-secondary";
                                         } elseif ($status === "Concluída") {
                                             $classeStatus = "bg-success";
                                         } elseif ($status === "Cancelada") {
@@ -261,19 +290,51 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
 
                                 <td>
-                                    <?= !empty($ordem["DataAbertura"]) 
-                                        ? date("d/m/Y", strtotime($ordem["DataAbertura"])) 
-                                        : "-" 
-                                    ?>
-                                    <br>
-                                    <?= !empty($ordem["DataPrevisao"]) 
-                                        ? date("d/m/Y", strtotime($ordem["DataPrevisao"])) 
-                                        : "-" 
-                                    ?>
+                                    <div>
+                                        <span class="text-muted small">Abertura:</span>
+                                        <strong>
+                                            <?= !empty($ordem["DataAbertura"]) 
+                                                ? date("d/m/Y", strtotime($ordem["DataAbertura"])) 
+                                                : "-" 
+                                            ?>
+                                        </strong>
+                                    </div>
+
+                                    <div class="os-subtitle">
+                                        Previsão:
+                                        <?= !empty($ordem["DataPrevisao"]) 
+                                            ? date("d/m/Y", strtotime($ordem["DataPrevisao"])) 
+                                            : "-" 
+                                        ?>
+                                    </div>
+
+                                    <?php if (!empty($ordem["DataConclusao"])): ?>
+                                        <div class="os-subtitle">
+                                            Conclusão: <?= date("d/m/Y", strtotime($ordem["DataConclusao"])) ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
 
                                 <td>
-                                    R$ <?= number_format((float)($ordem["ValorFinal"] ?? $ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?>
+                                    <?php if (!empty($ordem["ValorFinal"]) && (float)$ordem["ValorFinal"] > 0): ?>
+                                        <strong>
+                                            R$ <?= number_format((float)$ordem["ValorFinal"], 2, ",", ".") ?>
+                                        </strong>
+
+                                        <div class="os-subtitle">
+                                            Valor final
+                                        </div>
+                                    <?php elseif (!empty($ordem["ValorPrevisto"]) && (float)$ordem["ValorPrevisto"] > 0): ?>
+                                        <strong>
+                                            R$ <?= number_format((float)$ordem["ValorPrevisto"], 2, ",", ".") ?>
+                                        </strong>
+
+                                        <div class="os-subtitle">
+                                            Valor previsto
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted">Não informado</span>
+                                    <?php endif; ?>
                                 </td>
 
                                 <td>
@@ -302,7 +363,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 href="atendimento.php?id=<?= $ordem["OrdemServicoId"] ?>" 
                                                 class="btn btn-sm btn-success"
                                             >
-                                                Atender
+                                                Atendimento
                                             </a>
                                         <?php endif; ?>
 
@@ -323,7 +384,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                         class="dropdown-item" 
                                                         href="visualizar.php?id=<?= $ordem["OrdemServicoId"] ?>"
                                                     >
-                                                        Ver detalhes
+                                                        Visualizar OS
                                                     </a>
                                                 </li>
 
@@ -333,7 +394,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             class="dropdown-item" 
                                                             href="editar.php?id=<?= $ordem["OrdemServicoId"] ?>"
                                                         >
-                                                            Editar OS
+                                                            Editar
                                                         </a>
                                                     </li>
                                                 <?php endif; ?>
@@ -344,7 +405,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                         href="<?= htmlspecialchars($linkCliente) ?>" 
                                                         target="_blank"
                                                     >
-                                                        Abrir link do cliente
+                                                        Área do cliente
                                                     </a>
                                                 </li>
 
@@ -354,7 +415,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                         class="dropdown-item"
                                                         onclick="copiarLinkCliente('<?= htmlspecialchars($linkCliente, ENT_QUOTES) ?>')"
                                                     >
-                                                        Copiar link
+                                                        Copiar link do cliente
                                                     </button>
                                                 </li>
 
@@ -365,7 +426,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             href="<?= htmlspecialchars($linkWhatsApp) ?>" 
                                                             target="_blank"
                                                         >
-                                                            Enviar por WhatsApp
+                                                            Enviar link por WhatsApp
                                                         </a>
                                                     </li>
                                                 <?php endif; ?>
@@ -377,9 +438,9 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                         <a 
                                                             class="dropdown-item text-danger" 
                                                             href="excluir.php?id=<?= $ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>"
-                                                            onclick="return confirm('Deseja realmente cancelar esta OS?')"
+                                                            onclick="return confirm('Deseja realmente cancelar esta ordem de serviço?')"
                                                         >
-                                                            Cancelar OS
+                                                            Cancelar ordem
                                                         </a>
                                                     </li>
                                                 <?php endif; ?>
