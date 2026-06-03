@@ -3,6 +3,8 @@ require_once "../includes/proteger_admin.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
 require_once "../includes/csrf.php";
+require_once "../includes/demo.php";
+bloquearAcaoDemo();
 csrfValidarTokenPost();
 
 $empresaId = (int)$_SESSION["EmpresaId"];

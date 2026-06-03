@@ -5,6 +5,8 @@ exigirPerfil(["Admin"]);
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/demo.php";
+bloquearAcaoDemo();
 csrfValidarTokenGet();
 
 $empresaId = (int)$_SESSION["EmpresaId"];

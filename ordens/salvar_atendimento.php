@@ -5,6 +5,8 @@ require_once "../includes/permissoes.php";
 require_once "../includes/historico.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/demo.php";
+bloquearAcaoDemo();
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente", "Tecnico"]);

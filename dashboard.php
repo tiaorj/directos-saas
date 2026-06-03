@@ -4,9 +4,11 @@ require_once "config/conexao.php";
 require_once "includes/funcoes.php";
 require_once "includes/planos.php";
 require_once "includes/csrf.php";
+require_once "includes/demo.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $usuarioNome = $_SESSION["UsuarioNome"] ?? "Usuário";
+$mensagem = trim($_GET["mensagem"] ?? "");
 
 function buscarValorEmpresa($conn, $sql, $empresaId)
 {
@@ -282,7 +284,12 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container-fluid form-page-wide">
 
-    <div class="form-header">
+    <div class="form-header">  
+        <?php if ($mensagem !== ""): ?>
+            <div class="alert alert-warning">
+                <?= htmlspecialchars($mensagem) ?>
+            </div>
+        <?php endif; ?>           
         <?php if ($mostrarOnboarding): ?>
             <div class="card form-card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -384,7 +391,12 @@ $ultimasOrdens = $stmtUltimas->fetchAll(PDO::FETCH_ASSOC);
             + Nova OS
         </a>
     </div>
-
+    <?php if (usuarioDemo()): ?>
+        <div class="alert alert-info border mb-4">
+            <strong>Ambiente de demonstração:</strong>
+            você pode navegar, visualizar relatórios e abrir recibos. Algumas ações de alteração ou exclusão estão bloqueadas para preservar os dados demo.
+        </div>
+    <?php endif; ?>   
     <?php if ($mostrarAlertaPersonalizacaoOS): ?>
         <div class="card shadow-sm border-primary mb-4">
             <div class="card-body">

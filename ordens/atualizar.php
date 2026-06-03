@@ -9,7 +9,8 @@ require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 require_once "../includes/mensagens_whatsapp.php";
 require_once "../includes/campos_os.php";
-
+require_once "../includes/demo.php";
+bloquearAcaoDemo();
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin", "Atendente"]);

@@ -3,7 +3,8 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/csrf.php";
-
+require_once "../includes/demo.php";
+bloquearAcaoDemo();
 csrfValidarTokenPost();
 
 exigirPerfil(["Admin"]);

@@ -6,7 +6,7 @@ if (isset($_SESSION["UsuarioId"])) {
     header("Location: dashboard.php");
     exit;
 }
-
+$_SESSION["UsuarioEmail"] = $usuario["Email"];
 $erro = $_GET["erro"] ?? "";
 ?>
 
