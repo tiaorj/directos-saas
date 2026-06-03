@@ -242,31 +242,49 @@ function classeStatusFinanceiroOS($status)
     <div class="form-header">
         <div>
             <h3 class="mb-1">
-                Ordem de Serviço <?= htmlspecialchars($codigoOS) ?>
+                <?= htmlspecialchars($codigoOS) ?>
             </h3>
 
             <p>
                 <?= htmlspecialchars($ordem["Titulo"] ?? "Detalhes da ordem de serviço") ?>
             </p>
+
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="badge <?= classeStatusOS($ordem["Status"] ?? "") ?>">
+                    <?= htmlspecialchars($ordem["Status"] ?? "-") ?>
+                </span>
+
+                <span class="badge <?= classePrioridadeOS($ordem["Prioridade"] ?? "") ?>">
+                    Prioridade: <?= htmlspecialchars($ordem["Prioridade"] ?? "-") ?>
+                </span>
+
+                <span class="badge <?= classeStatusFinanceiroOS($ordem["StatusFinanceiro"] ?? "Pendente") ?>">
+                    Financeiro: <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
+                </span>
+            </div>
         </div>
 
-        <div class="form-actions" style="border-top: 0; margin-top: 0; padding-top: 0;">
-            <a href="nova_mensagem_whatsapp.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-success">
-                Nova mensagem WhatsApp
-            </a>            
-            <a href="anexar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-success">
-                Anexar Arquivo
-            </a>
-
+        <div class="form-actions d-flex flex-wrap gap-2" style="border-top: 0; margin-top: 0; padding-top: 0;">
             <a href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-primary">
                 Atendimento
             </a>
+
             <a href="recebimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-success">
                 Recebimento
-            </a>            
+            </a>
+
             <a href="recibo.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-success">
                 Recibo
-            </a>            
+            </a>
+
+            <a href="nova_mensagem_whatsapp.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-success">
+                WhatsApp
+            </a>
+
+            <a href="anexar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-primary">
+                Anexar
+            </a>
+
             <a href="editar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-warning">
                 Editar
             </a>
@@ -302,9 +320,9 @@ function classeStatusFinanceiroOS($status)
         <div class="alert alert-success border-0 shadow-sm">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <strong>Mensagem de WhatsApp pronta.</strong>
+                    <strong>Mensagem de WhatsApp preparada.</strong>
                     <br>
-                    A mensagem foi preparada com sucesso. Clique no botão para abrir o WhatsApp com a mensagem preenchida.
+                    Clique no botão para abrir o WhatsApp com a mensagem já preenchida para o cliente.
                 </div>
 
                 <div class="d-flex flex-wrap gap-2">
@@ -348,62 +366,67 @@ function classeStatusFinanceiroOS($status)
 
     <div class="row g-3 mb-4">
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Status</div>
+        <div class="row g-3 mb-4">
 
-                    <span class="badge <?= classeStatusOS($ordem["Status"] ?? "") ?> mt-2">
-                        <?= htmlspecialchars($ordem["Status"] ?? "-") ?>
-                    </span>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100 border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="small text-muted">Status da OS</div>
+
+                        <span class="badge <?= classeStatusOS($ordem["Status"] ?? "") ?> mt-2">
+                            <?= htmlspecialchars($ordem["Status"] ?? "-") ?>
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Prioridade</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">Prioridade</div>
 
-                    <span class="badge <?= classePrioridadeOS($ordem["Prioridade"] ?? "") ?> mt-2">
-                        <?= htmlspecialchars($ordem["Prioridade"] ?? "-") ?>
-                    </span>
+                        <span class="badge <?= classePrioridadeOS($ordem["Prioridade"] ?? "") ?> mt-2">
+                            <?= htmlspecialchars($ordem["Prioridade"] ?? "-") ?>
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Valor Previsto</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-muted">Valor previsto</div>
 
-                    <h5 class="mb-0 mt-2">
-                        R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?>
-                    </h5>
+                        <h5 class="mb-0 mt-2">
+                            R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?>
+                        </h5>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Valor Final</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100 border-start border-4 border-success">
+                    <div class="card-body">
+                        <div class="small text-muted">Valor final</div>
 
-                    <h5 class="mb-0 mt-2">
-                        R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?>
-                    </h5>
+                        <h5 class="mb-0 mt-2">
+                            R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?>
+                        </h5>
+                    </div>
                 </div>
             </div>
+
         </div>
 
     </div>
 
-    <div class="row g-3">
-    </div>
+    <div class="card form-card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Controle financeiro</span>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white">
-            <strong>Controle Financeiro</strong>
+            <a href="recebimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-sm btn-outline-success">
+                Ver recebimentos
+            </a>
         </div>
 
         <div class="card-body">
@@ -422,14 +445,14 @@ function classeStatusFinanceiroOS($status)
                 </div>
 
                 <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Valor pago</div>
-                    <strong>
+                    <div class="small text-muted">Valor recebido</div>
+                    <strong class="text-success">
                         R$ <?= number_format((float)($ordem["ValorPago"] ?? 0), 2, ",", ".") ?>
                     </strong>
                 </div>
 
                 <div class="col-md-3 mb-3">
-                    <div class="small text-muted">Data de pagamento</div>
+                    <div class="small text-muted">Último recebimento</div>
                     <strong>
                         <?= !empty($ordem["DataPagamento"])
                             ? date("d/m/Y", strtotime($ordem["DataPagamento"]))
@@ -450,96 +473,96 @@ function classeStatusFinanceiroOS($status)
             </div>
         </div>
     </div>
+        <div class="card form-card mb-3">
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card form-card mb-3 h-100">
+                    <div class="card-header">
+                        Dados da OS
+                    </div>
 
-    <div class="row g-3">
-        <div class="col-lg-6">
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-white">
-                    <strong>Dados da OS</strong>
-                </div>
+                    <div class="card-body">
+                        <div class="row">
 
-                <div class="card-body">
-                    <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Código</div>
+                                <strong><?= htmlspecialchars($codigoOS) ?></strong>
+                            </div>
 
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Código</div>
-                            <strong><?= htmlspecialchars($codigoOS) ?></strong>
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Serviço</div>
+                                <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Abertura</div>
+                                <strong><?= formatarDataOS($ordem["DataAbertura"] ?? null, true) ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Previsão</div>
+                                <strong><?= formatarDataOS($ordem["DataPrevisao"] ?? null) ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Conclusão</div>
+                                <strong><?= formatarDataOS($ordem["DataConclusao"] ?? null, true) ?></strong>
+                            </div>
+
                         </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Serviço</div>
-                            <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Data de Abertura</div>
-                            <strong><?= formatarDataOS($ordem["DataAbertura"] ?? null, true) ?></strong>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Data de Previsão</div>
-                            <strong><?= formatarDataOS($ordem["DataPrevisao"] ?? null) ?></strong>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Data de Conclusão</div>
-                            <strong><?= formatarDataOS($ordem["DataConclusao"] ?? null, true) ?></strong>
-                        </div>
-
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6">
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-white">
-                    <strong>Cliente</strong>
-                </div>
+            <div class="col-lg-6">
+                <div class="card form-card mb-3 h-100">
+                    <div class="card-header">
+                        Cliente
+                    </div>
 
-                <div class="card-body">
-                    <div class="row">
+                    <div class="card-body">
+                        <div class="row">
 
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Nome</div>
-                            <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Nome</div>
+                                <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Telefone</div>
+                                <strong><?= htmlspecialchars($ordem["ClienteTelefone"] ?? "-") ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">E-mail</div>
+                                <strong><?= htmlspecialchars($ordem["ClienteEmail"] ?? "-") ?></strong>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="small text-muted">Documento</div>
+                                <strong><?= htmlspecialchars($ordem["ClienteDocumento"] ?? "-") ?></strong>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="small text-muted">Endereço</div>
+                                <strong>
+                                    <?= htmlspecialchars($ordem["ClienteEndereco"] ?? "") ?>
+                                    <?= htmlspecialchars($ordem["ClienteCidade"] ?? "") ?>
+                                    <?= htmlspecialchars($ordem["ClienteEstado"] ?? "") ?>
+                                </strong>
+                            </div>
+
                         </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Telefone</div>
-                            <strong><?= htmlspecialchars($ordem["ClienteTelefone"] ?? "-") ?></strong>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">E-mail</div>
-                            <strong><?= htmlspecialchars($ordem["ClienteEmail"] ?? "-") ?></strong>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="small text-muted">Documento</div>
-                            <strong><?= htmlspecialchars($ordem["ClienteDocumento"] ?? "-") ?></strong>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="small text-muted">Endereço</div>
-                            <strong>
-                                <?= htmlspecialchars($ordem["ClienteEndereco"] ?? "") ?>
-                                <?= htmlspecialchars($ordem["ClienteCidade"] ?? "") ?>
-                                <?= htmlspecialchars($ordem["ClienteEstado"] ?? "") ?>
-                            </strong>
-                        </div>
-
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
-
     <?php if (count($camposPersonalizadosValoresOS) > 0): ?>
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-white">
-                <strong>Campos personalizados</strong>
+        <div class="card form-card mb-3">
+            <div class="card-header">
+                Campos personalizados da OS
             </div>
 
             <div class="card-body">
@@ -566,38 +589,38 @@ function classeStatusFinanceiroOS($status)
         </div>
     <?php endif; ?>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white">
-            <strong>Descrição do Problema</strong>
+    <div class="card form-card mb-3">
+        <div class="card-header">
+           Solicitação do cliente
         </div>
 
         <div class="card-body">
             <?php if (!empty($ordem["DescricaoProblema"])): ?>
                 <?= nl2br(htmlspecialchars($ordem["DescricaoProblema"])) ?>
             <?php else: ?>
-                <span class="text-muted">Nenhuma descrição informada.</span>
+                <span class="text-muted">Nenhuma solicitação detalhada foi informada.</span>
             <?php endif; ?>
         </div>
     </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white">
-            <strong>Solução Aplicada</strong>
+    <div class="card form-card mb-3">
+        <div class="card-header">
+            Solução aplicada
         </div>
 
         <div class="card-body">
             <?php if (!empty($ordem["DescricaoSolucao"])): ?>
                 <?= nl2br(htmlspecialchars($ordem["DescricaoSolucao"])) ?>
             <?php else: ?>
-                <span class="text-muted">Nenhuma solução registrada até o momento.</span>
+                <span class="text-muted">Nenhuma solução foi registrada até o momento.</span>
             <?php endif; ?>
         </div>
     </div>
 
     <?php if (!empty($ordem["Observacao"])): ?>
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-white">
-                <strong>Observação</strong>
+        <div class="card form-card mb-3">
+            <div class="card-header">
+                Observações internas
             </div>
 
             <div class="card-body">
@@ -606,8 +629,8 @@ function classeStatusFinanceiroOS($status)
         </div>
     <?php endif; ?>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div class="card form-card mb-3">
+        <div class="card-header">
             <strong>Anexos da OS</strong>
 
             <a href="anexar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-sm btn-primary">
@@ -615,7 +638,7 @@ function classeStatusFinanceiroOS($status)
             </a>
         </div>
 
-        <div class="card-body p-0">
+       <div class="card-body">
             <?php if (count($anexos) === 0): ?>
                 <div class="empty-state">
                     Nenhum anexo cadastrado.
@@ -700,16 +723,16 @@ function classeStatusFinanceiroOS($status)
         </div>
     </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <strong>Mensagens WhatsApp preparadas</strong>
+    <div class="card form-card mb-3">
+        <div class="card-header">
+            <strong>Mensagens de WhatsApp</strong>
 
             <span class="badge bg-success">
                 <?= count($mensagensWhatsApp) ?> registro(s)
             </span>
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body">
             <?php if (count($mensagensWhatsApp) === 0): ?>
                 <div class="empty-state">
                     Nenhuma mensagem WhatsApp preparada para esta OS.
