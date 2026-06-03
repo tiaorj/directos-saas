@@ -99,6 +99,16 @@ if ($saldoAtual < 0) {
     $saldoAtual = 0;
 }
 
+$percentualRecebido = 0;
+
+if ($valorReferencia > 0) {
+    $percentualRecebido = round(($totalRecebido / $valorReferencia) * 100);
+
+    if ($percentualRecebido > 100) {
+        $percentualRecebido = 100;
+    }
+}
+
 $mensagem = trim($_GET["mensagem"] ?? "");
 
 function dinheiroRecebimento($valor)
@@ -141,17 +151,37 @@ function classeStatusFinanceiroRecebimento($status)
     <div class="form-header">
         <div>
             <h3 class="mb-1">
-                Recebimentos da OS <?= htmlspecialchars($codigoOS) ?>
+                Recebimentos
             </h3>
 
             <p>
-                <?= htmlspecialchars($ordem["Titulo"] ?? "") ?>
+                <?= htmlspecialchars($codigoOS) ?> · <?= htmlspecialchars($ordem["Titulo"] ?? "") ?>
             </p>
+
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="badge bg-primary">
+                    <?= htmlspecialchars($ordem["Status"] ?? "-") ?>
+                </span>
+
+                <span class="badge <?= classeStatusFinanceiroRecebimento($ordem["StatusFinanceiro"] ?? "Pendente") ?>">
+                    Financeiro: <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
+                </span>
+
+                <span class="badge bg-light text-dark border">
+                    Cliente: <?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?>
+                </span>
+            </div>
         </div>
 
-        <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
-            Voltar
-        </a>
+        <div class="form-actions d-flex flex-wrap gap-2" style="border-top: 0; margin-top: 0; padding-top: 0;">
+            <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
+                Voltar para OS
+            </a>
+
+            <a href="recibo.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-success" target="_blank">
+                Recibo geral
+            </a>
+        </div>
     </div>
 
     <?php if ($mensagem !== ""): ?>
@@ -160,61 +190,71 @@ function classeStatusFinanceiroRecebimento($status)
         </div>
     <?php endif; ?>
 
-    <div class="row g-3 mb-4">
+    <div class="card form-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Resumo financeiro da OS</span>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Valor da OS</div>
-                    <h4 class="mb-0 mt-2">
-                        <?= dinheiroRecebimento($valorReferencia) ?>
-                    </h4>
-                </div>
-            </div>
+            <span class="badge <?= classeStatusFinanceiroRecebimento($ordem["StatusFinanceiro"] ?? "Pendente") ?>">
+                <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
+            </span>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 border border-success">
-                <div class="card-body">
-                    <div class="small text-muted">Total recebido</div>
-                    <h4 class="mb-0 mt-2 text-success">
-                        <?= dinheiroRecebimento($totalRecebido) ?>
-                    </h4>
+        <div class="card-body">
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <div class="border rounded-3 p-3 h-100 bg-light">
+                        <div class="small text-muted">Valor da OS</div>
+                        <h4 class="mb-0 mt-2">
+                            <?= dinheiroRecebimento($valorReferencia) ?>
+                        </h4>
+                    </div>
                 </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-3 p-3 h-100 bg-light">
+                        <div class="small text-muted">Total recebido</div>
+                        <h4 class="mb-0 mt-2 text-success">
+                            <?= dinheiroRecebimento($totalRecebido) ?>
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-3 p-3 h-100 bg-light">
+                        <div class="small text-muted">Saldo restante</div>
+                        <h4 class="mb-0 mt-2 <?= $saldoAtual > 0 ? "text-warning" : "text-success" ?>">
+                            <?= dinheiroRecebimento($saldoAtual) ?>
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-3 p-3 h-100 bg-light">
+                        <div class="small text-muted">Recebido</div>
+                        <h4 class="mb-2 mt-2">
+                            <?= (int)$percentualRecebido ?>%
+                        </h4>
+
+                        <div class="progress" style="height: 10px;">
+                            <div 
+                                class="progress-bar bg-success" 
+                                style="width: <?= (int)$percentualRecebido ?>%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 border border-warning">
-                <div class="card-body">
-                    <div class="small text-muted">Saldo</div>
-                    <h4 class="mb-0 mt-2 <?= $saldoAtual > 0 ? "text-warning" : "text-success" ?>">
-                        <?= dinheiroRecebimento($saldoAtual) ?>
-                    </h4>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Status financeiro</div>
-
-                    <span class="badge <?= classeStatusFinanceiroRecebimento($ordem["StatusFinanceiro"] ?? "Pendente") ?> mt-2">
-                        <?= htmlspecialchars($ordem["StatusFinanceiro"] ?? "Pendente") ?>
-                    </span>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <div class="row g-3">
 
         <div class="col-lg-5">
-            <div class="card form-card">
+            <div class="card form-card h-100">
                 <div class="card-header">
-                    Novo recebimento
+                    Registrar novo recebimento
                 </div>
 
                 <div class="card-body">
@@ -229,6 +269,7 @@ function classeStatusFinanceiroRecebimento($status)
                             <input 
                                 type="number" 
                                 step="0.01" 
+                                min="0.01"
                                 name="ValorRecebido" 
                                 class="form-control"
                                 required
@@ -278,7 +319,7 @@ function classeStatusFinanceiroRecebimento($status)
 
                         <div class="form-actions">
                             <button type="submit" class="btn btn-success">
-                                Registrar Recebimento
+                                Registrar recebimento
                             </button>
 
                             <a href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-outline-secondary">
@@ -292,7 +333,7 @@ function classeStatusFinanceiroRecebimento($status)
         </div>
 
         <div class="col-lg-7">
-            <div class="card form-card">
+            <div class="card form-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Histórico de recebimentos</span>
 
@@ -318,7 +359,7 @@ function classeStatusFinanceiroRecebimento($status)
                                         <th>Forma</th>
                                         <th>Usuário</th>
                                         <th>Observação</th>
-                                        <th width="170">Ação</th>
+                                        <th width="170">Ações</th>
                                     </tr>
                                 </thead>
 
@@ -326,12 +367,13 @@ function classeStatusFinanceiroRecebimento($status)
                                     <?php foreach ($recebimentos as $recebimento): ?>
                                         <tr>
                                             <td>
-                                                <?= dataRecebimento($recebimento["DataRecebimento"] ?? null) ?>
+                                                <strong><?= dataRecebimento($recebimento["DataRecebimento"] ?? null) ?></strong>
 
                                                 <div class="os-subtitle">
+                                                    Registrado em:
                                                     <?= !empty($recebimento["DataCadastro"])
                                                         ? date("d/m/Y H:i", strtotime($recebimento["DataCadastro"]))
-                                                        : ""
+                                                        : "-"
                                                     ?>
                                                 </div>
                                             </td>

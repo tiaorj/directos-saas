@@ -134,33 +134,29 @@ function dataReciboIndividual($data)
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background: #f5f5f5;
-            color: #222;
+            background: #eef2f7;
+            color: #1f2937;
             margin: 0;
             padding: 30px;
         }
 
         .recibo {
-            max-width: 850px;
+            max-width: 920px;
             margin: 0 auto;
             background: #fff;
-            border: 1px solid #ddd;
-            padding: 35px;
-            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 38px;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
         }
 
         .topo {
             display: flex;
             justify-content: space-between;
             gap: 20px;
-            border-bottom: 2px solid #222;
+            border-bottom: 2px solid #0d6efd;
             padding-bottom: 20px;
             margin-bottom: 25px;
-        }
-
-        .empresa h1 {
-            margin: 0;
-            font-size: 26px;
         }
 
         .empresa p,
@@ -179,6 +175,7 @@ function dataReciboIndividual($data)
             margin: 0;
             font-size: 28px;
             letter-spacing: 1px;
+            color: #0f172a;
         }
 
         .titulo p {
@@ -187,10 +184,11 @@ function dataReciboIndividual($data)
         }
 
         .box {
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
             padding: 18px;
             margin-bottom: 18px;
+            background: #ffffff;
         }
 
         .box h3 {
@@ -218,7 +216,7 @@ function dataReciboIndividual($data)
         }
 
         .valor-destaque {
-            font-size: 34px;
+            font-size: 32px;
             font-weight: bold;
             color: #198754;
         }
@@ -268,7 +266,9 @@ function dataReciboIndividual($data)
             color: #fff;
             border-color: #0d6efd;
         }
-
+        .btn:hover {
+            opacity: 0.92;
+        }
         @media print {
             body {
                 background: #fff;
@@ -282,6 +282,7 @@ function dataReciboIndividual($data)
             .recibo {
                 border: none;
                 border-radius: 0;
+                box-shadow: none;
                 max-width: 100%;
                 padding: 20px;
             }
@@ -323,8 +324,8 @@ function dataReciboIndividual($data)
     </div>
 
     <div class="titulo">
-        <h2>RECIBO DE RECEBIMENTO</h2>
-        <p>Comprovante referente a um pagamento específico da ordem de serviço.</p>
+        <h2>RECIBO DE PAGAMENTO INDIVIDUAL</h2>
+        <p>Comprovante referente a um recebimento específico registrado na ordem de serviço.</p>
     </div>
 
     <div class="box">
@@ -384,9 +385,10 @@ function dataReciboIndividual($data)
     </div>
 
     <p class="texto-recibo">
-        Recebemos de <strong><?= htmlspecialchars($recibo["ClienteNome"] ?? "-") ?></strong>
+        Declaramos que recebemos de <strong><?= htmlspecialchars($recibo["ClienteNome"] ?? "-") ?></strong>
         o valor de <strong><?= dinheiroReciboIndividual($valorRecebidoAtual) ?></strong>,
-        referente a pagamento da ordem de serviço <strong><?= htmlspecialchars($codigoOS) ?></strong>.
+        referente a um pagamento registrado na ordem de serviço
+        <strong><?= htmlspecialchars($codigoOS) ?></strong>.
     </p>
 
     <div class="box">

@@ -151,7 +151,7 @@ function dataRecibo($data)
             display: flex;
             justify-content: space-between;
             gap: 20px;
-            border-bottom: 2px solid #222;
+            border-bottom: 2px solid #0d6efd;
             padding-bottom: 20px;
             margin-bottom: 25px;
         }
@@ -177,15 +177,16 @@ function dataRecibo($data)
             margin: 0;
             font-size: 28px;
             letter-spacing: 1px;
+            color: #0f172a;
         }
 
         .box {
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
             padding: 18px;
             margin-bottom: 18px;
+            background: #ffffff;
         }
-
         .box h3 {
             margin-top: 0;
             margin-bottom: 12px;
@@ -211,7 +212,7 @@ function dataRecibo($data)
         }
 
         .valor-destaque {
-            font-size: 30px;
+            font-size: 32px;
             font-weight: bold;
             color: #198754;
         }
@@ -290,7 +291,9 @@ function dataRecibo($data)
             color: #fff;
             border-color: #0d6efd;
         }
-
+        .btn:hover {
+            opacity: 0.92;
+        }
         .alerta {
             background: #fff8e1;
             border: 1px solid #ffe08a;
@@ -314,6 +317,7 @@ function dataRecibo($data)
             .recibo {
                 border: none;
                 border-radius: 0;
+                box-shadow: none;
                 max-width: 100%;
                 padding: 20px;
             }
@@ -355,7 +359,7 @@ function dataRecibo($data)
     </div>
 
     <div class="titulo">
-        <h2>RECIBO DE PAGAMENTO</h2>
+        <h2>RECIBO GERAL DA ORDEM DE SERVIÇO</h2>
     </div>
 
     <?php if (count($recebimentos) === 0 && $totalRecebido <= 0): ?>
@@ -421,10 +425,11 @@ function dataRecibo($data)
     </div>
 
     <p class="texto-recibo">
-        Recebemos de <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+        Declaramos que recebemos de <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
         o valor total de <strong><?= dinheiroRecibo($totalRecebido) ?></strong>,
-        referente à ordem de serviço <strong><?= htmlspecialchars($codigoOS) ?></strong>,
-        pelo serviço <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>.
+        referente aos recebimentos registrados para a ordem de serviço
+        <strong><?= htmlspecialchars($codigoOS) ?></strong>,
+        relacionada ao serviço <strong><?= htmlspecialchars($ordem["ServicoNome"] ?? "Não informado") ?></strong>.
     </p>
 
     <div class="box">
