@@ -21,6 +21,11 @@ Preparar o DirectOS para publicação, apresentação comercial e primeiros test
 * [ ] Testar login no Render
 * [ ] Testar logout no Render
 * [ ] Remover arquivos temporários, testes ou `phpinfo.php`, se existirem
+* [ ] Confirmar versão do PHP local
+* [ ] Confirmar versão do PHP no Render
+* [ ] Confirmar `composer.json` com PHP 8.3
+* [ ] Confirmar Build Command do Render
+* [ ] Confirmar Start Command do Render
 
 ---
 
