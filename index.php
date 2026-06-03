@@ -17,7 +17,7 @@ if (isset($_SESSION["UsuarioId"])) {
 
     <meta 
         name="description" 
-        content="DirectOS é um sistema online de ordem de serviço com assistente IA, automação WhatsApp, n8n, clientes, serviços, anexos e acompanhamento pelo cliente."
+        content="DirectOS é um sistema online de ordem de serviço para pequenos prestadores, com clientes, serviços, IA, financeiro, recibos, área do cliente e mensagens prontas para WhatsApp."
     >
 
     <link 
@@ -315,7 +315,7 @@ if (isset($_SESSION["UsuarioId"])) {
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#automacao">Automação WhatsApp</a>
+                    <a class="nav-link" href="#automacao">WhatsApp</a>
                 </li>
 
                 <li class="nav-item">
@@ -348,32 +348,32 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="col-lg-7">
                 <div class="hero-badge">
-                    Sistema de Ordem de Serviço com IA + Automação WhatsApp
+                    Sistema de Ordem de Serviço com IA, financeiro e WhatsApp
                 </div>
 
                 <h1>
-                    Controle suas OS com IA e envie atualizações pelo WhatsApp.
+                    Controle suas ordens de serviço, recebimentos e clientes em um só lugar.
                 </h1>
 
                 <p class="lead mt-4">
-                    O DirectOS ajuda prestadores de serviço, assistências técnicas e pequenas empresas a controlar atendimentos, gerar resumos profissionais com IA, criar mensagens para WhatsApp e enviar atualizações automáticas usando n8n e Z-API.
+                    O DirectOS ajuda pequenos prestadores, assistências técnicas e empresas de serviço a organizar OS, clientes, serviços, recebimentos, recibos e comunicações com o cliente usando uma plataforma simples e profissional.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mt-4">
                     <a href="cadastro.php" class="btn btn-light btn-lg">
-                        Começar grátis
+                        Começar agora
                     </a>
 
                     <a href="#automacao" class="btn btn-outline-light btn-lg">
-                        Ver automação
+                        Acessar demonstração
                     </a>
                 </div>
 
                 <div class="row g-3 mt-4">
                     <div class="col-6 col-md-4">
-                        <strong>10 OS/mês</strong>
+                        <strong>OS organizadas</strong>
                         <div style="color: rgba(255,255,255,.72); font-size: .9rem;">
-                            no plano gratuito
+                            do atendimento ao recebimento
                         </div>
                     </div>
 
@@ -387,7 +387,7 @@ if (isset($_SESSION["UsuarioId"])) {
                     <div class="col-6 col-md-4">
                         <strong>WhatsApp automático</strong>
                         <div style="color: rgba(255,255,255,.72); font-size: .9rem;">
-                            via n8n + Z-API
+                            mensagens para enviar ao cliente
                         </div>
                     </div>
                 </div>
@@ -427,16 +427,16 @@ if (isset($_SESSION["UsuarioId"])) {
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">Automação</span>
-                            <strong>n8n + Z-API</strong>
+                            <span class="text-muted">Financeiro</span>
+                            <strong>Recebimento parcial registrado</strong>
                         </div>
 
                         <div class="alert alert-primary mt-4 mb-2">
-                            Mensagem criada com IA para o cliente.
+                             Mensagem profissional criada para o cliente.
                         </div>
 
                         <div class="alert alert-success mb-0">
-                            Atualização enviada automaticamente pelo WhatsApp.
+                            Recibo e acompanhamento disponíveis para a OS.
                         </div>
                     </div>
                 </div>
@@ -491,9 +491,9 @@ if (isset($_SESSION["UsuarioId"])) {
                 <div class="card feature-card">
                     <div class="card-body p-4">
                         <div class="feature-icon">WA</div>
-                        <h5>WhatsApp automatizado</h5>
+                        <h5>WhatsApp assistido</h5>
                         <p class="text-muted mb-0">
-                            Envie mensagens para o cliente usando integração com n8n e Z-API.
+                             Gere mensagens profissionais e abra o WhatsApp com o texto pronto para enviar ao cliente.
                         </p>
                     </div>
                 </div>
@@ -527,9 +527,9 @@ if (isset($_SESSION["UsuarioId"])) {
                 <div class="card feature-card">
                     <div class="card-body p-4">
                         <div class="feature-icon">▥</div>
-                        <h5>Multiempresa</h5>
+                        <h5>Financeiro e recibos</h5>
                         <p class="text-muted mb-0">
-                            Estrutura preparada para SaaS, com dados separados por empresa e plano.
+                            Registre recebimentos, pagamentos parciais, saldos e emita recibos da OS.
                         </p>
                     </div>
                 </div>
@@ -644,18 +644,18 @@ if (isset($_SESSION["UsuarioId"])) {
     </div>
 </section>
 
-<section class="section automation-section" id="automacao">
+<section class="section automation-section" id="whatsapp">
     <div class="container">
 
         <div class="section-title">
-            <span class="badge-soft-success">IA + Automação WhatsApp</span>
+            <span class="badge-soft-success">IA + WhatsApp</span>
 
             <h2 class="mt-3">
-                Mensagens inteligentes enviadas automaticamente pelo WhatsApp
+                Mensagens prontas para manter o cliente informado
             </h2>
 
             <p>
-                O DirectOS gera a mensagem com IA, envia para o n8n e o n8n dispara pelo WhatsApp usando Z-API. Menos trabalho manual, mais agilidade e mais transparência para o cliente.
+                O DirectOS ajuda a gerar mensagens profissionais para WhatsApp, facilitando o contato com o cliente durante o atendimento. A automação com n8n pode ser integrada futuramente conforme a necessidade da empresa.
             </p>
         </div>
 
@@ -673,9 +673,9 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="flow-step">
                 <div class="feature-icon">2</div>
-                <strong>IA gera a mensagem</strong>
+                <strong>Mensagem preparada</strong>
                 <p class="text-muted mb-0">
-                    A IA cria um texto profissional para informar o cliente.
+                    O sistema ajuda a preparar um texto claro e profissional.
                 </p>
             </div>
 
@@ -683,9 +683,9 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="flow-step">
                 <div class="feature-icon">3</div>
-                <strong>n8n processa</strong>
+                <strong>WhatsApp aberto</strong>
                 <p class="text-muted mb-0">
-                    O DirectOS envia os dados para um fluxo de automação no n8n.
+                    O usuário abre o WhatsApp com a mensagem preenchida.
                 </p>
             </div>
 
@@ -693,9 +693,9 @@ if (isset($_SESSION["UsuarioId"])) {
 
             <div class="flow-step">
                 <div class="feature-icon">4</div>
-                <strong>WhatsApp enviado</strong>
+                <strong>Cliente informado</strong>
                 <p class="text-muted mb-0">
-                    A Z-API dispara a mensagem para o cliente no WhatsApp.
+                    O cliente recebe a atualização e pode acompanhar a OS pelo link.
                 </p>
             </div>
 
@@ -709,18 +709,18 @@ if (isset($_SESSION["UsuarioId"])) {
                         <span class="badge-soft-success">Diferencial para o mercado</span>
 
                         <h3 class="mt-3">
-                            Atendimento mais rápido sem depender de mensagens manuais
+                            Comunicação mais profissional sem perder tempo escrevendo do zero
                         </h3>
 
                         <p class="text-muted">
-                            Em vez de copiar textos, abrir WhatsApp e explicar manualmente cada atualização, sua equipe pode gerar a mensagem com IA e disparar pelo fluxo automatizado.
+                            Em vez de escrever cada atualização do zero, sua equipe pode gerar uma mensagem clara, copiar ou abrir o WhatsApp com o texto preenchido e manter o cliente informado.
                         </p>
 
                         <ul class="check-list mb-0">
                             <li>Mensagem profissional criada com IA.</li>
-                            <li>Envio via n8n integrado ao DirectOS.</li>
-                            <li>Disparo pelo WhatsApp usando Z-API.</li>
-                            <li>Registro em auditoria para acompanhar os envios.</li>
+                            <li>Abertura do WhatsApp com mensagem preenchida.</li>
+                            <li>Link de acompanhamento da OS para o cliente.</li>
+                            <li>Automação com n8n opcional para evolução futura.</li>
                         </ul>
                     </div>
                 </div>
@@ -743,17 +743,17 @@ if (isset($_SESSION["UsuarioId"])) {
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">Automação</span>
-                            <strong>n8n</strong>
+                            <span class="text-muted">Envio</span>
+                            <strong>WhatsApp manual assistido</strong>
                         </div>
 
                         <div class="fake-table-row">
-                            <span class="text-muted">Envio</span>
-                            <strong>Z-API / WhatsApp</strong>
+                            <span class="text-muted">Link</span>
+                            <strong>Área do cliente</strong>
                         </div>
 
                         <div class="alert alert-primary mt-4 mb-0">
-                            O cliente recebe a atualização no WhatsApp e acompanha a OS pelo link público.
+                            O cliente recebe a atualização e acompanha a OS pelo link público.
                         </div>
                     </div>
                 </div>
@@ -836,26 +836,26 @@ if (isset($_SESSION["UsuarioId"])) {
             <div class="col-lg-4">
                 <div class="card price-card">
                     <div class="card-body p-4">
-                        <h5>Gratuito</h5>
+                        <h5>Starter</h5>
 
                         <div class="price mt-3">
-                            R$ 0
+                            R$ 39/mês
                         </div>
 
                         <p class="text-muted">
-                            Para começar e validar o uso do sistema.
+                            Para começar a controlar OS de forma profissional.
                         </p>
 
                         <ul class="check-list">
-                            <li>Até 10 OS por mês</li>
-                            <li>Cadastro de clientes</li>
-                            <li>Cadastro de serviços</li>
-                            <li>Área pública do cliente</li>
-                            <li>Link de acompanhamento</li>
+                            <li>Até 30 OS/mês</li>
+                            <li>1 usuário</li>
+                            <li>Clientes e serviços</li>
+                            <li>Controle básico de OS</li>
+                            <li>Financeiro básico</li>
                         </ul>
 
                         <a href="cadastro.php" class="btn btn-outline-primary w-100">
-                            Começar grátis
+                            Criar conta
                         </a>
                     </div>
                 </div>
@@ -871,19 +871,20 @@ if (isset($_SESSION["UsuarioId"])) {
                         <h5>Profissional</h5>
 
                         <div class="price mt-3">
-                            OS ilimitadas
+                            R$ 79/mês
                         </div>
 
                         <p class="text-muted">
-                            Para quem já tem rotina de atendimento e quer escalar.
+                            Para quem quer IA, financeiro, recibos e área do cliente.
                         </p>
 
                         <ul class="check-list">
-                            <li>Ordens de serviço ilimitadas</li>
-                            <li>Assistente IA para OS</li>
-                            <li>Mensagens WhatsApp com IA</li>
-                            <li>Automação n8n + Z-API</li>
-                            <li>Anexos e histórico</li>
+                            <li>Até 150 OS/mês</li>
+                            <li>Até 3 usuários</li>
+                            <li>Assistente IA</li>
+                            <li>Área do cliente</li>
+                            <li>Recebimentos e recibos</li>
+                            <li>WhatsApp assistido
                         </ul>
 
                         <a href="cadastro.php" class="btn btn-primary w-100">
@@ -899,23 +900,24 @@ if (isset($_SESSION["UsuarioId"])) {
                         <h5>Empresa</h5>
 
                         <div class="price mt-3">
-                            Completo
+                            R$ 149/mês
                         </div>
 
                         <p class="text-muted">
-                            Para equipes com mais usuários e necessidade de gestão.
+                            Para equipes maiores e operação com mais volume.
                         </p>
 
                         <ul class="check-list">
-                            <li>Usuários ilimitados</li>
-                            <li>Recursos extras de gestão</li>
-                            <li>Administração multiempresa</li>
-                            <li>Auditoria de ações sensíveis</li>
-                            <li>Integrações e automações</li>
+                            <li>OS ilimitadas</li>
+                            <li>Até 10 usuários</li>
+                            <li>Campos personalizados</li>
+                            <li>Relatórios avançados</li>
+                            <li>Exportação CSV</li>
+                            <li>Suporte para implantação</li>
                         </ul>
 
                         <a href="cadastro.php" class="btn btn-outline-primary w-100">
-                            Começar
+                            Criar conta
                         </a>
                     </div>
                 </div>

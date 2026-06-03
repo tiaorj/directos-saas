@@ -63,7 +63,7 @@ function percentualUsoPlano($total, $limite)
         <div>
             <h3 class="mb-1">Meu Plano</h3>
             <p>
-                Acompanhe sua assinatura, limites mensais e recursos disponíveis no DirectOS.
+                Acompanhe o plano da empresa, limites de uso e recursos disponíveis no DirectOS.
             </p>
         </div>
 
@@ -151,7 +151,7 @@ function percentualUsoPlano($total, $limite)
 
         <div class="card form-card mb-4">
             <div class="card-header">
-                Uso do Plano
+                Uso do plano
             </div>
 
             <div class="card-body">
@@ -242,7 +242,7 @@ function percentualUsoPlano($total, $limite)
     <div class="form-header mb-3">
         <div>
             <h4 class="mb-1">Planos disponíveis</h4>
-            <p>Compare os recursos e altere o plano da empresa quando necessário.</p>
+            <p>Compare os recursos disponíveis e escolha o plano mais adequado para a operação da empresa.</p>
         </div>
     </div>
 
@@ -308,7 +308,7 @@ function percentualUsoPlano($total, $limite)
                             <?php endif; ?>
 
                             <?php if ((int)$plano["PermiteWhatsapp"] === 1): ?>
-                                <li>Envio por WhatsApp</li>
+                                <li>WhatsApp assistido</li>
                             <?php endif; ?>
                         </ul>
 
