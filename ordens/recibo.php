@@ -127,6 +127,7 @@ function dataRecibo($data)
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Recibo - <?= htmlspecialchars($codigoOS) ?></title>
 
     <style>
@@ -302,6 +303,84 @@ function dataRecibo($data)
             border-radius: 6px;
             margin-bottom: 18px;
             font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                background: #fff;
+                padding: 12px;
+                overflow-x: hidden;
+            }
+
+            .acoes {
+                width: 100%;
+                max-width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                margin-bottom: 12px;
+            }
+
+            .btn {
+                text-align: center;
+            }
+
+            .recibo {
+                max-width: 100%;
+                padding: 18px;
+                border-radius: 8px;
+            }
+
+            .topo {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .empresa h1 {
+                font-size: 22px;
+            }
+
+            .titulo {
+                margin: 22px 0;
+            }
+
+            .titulo h2 {
+                font-size: 22px;
+                line-height: 1.2;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .item[style*="grid-column"] {
+                grid-column: auto !important;
+            }
+
+            .valor-destaque {
+                font-size: 26px;
+            }
+
+            .valor-saldo {
+                font-size: 20px;
+            }
+
+            .texto-recibo {
+                font-size: 15px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .assinaturas {
+                grid-template-columns: 1fr;
+                gap: 44px;
+                margin-top: 46px;
+            }
         }
 
         @media print {

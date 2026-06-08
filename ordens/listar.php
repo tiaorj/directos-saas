@@ -209,7 +209,7 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="card-body p-0">
 
-            <div class="table-responsive">
+            <div class="table-responsive desktop-only">
                 <table class="table table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
@@ -455,6 +455,195 @@ $ordens = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
 
                 </table>
+            </div>
+
+            <div class="mobile-card-list p-3">
+                <?php if (count($ordens) === 0): ?>
+                    <div class="empty-state">
+                        Nenhuma ordem de servi&ccedil;o encontrada para os filtros selecionados.
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($ordens as $ordem): ?>
+                    <?php
+                        $status = $ordem["Status"] ?? "";
+                        $classeStatus = "bg-secondary";
+
+                        if ($status === "Aberta") {
+                            $classeStatus = "bg-primary";
+                        } elseif ($status === "Em andamento") {
+                            $classeStatus = "bg-warning text-dark";
+                        } elseif ($status === "Aguardando cliente" || $status === "Aguardando peça") {
+                            $classeStatus = "bg-secondary";
+                        } elseif ($status === "Concluída") {
+                            $classeStatus = "bg-success";
+                        } elseif ($status === "Cancelada") {
+                            $classeStatus = "bg-danger";
+                        }
+
+                        $prioridade = $ordem["Prioridade"] ?? "-";
+                        $classePrioridade = "bg-secondary";
+
+                        if ($prioridade === "Baixa") {
+                            $classePrioridade = "bg-info text-dark";
+                        } elseif ($prioridade === "Alta") {
+                            $classePrioridade = "bg-warning text-dark";
+                        } elseif ($prioridade === "Urgente") {
+                            $classePrioridade = "bg-danger";
+                        }
+
+                        $codigoOS = $ordem["CodigoOS"] ?? ("OS-" . date("Y") . "-" . str_pad($ordem["OrdemServicoId"], 6, "0", STR_PAD_LEFT));
+                        $linkCliente = APP_URL . "/public/os.php?token=" . urlencode($ordem["TokenAcompanhamento"]);
+                        $telefoneCliente = preg_replace('/\D/', '', $ordem["ClienteTelefone"] ?? "");
+                        $mensagemWhatsApp = "Olá " . ($ordem["ClienteNome"] ?? "") .
+                            ", sua ordem de serviço " . $codigoOS .
+                            " pode ser acompanhada pelo link: " . $linkCliente;
+                        $linkWhatsApp = "";
+
+                        if ($telefoneCliente !== "") {
+                            $linkWhatsApp = "https://wa.me/55" . $telefoneCliente . "?text=" . urlencode($mensagemWhatsApp);
+                        }
+
+                        $valorTexto = "N&atilde;o informado";
+
+                        if (!empty($ordem["ValorFinal"]) && (float)$ordem["ValorFinal"] > 0) {
+                            $valorTexto = "R$ " . number_format((float)$ordem["ValorFinal"], 2, ",", ".") . " (final)";
+                        } elseif (!empty($ordem["ValorPrevisto"]) && (float)$ordem["ValorPrevisto"] > 0) {
+                            $valorTexto = "R$ " . number_format((float)$ordem["ValorPrevisto"], 2, ",", ".") . " (previsto)";
+                        }
+                    ?>
+
+                    <article class="mobile-record-card">
+                        <div class="mobile-record-header">
+                            <div class="mobile-record-title">
+                                <strong><?= htmlspecialchars($codigoOS) ?></strong>
+                                <span><?= htmlspecialchars($ordem["Titulo"] ?? "") ?></span>
+                            </div>
+                        </div>
+
+                        <div class="mobile-record-badges">
+                            <span class="badge <?= $classeStatus ?>">
+                                <?= htmlspecialchars($status ?: "-") ?>
+                            </span>
+
+                            <span class="badge <?= $classePrioridade ?>">
+                                <?= htmlspecialchars($prioridade) ?>
+                            </span>
+                        </div>
+
+                        <div class="mobile-record-grid">
+                            <div class="mobile-record-field">
+                                <small>Cliente</small>
+                                <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Servi&ccedil;o</small>
+                                <span><?= htmlspecialchars($ordem["ServicoNome"] ?? "Nao informado") ?></span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Abertura</small>
+                                <span>
+                                    <?= !empty($ordem["DataAbertura"])
+                                        ? date("d/m/Y", strtotime($ordem["DataAbertura"]))
+                                        : "-"
+                                    ?>
+                                </span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Previs&atilde;o</small>
+                                <span>
+                                    <?= !empty($ordem["DataPrevisao"])
+                                        ? date("d/m/Y", strtotime($ordem["DataPrevisao"]))
+                                        : "-"
+                                    ?>
+                                </span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Valor</small>
+                                <strong><?= $valorTexto ?></strong>
+                            </div>
+                        </div>
+
+                        <div class="mobile-record-actions">
+                            <a
+                                href="visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>"
+                                class="btn btn-primary"
+                            >
+                                Visualizar
+                            </a>
+
+                            <div class="dropdown mobile-action-dropdown">
+                                <button
+                                    class="btn btn-outline-dark dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    A&ccedil;&otilde;es
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <?php if ($podeAtenderOS): ?>
+                                        <li>
+                                            <a class="dropdown-item" href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>">
+                                                Atendimento
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    <?php if ($podeEditarOS): ?>
+                                        <li>
+                                            <a class="dropdown-item" href="editar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>">
+                                                Editar
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    <li>
+                                        <a class="dropdown-item" href="<?= htmlspecialchars($linkCliente) ?>" target="_blank">
+                                            &Aacute;rea do cliente
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <button
+                                            type="button"
+                                            class="dropdown-item"
+                                            onclick="copiarLinkCliente('<?= htmlspecialchars($linkCliente, ENT_QUOTES) ?>')"
+                                        >
+                                            Copiar link do cliente
+                                        </button>
+                                    </li>
+
+                                    <?php if ($linkWhatsApp !== ""): ?>
+                                        <li>
+                                            <a class="dropdown-item" href="<?= htmlspecialchars($linkWhatsApp) ?>" target="_blank">
+                                                WhatsApp
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    <?php if ($podeCancelarOS): ?>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a
+                                                class="dropdown-item text-danger"
+                                                href="excluir.php?id=<?= (int)$ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>"
+                                                onclick="return confirm('Deseja realmente cancelar esta ordem de serviço?')"
+                                            >
+                                                Cancelar ordem
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
             </div>
 
         </div>

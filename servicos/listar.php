@@ -61,7 +61,7 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="card-body">
 
-            <div class="table-responsive">
+            <div class="table-responsive desktop-only">
                 <table class="table table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
@@ -145,6 +145,68 @@ $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
 
                 </table>
+            </div>
+
+            <div class="mobile-card-list">
+                <?php if (count($servicos) === 0): ?>
+                    <div class="empty-state">
+                        Nenhum servico cadastrado ate o momento.
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($servicos as $servico): ?>
+                    <article class="mobile-record-card">
+                        <div class="mobile-record-header">
+                            <div class="mobile-record-title">
+                                <strong><?= htmlspecialchars($servico["Nome"] ?? "") ?></strong>
+                                <span>#<?= (int)$servico["ServicoId"] ?></span>
+                            </div>
+
+                            <?php if ((int)$servico["Ativo"] === 1): ?>
+                                <span class="badge bg-success">Ativo</span>
+                            <?php else: ?>
+                                <span class="badge bg-secondary">Inativo</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mobile-record-grid">
+                            <div class="mobile-record-field">
+                                <small>Valor base</small>
+                                <strong>R$ <?= number_format((float)$servico["ValorBase"], 2, ",", ".") ?></strong>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Descricao</small>
+                                <span><?= htmlspecialchars($servico["Descricao"] ?? "-") ?></span>
+                            </div>
+                        </div>
+
+                        <?php if ($podeEditarServicos): ?>
+                            <div class="mobile-record-actions">
+                                <a
+                                    href="editar.php?id=<?= (int)$servico["ServicoId"] ?>"
+                                    class="btn btn-primary"
+                                >
+                                    Editar
+                                </a>
+
+                                <?php if ((int)$servico["Ativo"] === 1): ?>
+                                    <a
+                                        href="excluir.php?id=<?= (int)$servico["ServicoId"] ?>&<?= csrfTokenUrl() ?>"
+                                        class="btn btn-outline-danger"
+                                        onclick="return confirm('Deseja realmente inativar este serviÃ§o?')"
+                                    >
+                                        Inativar
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="mobile-record-note">
+                                Somente leitura
+                            </div>
+                        <?php endif; ?>
+                    </article>
+                <?php endforeach; ?>
             </div>
 
         </div>

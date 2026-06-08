@@ -264,7 +264,7 @@ function classeStatusFinanceiroOS($status)
             </div>
         </div>
 
-        <div class="form-actions d-flex flex-wrap gap-2" style="border-top: 0; margin-top: 0; padding-top: 0;">
+        <div class="form-actions d-flex flex-wrap gap-2 desktop-only" style="border-top: 0; margin-top: 0; padding-top: 0;">
             <a href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-primary">
                 Atendimento
             </a>
@@ -292,6 +292,61 @@ function classeStatusFinanceiroOS($status)
             <button onclick="window.print()" class="btn btn-outline-secondary">
                 Imprimir
             </button>
+
+            <a href="listar.php" class="btn btn-outline-secondary">
+                Voltar
+            </a>
+        </div>
+
+        <div class="mobile-only mobile-top-actions">
+            <a href="atendimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="btn btn-primary">
+                Atendimento
+            </a>
+
+            <div class="dropdown mobile-action-dropdown">
+                <button
+                    class="btn btn-outline-dark dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                >
+                    A&ccedil;&otilde;es
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a href="recebimento.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="dropdown-item">
+                            Recebimento
+                        </a>
+                    </li>
+                    <li>
+                        <a href="recibo.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="dropdown-item">
+                            Recibo
+                        </a>
+                    </li>
+                    <li>
+                        <a href="nova_mensagem_whatsapp.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="dropdown-item">
+                            WhatsApp
+                        </a>
+                    </li>
+                    <li>
+                        <a href="anexar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="dropdown-item">
+                            Anexar
+                        </a>
+                    </li>
+                    <li>
+                        <a href="editar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>" class="dropdown-item">
+                            Editar
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button type="button" onclick="window.print()" class="dropdown-item">
+                            Imprimir
+                        </button>
+                    </li>
+                </ul>
+            </div>
 
             <a href="listar.php" class="btn btn-outline-secondary">
                 Voltar

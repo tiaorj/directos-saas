@@ -350,7 +350,7 @@ function classeStatusFinanceiroRecebimento($status)
                         </div>
                     <?php else: ?>
 
-                        <div class="table-responsive">
+                        <div class="table-responsive desktop-only">
                             <table class="table table-hover align-middle table-os mb-0">
                                 <thead>
                                     <tr>
@@ -425,6 +425,67 @@ function classeStatusFinanceiroRecebimento($status)
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="mobile-card-list p-3">
+                            <?php foreach ($recebimentos as $recebimento): ?>
+                                <article class="mobile-record-card">
+                                    <div class="mobile-record-header">
+                                        <div class="mobile-record-title">
+                                            <strong class="text-success">
+                                                <?= dinheiroRecebimento($recebimento["ValorRecebido"] ?? 0) ?>
+                                            </strong>
+                                            <span><?= dataRecebimento($recebimento["DataRecebimento"] ?? null) ?></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mobile-record-grid">
+                                        <div class="mobile-record-field">
+                                            <small>Forma</small>
+                                            <span><?= htmlspecialchars($recebimento["FormaPagamento"] ?? "Nao informado") ?></span>
+                                        </div>
+
+                                        <div class="mobile-record-field">
+                                            <small>Usuario</small>
+                                            <span><?= htmlspecialchars($recebimento["UsuarioNome"] ?? "-") ?></span>
+                                        </div>
+
+                                        <div class="mobile-record-field">
+                                            <small>Registrado em</small>
+                                            <span>
+                                                <?= !empty($recebimento["DataCadastro"])
+                                                    ? date("d/m/Y H:i", strtotime($recebimento["DataCadastro"]))
+                                                    : "-"
+                                                ?>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <?php if (!empty($recebimento["Observacao"])): ?>
+                                        <div class="mobile-record-note" style="white-space: pre-line;">
+                                            <?= nl2br(htmlspecialchars($recebimento["Observacao"])) ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div class="mobile-record-actions mt-3">
+                                        <a
+                                            href="recibo_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>"
+                                            class="btn btn-outline-success"
+                                            target="_blank"
+                                        >
+                                            Recibo
+                                        </a>
+
+                                        <a
+                                            href="excluir_recebimento.php?id=<?= (int)$recebimento["RecebimentoId"] ?>&os=<?= (int)$ordem["OrdemServicoId"] ?>&<?= csrfTokenUrl() ?>"
+                                            class="btn btn-outline-danger"
+                                            onclick="return confirm('Deseja excluir este recebimento? O total pago da OS serÃ¡ recalculado.')"
+                                        >
+                                            Excluir
+                                        </a>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
                         </div>
 
                     <?php endif; ?>

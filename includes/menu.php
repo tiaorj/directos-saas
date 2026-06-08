@@ -10,7 +10,7 @@ $baseUrl = rtrim(APP_URL, "/");
 
 <div class="app-layout">
 
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="app-sidebar">
 
         <div class="sidebar-brand">
             <a href="<?= htmlspecialchars($baseUrl) ?>/dashboard.php">
@@ -139,19 +139,33 @@ $baseUrl = rtrim(APP_URL, "/");
 
     </aside>
 
+    <div class="app-sidebar-overlay" data-menu-close></div>
+
     <main class="app-main">
 
         <header class="app-topbar">
-            <div>
+            <button
+                type="button"
+                class="mobile-menu-toggle"
+                aria-label="Abrir menu"
+                aria-controls="app-sidebar"
+                aria-expanded="false"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="topbar-branding">
                 <strong>DirectOS</strong>
-                <span class="text-muted ms-2">
+                <span class="topbar-company text-muted ms-2">
                     <?= htmlspecialchars($empresaNome) ?>
                 </span>
             </div>
 
             <div class="topbar-user">
-                <span><?= htmlspecialchars($usuarioNome) ?></span>
-                <a href="<?= htmlspecialchars($baseUrl) ?>/logout.php" class="btn btn-sm btn-outline-secondary">
+                <span class="topbar-user-name"><?= htmlspecialchars($usuarioNome) ?></span>
+                <a href="<?= htmlspecialchars($baseUrl) ?>/logout.php" class="btn btn-sm btn-outline-secondary topbar-logout">
                     Sair
                 </a>
             </div>

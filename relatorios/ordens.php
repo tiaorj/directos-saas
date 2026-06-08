@@ -835,7 +835,7 @@ $totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
                 </div>
             <?php else: ?>
 
-                <div class="table-responsive">
+                <div class="table-responsive desktop-only">
                     <table class="table table-hover align-middle table-os mb-0">
                         <thead>
                             <tr>
@@ -919,6 +919,88 @@ $totalGraficoStatus = max(1, valorResumo($resumo, "TotalOS"));
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="mobile-card-list p-3">
+                    <?php foreach ($ordens as $ordem): ?>
+                        <?php
+                            $codigoOSRelatorio = formatarCodigoOS(
+                                $ordem["OrdemServicoId"],
+                                $ordem["CodigoOS"] ?? null,
+                                $ordem["DataAbertura"] ?? null
+                            );
+                        ?>
+
+                        <article class="mobile-record-card">
+                            <div class="mobile-record-header">
+                                <div class="mobile-record-title">
+                                    <strong><?= htmlspecialchars($codigoOSRelatorio) ?></strong>
+                                    <span><?= htmlspecialchars($ordem["Titulo"] ?? "") ?></span>
+                                </div>
+                            </div>
+
+                            <div class="mobile-record-badges">
+                                <span class="badge <?= classeStatusRelatorio($ordem["Status"] ?? "") ?>">
+                                    <?= htmlspecialchars($ordem["Status"] ?? "-") ?>
+                                </span>
+
+                                <span class="badge <?= classePrioridadeRelatorio($ordem["Prioridade"] ?? "") ?>">
+                                    <?= htmlspecialchars($ordem["Prioridade"] ?? "-") ?>
+                                </span>
+                            </div>
+
+                            <div class="mobile-record-grid">
+                                <div class="mobile-record-field">
+                                    <small>Cliente</small>
+                                    <strong><?= htmlspecialchars($ordem["ClienteNome"] ?? "-") ?></strong>
+                                </div>
+
+                                <div class="mobile-record-field">
+                                    <small>Servi&ccedil;o</small>
+                                    <span><?= htmlspecialchars($ordem["ServicoNome"] ?? "Nao informado") ?></span>
+                                </div>
+
+                                <div class="mobile-record-field">
+                                    <small>Abertura</small>
+                                    <span>
+                                        <?= !empty($ordem["DataAbertura"])
+                                            ? date("d/m/Y H:i", strtotime($ordem["DataAbertura"]))
+                                            : "-"
+                                        ?>
+                                    </span>
+                                </div>
+
+                                <div class="mobile-record-field">
+                                    <small>Previs&atilde;o</small>
+                                    <span>
+                                        <?= !empty($ordem["DataPrevisao"])
+                                            ? date("d/m/Y", strtotime($ordem["DataPrevisao"]))
+                                            : "-"
+                                        ?>
+                                    </span>
+                                </div>
+
+                                <div class="mobile-record-field">
+                                    <small>Valor previsto</small>
+                                    <strong>R$ <?= number_format((float)($ordem["ValorPrevisto"] ?? 0), 2, ",", ".") ?></strong>
+                                </div>
+
+                                <div class="mobile-record-field">
+                                    <small>Valor final</small>
+                                    <strong>R$ <?= number_format((float)($ordem["ValorFinal"] ?? 0), 2, ",", ".") ?></strong>
+                                </div>
+                            </div>
+
+                            <div class="mobile-record-actions">
+                                <a
+                                    href="../ordens/visualizar.php?id=<?= (int)$ordem["OrdemServicoId"] ?>"
+                                    class="btn btn-primary"
+                                >
+                                    Visualizar
+                                </a>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
                 </div>
 
                 <?php if (count($ordens) >= 300): ?>

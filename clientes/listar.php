@@ -56,7 +56,7 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="card-body p-0">
 
-            <div class="table-responsive">
+            <div class="table-responsive desktop-only">
                 <table class="table table-hover align-middle table-os">
                     <thead class="table-dark">
                         <tr>
@@ -146,6 +146,77 @@ $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
 
                 </table>
+            </div>
+
+            <div class="mobile-card-list p-3">
+                <?php if (count($clientes) === 0): ?>
+                    <div class="empty-state">
+                        Nenhum cliente cadastrado ate o momento.
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($clientes as $cliente): ?>
+                    <article class="mobile-record-card">
+                        <div class="mobile-record-header">
+                            <div class="mobile-record-title">
+                                <strong><?= htmlspecialchars($cliente["Nome"] ?? "") ?></strong>
+                                <span>#<?= (int)$cliente["ClienteId"] ?></span>
+                            </div>
+
+                            <?php if ((int)$cliente["Ativo"] === 1): ?>
+                                <span class="badge bg-success">Ativo</span>
+                            <?php else: ?>
+                                <span class="badge bg-secondary">Inativo</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mobile-record-grid">
+                            <div class="mobile-record-field">
+                                <small>Telefone</small>
+                                <span><?= htmlspecialchars($cliente["Telefone"] ?? "-") ?></span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Email</small>
+                                <span><?= htmlspecialchars($cliente["Email"] ?? "-") ?></span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Documento</small>
+                                <span><?= htmlspecialchars($cliente["Documento"] ?? "-") ?></span>
+                            </div>
+
+                            <div class="mobile-record-field">
+                                <small>Cidade/UF</small>
+                                <span>
+                                    <?= htmlspecialchars($cliente["Cidade"] ?? "-") ?>
+                                    <?php if (!empty($cliente["Estado"])): ?>
+                                        / <?= htmlspecialchars($cliente["Estado"]) ?>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mobile-record-actions">
+                            <a
+                                href="editar.php?id=<?= (int)$cliente["ClienteId"] ?>"
+                                class="btn btn-primary"
+                            >
+                                Editar
+                            </a>
+
+                            <?php if ((int)$cliente["Ativo"] === 1): ?>
+                                <a
+                                    href="excluir.php?id=<?= (int)$cliente["ClienteId"] ?>&<?= csrfTokenUrl() ?>"
+                                    class="btn btn-outline-danger"
+                                    onclick="return confirm('Deseja realmente inativar este cliente?')"
+                                >
+                                    Inativar
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
             </div>
 
         </div>
