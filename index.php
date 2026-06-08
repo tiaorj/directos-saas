@@ -5,6 +5,9 @@ if (isset($_SESSION["UsuarioId"])) {
     header("Location: dashboard.php");
     exit;
 }
+
+$assuntoContato = rawurlencode("Solicitar implantacao assistida DirectOS");
+$linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoContato}";
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -266,6 +269,15 @@ if (isset($_SESSION["UsuarioId"])) {
             letter-spacing: -0.7px;
         }
 
+        .launch-note {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 18px;
+            color: #1e3a8a;
+            padding: 18px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+        }
+
         footer {
             background: #111827;
             color: #cbd5e1;
@@ -315,7 +327,7 @@ if (isset($_SESSION["UsuarioId"])) {
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#automacao">WhatsApp</a>
+                    <a class="nav-link" href="#whatsapp">WhatsApp</a>
                 </li>
 
                 <li class="nav-item">
@@ -333,8 +345,8 @@ if (isset($_SESSION["UsuarioId"])) {
                 </li>
 
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                    <a class="btn btn-light btn-sm" href="cadastro.php">
-                        Começar agora
+                    <a class="btn btn-light btn-sm" href="#contato">
+                        Solicitar acesso
                     </a>
                 </li>
             </ul>
@@ -359,13 +371,17 @@ if (isset($_SESSION["UsuarioId"])) {
                     O DirectOS ajuda pequenos prestadores, assistências técnicas e empresas de serviço a organizar OS, clientes, serviços, recebimentos, recibos e comunicações com o cliente usando uma plataforma simples e profissional.
                 </p>
 
+                <p class="mt-3">
+                    Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
+                </p>
+
                 <div class="d-flex flex-wrap gap-2 mt-4">
-                    <a href="cadastro.php" class="btn btn-light btn-lg">
-                        Começar agora
+                    <a href="#contato" class="btn btn-light btn-lg">
+                        Solicitar implantação assistida
                     </a>
 
-                    <a href="#automacao" class="btn btn-outline-light btn-lg">
-                        Acessar demonstração
+                    <a href="login.php?demo=1" class="btn btn-outline-light btn-lg">
+                        Ver demonstração
                     </a>
                 </div>
 
@@ -779,8 +795,8 @@ if (isset($_SESSION["UsuarioId"])) {
                     O DirectOS foi pensado para quem precisa organizar atendimentos, reduzir mensagens repetidas, melhorar a comunicação com o cliente e usar IA para ganhar produtividade.
                 </p>
 
-                <a href="#planos" class="btn btn-primary">
-                    Ver planos
+                <a href="#contato" class="btn btn-primary">
+                    Solicitar acesso
                 </a>
             </div>
 
@@ -827,9 +843,13 @@ if (isset($_SESSION["UsuarioId"])) {
             </h2>
 
             <p>
-                Escolha o plano ideal para organizar suas ordens de serviço, controlar recebimentos,
-                emitir recibos e atender seus clientes com mais profissionalismo.
+                Os planos abaixo servem como referência para a implantação inicial. Após o contato,
+                alinhamos sua operação, configuramos sua empresa e liberamos o acesso ao sistema.
             </p>
+        </div>
+
+        <div class="launch-note mb-4">
+            Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
         </div>
 
         <div class="row g-4 align-items-stretch">
@@ -871,8 +891,8 @@ if (isset($_SESSION["UsuarioId"])) {
                             autônomos, técnicos independentes e pequenos prestadores que estão começando.
                         </div>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
-                            Criar conta
+                        <a href="#contato" class="btn btn-outline-primary w-100 mt-3">
+                            Falar sobre este plano
                         </a>
 
                     </div>
@@ -923,8 +943,8 @@ if (isset($_SESSION["UsuarioId"])) {
                             assistências técnicas, oficinas, manutenção, suporte e empresas de serviço em crescimento.
                         </div>
 
-                        <a href="cadastro.php" class="btn btn-primary w-100 mt-3">
-                            Criar conta
+                        <a href="#contato" class="btn btn-primary w-100 mt-3">
+                            Solicitar implantação
                         </a>
 
                     </div>
@@ -972,8 +992,8 @@ if (isset($_SESSION["UsuarioId"])) {
                             empresas com equipe, alto volume de OS e necessidade de padronizar a operação.
                         </div>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
-                            Criar conta
+                        <a href="#contato" class="btn btn-outline-primary w-100 mt-3">
+                            Falar sobre este plano
                         </a>
 
                     </div>
@@ -984,30 +1004,40 @@ if (isset($_SESSION["UsuarioId"])) {
 
         <div class="text-center mt-5">
             <p class="text-muted mb-3">
-                Ainda está começando? Você pode testar o DirectOS e evoluir de plano conforme sua operação crescer.
+                Quer conhecer a experiência antes de solicitar a implantação? Acesse a demonstração do DirectOS.
             </p>
 
-            <a href="login.php" class="btn btn-outline-secondary">
-                Acessar demonstração
+            <a href="login.php?demo=1" class="btn btn-outline-secondary">
+                Ver demonstração
             </a>
         </div>
 
     </div>
 </section>
 
-<section class="cta-section">
+<section class="cta-section" id="contato">
     <div class="container text-center">
         <h2>
-            Transforme suas ordens de serviço em uma experiência profissional com IA e automação.
+            Solicitar implantação assistida
         </h2>
 
         <p class="lead mt-3 mb-4" style="color: rgba(255,255,255,.82);">
-            Controle suas OS, gere mensagens inteligentes e envie atualizações pelo WhatsApp com n8n e Z-API.
+            Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
         </p>
 
-        <a href="cadastro.php" class="btn btn-light btn-lg">
-            Começar agora
-        </a>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a href="<?= htmlspecialchars($linkContatoImplantacao) ?>" class="btn btn-light btn-lg">
+                Solicitar implantação assistida
+            </a>
+
+            <a href="login.php" class="btn btn-outline-light btn-lg">
+                Ver demonstração
+            </a>
+        </div>
+
+        <p class="mt-3 mb-0" style="color: rgba(255,255,255,.72);">
+            Contato: direct.ti.tec@gmail.com
+        </p>
     </div>
 </section>
 

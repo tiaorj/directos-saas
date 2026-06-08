@@ -8,6 +8,8 @@ if (isset($_SESSION["UsuarioId"])) {
 }
 $_SESSION["UsuarioEmail"] = $usuario["Email"];
 $erro = $_GET["erro"] ?? "";
+
+$modoDemo = isset($_GET['demo']) && $_GET['demo'] == '1';
 ?>
 
 <!DOCTYPE html>
@@ -258,7 +260,24 @@ $erro = $_GET["erro"] ?? "";
                             <?= htmlspecialchars($erro) ?>
                         </div>
                     <?php endif; ?>
+<?php if ($modoDemo): ?>
+    <div class="alert alert-info border-0 rounded-3 mb-4">
+        <h6 class="fw-bold mb-2">Acessar ambiente de demonstração</h6>
 
+        <p class="mb-2">
+            Use os dados abaixo para conhecer o DirectOS:
+        </p>
+
+        <div class="bg-white rounded-3 p-3 border">
+            <div><strong>E-mail:</strong> demo@directos.com.br</div>
+            <div><strong>Senha:</strong> Demo@123</div>
+        </div>
+
+        <small class="d-block mt-2 text-muted">
+            Algumas ações podem estar bloqueadas para preservar os dados do ambiente demo.
+        </small>
+    </div>
+<?php endif; ?>
                     <form method="post" action="validar_login.php">
                         <?= csrfInput() ?>
 
