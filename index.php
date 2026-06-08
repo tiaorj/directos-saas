@@ -827,102 +827,169 @@ if (isset($_SESSION["UsuarioId"])) {
             </h2>
 
             <p>
-                Os planos já estão alinhados com a estrutura SaaS do DirectOS.
+                Escolha o plano ideal para organizar suas ordens de serviço, controlar recebimentos,
+                emitir recibos e atender seus clientes com mais profissionalismo.
             </p>
         </div>
 
         <div class="row g-4 align-items-stretch">
 
             <div class="col-lg-4">
-                <div class="card price-card">
-                    <div class="card-body p-4">
-                        <h5>Starter</h5>
+                <div class="card price-card h-100">
+                    <div class="card-body p-4 d-flex flex-column">
 
-                        <div class="price mt-3">
-                            R$ 39/mês
+                        <div class="mb-3">
+                            <span class="badge-soft">Entrada</span>
+                        </div>
+
+                        <h4 class="mb-3">Starter</h4>
+
+                        <div class="price mb-2">
+                            R$ 39<span style="font-size: 1rem; font-weight: 600;">/mês</span>
                         </div>
 
                         <p class="text-muted">
-                            Para começar a controlar OS de forma profissional.
+                            Ideal para prestadores individuais ou pequenos negócios que querem sair do controle manual
+                            e começar a organizar ordens de serviço de forma profissional.
                         </p>
 
-                        <ul class="check-list">
-                            <li>Até 30 OS/mês</li>
+                        <ul class="check-list mt-3 mb-4">
+                            <li>Até 30 ordens de serviço por mês</li>
                             <li>1 usuário</li>
-                            <li>Clientes e serviços</li>
-                            <li>Controle básico de OS</li>
-                            <li>Financeiro básico</li>
+                            <li>Cadastro de clientes</li>
+                            <li>Cadastro de serviços</li>
+                            <li>Controle de status e prioridade da OS</li>
+                            <li>Valores previstos e valores finais</li>
+                            <li>Controle financeiro básico</li>
+                            <li>Registro de recebimentos</li>
+                            <li>Recibo geral da OS</li>
+                            <li>Dashboard com resumo da operação</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100">
+                        <div class="alert alert-light border mt-auto">
+                            <strong>Indicado para:</strong><br>
+                            autônomos, técnicos independentes e pequenos prestadores que estão começando.
+                        </div>
+
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
                             Criar conta
                         </a>
+
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card price-card price-card-highlight">
-                    <div class="card-body p-4">
-                        <span class="badge bg-primary mb-2">
-                            Mais indicado
-                        </span>
+                <div class="card price-card price-card-highlight h-100">
+                    <div class="card-body p-4 d-flex flex-column">
 
-                        <h5>Profissional</h5>
+                        <div class="mb-3">
+                            <span class="badge bg-primary">
+                                Mais indicado
+                            </span>
+                        </div>
 
-                        <div class="price mt-3">
-                            R$ 79/mês
+                        <h4 class="mb-3">Profissional</h4>
+
+                        <div class="price mb-2">
+                            R$ 79<span style="font-size: 1rem; font-weight: 600;">/mês</span>
                         </div>
 
                         <p class="text-muted">
-                            Para quem quer IA, financeiro, recibos e área do cliente.
+                            Para pequenas empresas que já possuem rotina de atendimento e precisam controlar OS,
+                            clientes, financeiro, recibos, IA e comunicação com o cliente em um só lugar.
                         </p>
 
-                        <ul class="check-list">
-                            <li>Até 150 OS/mês</li>
+                        <ul class="check-list mt-3 mb-4">
+                            <li>Até 150 ordens de serviço por mês</li>
                             <li>Até 3 usuários</li>
-                            <li>Assistente IA</li>
-                            <li>Área do cliente</li>
-                            <li>Recebimentos e recibos</li>
-                            <li>WhatsApp assistido
+                            <li>Tudo do plano Starter</li>
+                            <li>Assistente IA para descrições da OS</li>
+                            <li>IA para checklist técnico</li>
+                            <li>IA para mensagens de WhatsApp</li>
+                            <li>Checklist padrão por serviço</li>
+                            <li>Campos personalizados da OS</li>
+                            <li>Área do cliente por link público</li>
+                            <li>Recebimentos parciais</li>
+                            <li>Recibo geral e recibo por pagamento</li>
+                            <li>Relatórios operacionais</li>
+                            <li>Relatório financeiro</li>
+                            <li>Exportação CSV</li>
+                            <li>WhatsApp assistido com mensagem pronta</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-primary w-100">
+                        <div class="alert alert-primary mt-auto">
+                            <strong>Indicado para:</strong><br>
+                            assistências técnicas, oficinas, manutenção, suporte e empresas de serviço em crescimento.
+                        </div>
+
+                        <a href="cadastro.php" class="btn btn-primary w-100 mt-3">
                             Criar conta
                         </a>
+
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card price-card">
-                    <div class="card-body p-4">
-                        <h5>Empresa</h5>
+                <div class="card price-card h-100">
+                    <div class="card-body p-4 d-flex flex-column">
 
-                        <div class="price mt-3">
-                            R$ 149/mês
+                        <div class="mb-3">
+                            <span class="badge-soft">Operação completa</span>
+                        </div>
+
+                        <h4 class="mb-3">Empresa</h4>
+
+                        <div class="price mb-2">
+                            R$ 149<span style="font-size: 1rem; font-weight: 600;">/mês</span>
                         </div>
 
                         <p class="text-muted">
-                            Para equipes maiores e operação com mais volume.
+                            Para equipes com maior volume de atendimento, mais usuários e necessidade de relatórios,
+                            personalização por segmento e apoio inicial para implantação.
                         </p>
 
-                        <ul class="check-list">
-                            <li>OS ilimitadas</li>
+                        <ul class="check-list mt-3 mb-4">
+                            <li>Ordens de serviço ilimitadas</li>
                             <li>Até 10 usuários</li>
-                            <li>Campos personalizados</li>
-                            <li>Relatórios avançados</li>
-                            <li>Exportação CSV</li>
-                            <li>Suporte para implantação</li>
+                            <li>Tudo do plano Profissional</li>
+                            <li>Segmento da empresa</li>
+                            <li>Modelos prontos por segmento</li>
+                            <li>Campos personalizados avançados</li>
+                            <li>Relatórios operacionais completos</li>
+                            <li>Relatório financeiro completo</li>
+                            <li>Histórico de recebimentos por OS</li>
+                            <li>Recibos profissionais para impressão/PDF</li>
+                            <li>Exportação CSV operacional e financeira</li>
+                            <li>Área do cliente para acompanhamento</li>
+                            <li>Suporte inicial para implantação</li>
+                            <li>Evolução futura para automação com n8n</li>
                         </ul>
 
-                        <a href="cadastro.php" class="btn btn-outline-primary w-100">
+                        <div class="alert alert-light border mt-auto">
+                            <strong>Indicado para:</strong><br>
+                            empresas com equipe, alto volume de OS e necessidade de padronizar a operação.
+                        </div>
+
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
                             Criar conta
                         </a>
+
                     </div>
                 </div>
             </div>
 
+        </div>
+
+        <div class="text-center mt-5">
+            <p class="text-muted mb-3">
+                Ainda está começando? Você pode testar o DirectOS e evoluir de plano conforme sua operação crescer.
+            </p>
+
+            <a href="login.php" class="btn btn-outline-secondary">
+                Acessar demonstração
+            </a>
         </div>
 
     </div>
