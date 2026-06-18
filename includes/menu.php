@@ -108,6 +108,10 @@ $baseUrl = rtrim(APP_URL, "/");
                     <span class="sidebar-icon">◆</span>
                     <span>Admin SaaS</span>
                 </a>
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/implantacoes.php">
+                    <span class="sidebar-icon">▨</span>
+                    <span>Implantação Assistida</span>
+                </a>
                 <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/usuarios.php">
                     <span class="sidebar-icon">◉</span>
                     <span>Usuários SaaS</span>

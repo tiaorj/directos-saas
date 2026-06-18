@@ -3,8 +3,11 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/planos.php";
 require_once "../includes/csrf.php";
+require_once "../includes/permissoes.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
+
+$usuarioSuperAdmin = usuarioEhSuperAdmin();
 
 $planoAtual = obterPlanoEmpresa($conn, $empresaId);
 $totalMes = totalOSMesEmpresa($conn, $empresaId);
@@ -450,6 +453,7 @@ if ($planoAtual) {
                                     Plano atual
                                 </button>
                             <?php else: ?>
+                                <?php if ($usuarioSuperAdmin): ?>
                                 <form method="post" action="alterar.php">
                                     <?= csrfInput() ?>
 
@@ -463,6 +467,13 @@ if ($planoAtual) {
                                         Alterar para este plano
                                     </button>
                                 </form>
+                                <?php else: ?>
+                                    <a href="https://wa.me/5541999113960?text=Olá,%20gostaria%20de%20alterar%20meu%20plano%20no%20DirectOS."
+                                    target="_blank"
+                                    class="btn btn-outline-primary w-100">
+                                        Solicitar alteração de plano
+                                    </a>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
 
