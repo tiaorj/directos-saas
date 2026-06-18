@@ -43,7 +43,10 @@ $baseUrl = rtrim(APP_URL, "/");
                 <span class="sidebar-icon">▣</span>
                 <span>Dashboard</span>
             </a>
-
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/ajuda/manual.php">
+                <span class="sidebar-icon">?</span>
+                <span>Manual de uso</span>
+            </a>
             <div class="sidebar-section">Operação</div>
 
             <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/ordens/listar.php">
