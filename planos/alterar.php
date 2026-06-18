@@ -2,6 +2,7 @@
 require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
+
 csrfValidarTokenPost();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
@@ -13,8 +14,8 @@ if ($planoId <= 0) {
 }
 
 $sqlPlano = "
-    SELECT 
-        PlanoId, 
+    SELECT
+        PlanoId,
         Nome,
         Slug,
         LimiteOSMes,
@@ -22,7 +23,7 @@ $sqlPlano = "
     FROM OS_Planos
     WHERE PlanoId = :PlanoId
       AND Ativo = 1
-      AND Slug IN ('starter', 'profissional', 'empresa')
+      AND Slug IN ('starter', 'profissional', 'empresa', 'teste-assistido')
 ";
 
 $stmtPlano = $conn->prepare($sqlPlano);
@@ -36,30 +37,30 @@ if (!$plano) {
     exit;
 }
 
-$sqlPlanoAtual = "
-    SELECT TOP 1
-        a.AssinaturaId,
-        a.PlanoId,
-        p.Nome
-    FROM OS_Assinaturas a
-    INNER JOIN OS_Planos p ON p.PlanoId = a.PlanoId
-    WHERE a.EmpresaId = :EmpresaId
-      AND a.Status = 'Ativa'
-    ORDER BY a.AssinaturaId DESC
+$sqlEmpresa = "
+    SELECT
+        EmpresaId,
+        PlanoId,
+        StatusComercial
+    FROM OS_Empresas
+    WHERE EmpresaId = :EmpresaId
 ";
 
-$stmtPlanoAtual = $conn->prepare($sqlPlanoAtual);
-$stmtPlanoAtual->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
-$stmtPlanoAtual->execute();
+$stmtEmpresa = $conn->prepare($sqlEmpresa);
+$stmtEmpresa->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+$stmtEmpresa->execute();
 
-$planoAtual = $stmtPlanoAtual->fetch(PDO::FETCH_ASSOC);
+$empresa = $stmtEmpresa->fetch(PDO::FETCH_ASSOC);
 
-if ($planoAtual && (int)$planoAtual["PlanoId"] === (int)$planoId) {
-    header("Location: meu_plano.php?erro=Este já é o plano atual da empresa.");
+if (!$empresa) {
+    header("Location: meu_plano.php?erro=Empresa não encontrada.");
     exit;
 }
 
-$totalUsuarios = 0;
+if (!empty($empresa["PlanoId"]) && (int)$empresa["PlanoId"] === (int)$planoId) {
+    header("Location: meu_plano.php?erro=Este já é o plano atual da empresa.");
+    exit;
+}
 
 $sqlUsuarios = "
     SELECT COUNT(*)
@@ -78,8 +79,6 @@ if ($plano["LimiteUsuarios"] !== null && $plano["LimiteUsuarios"] !== "" && $tot
     header("Location: meu_plano.php?erro=Não é possível alterar para este plano. A empresa possui mais usuários ativos do que o limite permitido.");
     exit;
 }
-
-$totalOSMes = 0;
 
 $sqlOSMes = "
     SELECT COUNT(*)
@@ -103,6 +102,43 @@ if ($plano["LimiteOSMes"] !== null && $plano["LimiteOSMes"] !== "" && $totalOSMe
 $conn->beginTransaction();
 
 try {
+    /*
+        Atualiza o plano atual diretamente na empresa.
+        Essa passa a ser a fonte principal do plano vigente.
+    */
+
+    if (($plano["Slug"] ?? "") === "teste-assistido") {
+        $sqlAtualizarEmpresa = "
+            UPDATE OS_Empresas
+            SET
+                PlanoId = :PlanoId,
+                StatusComercial = 'Teste',
+                DataInicioTeste = ISNULL(DataInicioTeste, GETDATE()),
+                DataFimTeste = ISNULL(DataFimTeste, DATEADD(DAY, 7, GETDATE())),
+                ObservacaoComercial = ISNULL(ObservacaoComercial, 'Acesso liberado para teste assistido.')
+            WHERE EmpresaId = :EmpresaId
+        ";
+    } else {
+        $sqlAtualizarEmpresa = "
+            UPDATE OS_Empresas
+            SET
+                PlanoId = :PlanoId,
+                StatusComercial = 'Ativa',
+                DataInicioTeste = NULL,
+                DataFimTeste = NULL
+            WHERE EmpresaId = :EmpresaId
+        ";
+    }
+
+    $stmtAtualizarEmpresa = $conn->prepare($sqlAtualizarEmpresa);
+    $stmtAtualizarEmpresa->bindValue(":PlanoId", $planoId, PDO::PARAM_INT);
+    $stmtAtualizarEmpresa->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtAtualizarEmpresa->execute();
+
+    /*
+        Mantém histórico em OS_Assinaturas para compatibilidade e auditoria.
+    */
+
     $sqlCancelar = "
         UPDATE OS_Assinaturas
         SET Status = 'Cancelada',

@@ -24,18 +24,24 @@ $sqlEmpresa = "
         e.Slug,
         e.Ativo,
         e.DataCadastro,
+        e.PlanoId,
+        e.StatusComercial,
+        e.DataInicioTeste,
+        e.DataFimTeste,
+        e.ObservacaoComercial,
 
         a.AssinaturaId,
         a.Status AS StatusAssinatura,
         a.DataInicio AS DataInicioAssinatura,
         a.DataFim AS DataFimAssinatura,
 
-        p.PlanoId,
+        p.PlanoId AS PlanoAtualId,
         p.Nome AS PlanoAtual,
         p.ValorMensal,
         p.LimiteOSMes,
         p.LimiteUsuarios
     FROM OS_Empresas e
+    LEFT JOIN OS_Planos p ON p.PlanoId = e.PlanoId
     OUTER APPLY (
         SELECT TOP 1
             a.AssinaturaId,
@@ -48,7 +54,6 @@ $sqlEmpresa = "
           AND a.Status = 'Ativa'
         ORDER BY a.AssinaturaId DESC
     ) a
-    LEFT JOIN OS_Planos p ON p.PlanoId = a.PlanoId
     WHERE e.EmpresaId = :EmpresaId
 ";
 

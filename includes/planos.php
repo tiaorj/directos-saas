@@ -2,7 +2,51 @@
 
 function obterPlanoEmpresa($conn, $empresaId)
 {
+    /*
+        Regra nova:
+        - O plano atual da empresa vem de OS_Empresas.PlanoId.
+        - OS_Assinaturas pode continuar existindo como histórico.
+        - Se PlanoId ainda estiver NULL em alguma empresa antiga, faz fallback para a última assinatura ativa.
+    */
+
     $sql = "
+        SELECT
+            p.PlanoId,
+            p.Nome,
+            p.Slug,
+            p.Descricao,
+            p.LimiteOSMes,
+            p.LimiteUsuarios,
+            p.PermiteAnexos,
+            p.PermiteAreaCliente,
+            p.PermiteWhatsapp,
+            p.ValorMensal,
+            e.StatusComercial AS StatusAssinatura,
+            e.DataInicioTeste AS DataInicio,
+            e.DataFimTeste AS DataFim
+        FROM OS_Empresas e
+        INNER JOIN OS_Planos p ON p.PlanoId = e.PlanoId
+        WHERE e.EmpresaId = :EmpresaId
+          AND e.Ativo = 1
+          AND p.Ativo = 1
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $plano = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($plano) {
+        return $plano;
+    }
+
+    /*
+        Fallback temporário:
+        Caso alguma empresa antiga ainda não tenha PlanoId preenchido,
+        usa a assinatura ativa antiga.
+    */
+    $sqlFallback = "
         SELECT TOP 1
             p.PlanoId,
             p.Nome,
@@ -25,11 +69,11 @@ function obterPlanoEmpresa($conn, $empresaId)
         ORDER BY a.AssinaturaId DESC
     ";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmtFallback = $conn->prepare($sqlFallback);
+    $stmtFallback->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtFallback->execute();
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    return $stmtFallback->fetch(PDO::FETCH_ASSOC);
 }
 
 function totalOSMesEmpresa($conn, $empresaId)
