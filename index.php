@@ -850,6 +850,7 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
 
         <div class="launch-note mb-4">
             Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
+            Para interessados, liberamos um acesso de Teste Assistido por tempo limitado durante a implantação.
         </div>
 
         <div class="row g-4 align-items-stretch">

@@ -167,7 +167,7 @@ GO
 
 UPDATE OS_Planos
 SET Ativo = 0
-WHERE Slug NOT IN ('starter', 'profissional', 'empresa');
+WHERE Slug NOT IN ('starter', 'profissional', 'empresa', 'teste-assistido');
 GO
 
 ------------------------------------------------------------

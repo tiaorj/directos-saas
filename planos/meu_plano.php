@@ -24,7 +24,14 @@ $sqlPlanos = "
         ValorMensal
     FROM OS_Planos
     WHERE Ativo = 1
-    ORDER BY ValorMensal
+      AND Slug IN ('starter', 'profissional', 'empresa')
+    ORDER BY
+        CASE Slug
+            WHEN 'starter' THEN 1
+            WHEN 'profissional' THEN 2
+            WHEN 'empresa' THEN 3
+            ELSE 99
+        END
 ";
 
 $stmtPlanos = $conn->prepare($sqlPlanos);
@@ -53,10 +60,10 @@ function percentualUsoPlano($total, $limite)
     return min(100, round(((int)$total / (int)$limite) * 100));
 }
 
-function montarPlanoComercial($planoBanco, $indice)
+function montarPlanoComercial($planoBanco)
 {
     $modelos = [
-        [
+        "starter" => [
             "NomeComercial" => "Starter",
             "DescricaoComercial" => "Para prestadores individuais ou pequenos negócios começando a organizar ordens de serviço.",
             "ValorComercial" => 39.00,
@@ -75,7 +82,7 @@ function montarPlanoComercial($planoBanco, $indice)
                 "Recibo da OS"
             ]
         ],
-        [
+        "profissional" => [
             "NomeComercial" => "Profissional",
             "DescricaoComercial" => "Para pequenas empresas que já possuem rotina de atendimento e precisam de mais organização.",
             "ValorComercial" => 79.00,
@@ -98,7 +105,7 @@ function montarPlanoComercial($planoBanco, $indice)
                 "Exportação CSV"
             ]
         ],
-        [
+        "empresa" => [
             "NomeComercial" => "Empresa",
             "DescricaoComercial" => "Para empresas com maior volume de OS ou mais usuários no atendimento.",
             "ValorComercial" => 149.00,
@@ -119,7 +126,13 @@ function montarPlanoComercial($planoBanco, $indice)
         ]
     ];
 
-    $modelo = $modelos[$indice] ?? $modelos[count($modelos) - 1];
+    $slug = $planoBanco["Slug"] ?? "";
+
+    if (!isset($modelos[$slug])) {
+        return null;
+    }
+
+    $modelo = $modelos[$slug];
 
     $planoBanco["NomeExibicao"] = $modelo["NomeComercial"];
     $planoBanco["DescricaoExibicao"] = $modelo["DescricaoComercial"];
@@ -135,8 +148,12 @@ function montarPlanoComercial($planoBanco, $indice)
 
 $planos = [];
 
-foreach ($planosBanco as $indice => $planoBanco) {
-    $planos[] = montarPlanoComercial($planoBanco, $indice);
+foreach ($planosBanco as $planoBanco) {
+    $planoComercial = montarPlanoComercial($planoBanco);
+
+    if ($planoComercial) {
+        $planos[] = $planoComercial;
+    }
 }
 
 $planoAtualComercial = null;
@@ -156,6 +173,14 @@ if ($planoAtual) {
         $planoAtualComercial["ValorExibicao"] = (float)($planoAtual["ValorMensal"] ?? 0);
         $planoAtualComercial["LimiteOSMesExibicao"] = $planoAtual["LimiteOSMes"] ?? null;
         $planoAtualComercial["LimiteUsuariosExibicao"] = $planoAtual["LimiteUsuarios"] ?? null;
+
+        if (($planoAtual["Slug"] ?? "") === "teste-assistido") {
+            $planoAtualComercial["NomeExibicao"] = "Teste Assistido";
+            $planoAtualComercial["DescricaoExibicao"] = "Avaliação inicial com implantação assistida";
+            $planoAtualComercial["ValorExibicao"] = 0.00;
+            $planoAtualComercial["LimiteOSMesExibicao"] = 10;
+            $planoAtualComercial["LimiteUsuariosExibicao"] = 1;
+        }
     }
 }
 ?>
@@ -256,6 +281,14 @@ if ($planoAtual) {
 
         </div>
 
+        <?php if (($planoAtual["Slug"] ?? "") === "teste-assistido"): ?>
+            <div class="alert alert-info mb-4">
+                <strong>Teste Assistido</strong><br>
+                R$ 0 · Até 10 OS/mês · 1 usuário<br>
+                Avaliação inicial com implantação assistida
+            </div>
+        <?php endif; ?>
+
         <div class="card form-card mb-4">
             <div class="card-header">
                 Uso do plano
@@ -351,7 +384,7 @@ if ($planoAtual) {
             <h4 class="mb-1">Planos disponíveis</h4>
 
             <p>
-                Compare os recursos disponíveis e escolha o plano mais adequado para a operação da empresa.
+                Compare os planos comerciais disponíveis e escolha o mais adequado para a operação da empresa.
             </p>
         </div>
     </div>

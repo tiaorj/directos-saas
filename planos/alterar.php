@@ -22,6 +22,7 @@ $sqlPlano = "
     FROM OS_Planos
     WHERE PlanoId = :PlanoId
       AND Ativo = 1
+      AND Slug IN ('starter', 'profissional', 'empresa')
 ";
 
 $stmtPlano = $conn->prepare($sqlPlano);

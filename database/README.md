@@ -7,6 +7,8 @@ Esta pasta contém os scripts SQL do DirectOS.
 1. `001_schema_inicial.sql`
 2. `002_alteracoes_publicacao_mvp.sql`
 3. `003_dados_demo.sql` somente em ambiente de demonstração
+4. `004_atualiza_planos_comerciais.sql`
+5. `005_plano_teste_assistido.sql`
 
 ## Observações
 
@@ -34,3 +36,11 @@ Alterações criadas durante a evolução do MVP, como:
 ### 003_dados_demo.sql
 
 Dados fictícios para ambiente de demonstração.
+
+### 004_atualiza_planos_comerciais.sql
+
+Cria ou atualiza os planos comerciais Starter, Profissional e Empresa.
+
+### 005_plano_teste_assistido.sql
+
+Cria ou atualiza o plano Teste Assistido para avaliação inicial com implantação assistida.
