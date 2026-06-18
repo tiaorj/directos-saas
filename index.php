@@ -345,8 +345,8 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                 </li>
 
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                    <a class="btn btn-light btn-sm" href="#contato">
-                        Solicitar acesso
+                    <a class="btn btn-light btn-sm" href="cadastro.php">
+                        Criar acesso de teste
                     </a>
                 </li>
             </ul>
@@ -372,12 +372,12 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                 </p>
 
                 <p class="mt-3">
-                    Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
+                    Crie seu acesso de teste e comece a usar o DirectOS com limite inicial. Depois, se fizer sentido para sua operação, solicite a ativação de um plano dentro do sistema.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mt-4">
-                    <a href="#contato" class="btn btn-light btn-lg">
-                        Solicitar implantação assistida
+                    <a href="cadastro.php" class="btn btn-light btn-lg">
+                        Criar acesso de teste
                     </a>
 
                     <a href="login.php?demo=1" class="btn btn-outline-light btn-lg">
@@ -795,8 +795,8 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                     O DirectOS foi pensado para quem precisa organizar atendimentos, reduzir mensagens repetidas, melhorar a comunicação com o cliente e usar IA para ganhar produtividade.
                 </p>
 
-                <a href="#contato" class="btn btn-primary">
-                    Solicitar acesso
+                <a href="cadastro.php" class="btn btn-primary">
+                    Criar acesso de teste
                 </a>
             </div>
 
@@ -843,14 +843,14 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
             </h2>
 
             <p>
-                Os planos abaixo servem como referência para a implantação inicial. Após o contato,
-                alinhamos sua operação, configuramos sua empresa e liberamos o acesso ao sistema.
+                Comece pelo acesso de Teste Assistido e, quando estiver pronto para continuar usando,
+                solicite a ativação de um plano dentro do sistema.
             </p>
         </div>
 
         <div class="launch-note mb-4">
-            Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
-            Para interessados, liberamos um acesso de Teste Assistido por tempo limitado durante a implantação.
+            O cadastro inicial cria automaticamente um acesso de <strong>Teste Assistido</strong>, com limite de uso para avaliação.
+            Os planos Starter, Profissional e Empresa são ativados mediante solicitação dentro do sistema.
         </div>
 
         <div class="row g-4 align-items-stretch">
@@ -892,8 +892,8 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                             autônomos, técnicos independentes e pequenos prestadores que estão começando.
                         </div>
 
-                        <a href="#contato" class="btn btn-outline-primary w-100 mt-3">
-                            Falar sobre este plano
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
+                            Começar com teste assistido
                         </a>
 
                     </div>
@@ -944,8 +944,8 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                             assistências técnicas, oficinas, manutenção, suporte e empresas de serviço em crescimento.
                         </div>
 
-                        <a href="#contato" class="btn btn-primary w-100 mt-3">
-                            Solicitar implantação
+                        <a href="cadastro.php" class="btn btn-primary w-100 mt-3">
+                            Começar com teste assistido
                         </a>
 
                     </div>
@@ -993,8 +993,8 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
                             empresas com equipe, alto volume de OS e necessidade de padronizar a operação.
                         </div>
 
-                        <a href="#contato" class="btn btn-outline-primary w-100 mt-3">
-                            Falar sobre este plano
+                        <a href="cadastro.php" class="btn btn-outline-primary w-100 mt-3">
+                            Começar com teste assistido
                         </a>
 
                     </div>
@@ -1019,25 +1019,26 @@ $linkContatoImplantacao = "mailto:direct.ti.tec@gmail.com?subject={$assuntoConta
 <section class="cta-section" id="contato">
     <div class="container text-center">
         <h2>
-            Solicitar implantação assistida
+            Comece testando o DirectOS
         </h2>
 
         <p class="lead mt-3 mb-4" style="color: rgba(255,255,255,.82);">
-            Nesta fase inicial, o DirectOS está sendo liberado com implantação assistida. Após o contato, configuramos sua empresa, plano inicial e acesso ao sistema.
+            Crie seu acesso de Teste Assistido, cadastre clientes, serviços e ordens de serviço,
+            e veja se o DirectOS se encaixa na sua operação.
         </p>
 
         <div class="d-flex flex-wrap justify-content-center gap-2">
-            <a href="<?= htmlspecialchars($linkContatoImplantacao) ?>" class="btn btn-light btn-lg">
-                Solicitar implantação assistida
+            <a href="cadastro.php" class="btn btn-light btn-lg">
+                Criar acesso de teste
             </a>
 
-            <a href="login.php" class="btn btn-outline-light btn-lg">
+            <a href="login.php?demo=1" class="btn btn-outline-light btn-lg">
                 Ver demonstração
             </a>
         </div>
 
         <p class="mt-3 mb-0" style="color: rgba(255,255,255,.72);">
-            Contato: direct.ti.tec@gmail.com
+            Após o teste, a ativação de um plano é solicitada dentro do sistema.
         </p>
     </div>
 </section>
