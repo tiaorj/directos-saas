@@ -318,8 +318,8 @@ $modoDemo = isset($_GET['demo']) && $_GET['demo'] == '1';
                     </small>
                     <br>
 
-                    <a href="index.php#planos" class="text-decoration-none fw-semibold">
-                        Conheça os planos do DirectOS
+                    <a href="cadastro.php" class="text-decoration-none fw-semibold">
+                        Criar acesso de teste
                     </a>
                 </div>
             </div>

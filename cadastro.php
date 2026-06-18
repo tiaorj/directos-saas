@@ -191,21 +191,21 @@ $sucesso = $_GET["sucesso"] ?? "";
             </a>
 
             <div class="brand-badge">
-                Comece pelo plano gratuito
+                Teste Assistido
             </div>
 
             <h1 class="brand-title mb-3">
-                Crie sua conta e organize suas OS.
+                Crie seu acesso de teste ao DirectOS.
             </h1>
 
             <p class="lead brand-subtitle">
-                Cadastre sua empresa, crie seu usuário administrador e comece a usar o DirectOS.
+                Você poderá testar o sistema com limite inicial de uso. Após o teste, a ativação de um plano é feita por solicitação dentro do sistema.
             </p>
 
             <div class="mt-4">
                 <div class="feature-item">
                     <span class="feature-icon">✓</span>
-                    Plano gratuito com até 10 OS por mês.
+                    Teste Assistido com até 10 OS por mês.
                 </div>
 
                 <div class="feature-item">
@@ -220,7 +220,7 @@ $sucesso = $_GET["sucesso"] ?? "";
 
                 <div class="feature-item">
                     <span class="feature-icon">✓</span>
-                    Estrutura preparada para evoluir para planos pagos.
+                    Alteração de plano solicitada depois dentro do sistema.
                 </div>
             </div>
         </div>
@@ -240,7 +240,7 @@ $sucesso = $_GET["sucesso"] ?? "";
                         </h3>
 
                         <p class="text-muted mb-0">
-                            Preencha os dados abaixo para criar sua conta inicial.
+                            Preencha os dados abaixo para criar seu acesso de Teste Assistido.
                         </p>
                     </div>
 
@@ -394,11 +394,11 @@ $sucesso = $_GET["sucesso"] ?? "";
                         </div>
 
                         <div class="alert alert-info">
-                            Ao criar sua conta, sua empresa será vinculada automaticamente ao plano <strong>Gratuito</strong>.
+                            Ao criar sua conta, sua empresa será vinculada automaticamente ao <strong>Teste Assistido</strong>. O acesso é limitado e a alteração de plano deve ser solicitada depois dentro do sistema.
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-cadastro w-100">
-                            Criar conta gratuita
+                            Criar acesso de teste
                         </button>
 
                     </form>

@@ -124,7 +124,7 @@ if (isset($_SESSION["UsuarioId"])) {
                     </h1>
 
                     <p class="text-muted lead mb-4">
-                        Sua empresa foi cadastrada no DirectOS e vinculada automaticamente ao plano Gratuito.
+                        Sua empresa foi cadastrada no DirectOS e vinculada automaticamente ao Teste Assistido.
                     </p>
 
                     <a href="login.php" class="btn btn-primary btn-main mb-4">

@@ -35,7 +35,7 @@ if (!$empresa) {
 }
 
 $sqlPlano = "
-    SELECT PlanoId, Nome
+    SELECT PlanoId, Nome, Slug
     FROM OS_Planos
     WHERE PlanoId = :PlanoId
       AND Ativo = 1
@@ -55,6 +55,34 @@ if (!$plano) {
 $conn->beginTransaction();
 
 try {
+    if (($plano["Slug"] ?? "") === "teste-assistido") {
+        $sqlAtualizarEmpresa = "
+            UPDATE OS_Empresas
+            SET
+                PlanoId = :PlanoId,
+                StatusComercial = 'Teste',
+                DataInicioTeste = ISNULL(DataInicioTeste, GETDATE()),
+                DataFimTeste = ISNULL(DataFimTeste, DATEADD(DAY, 7, GETDATE())),
+                ObservacaoComercial = ISNULL(ObservacaoComercial, 'Acesso liberado para teste assistido.')
+            WHERE EmpresaId = :EmpresaId
+        ";
+    } else {
+        $sqlAtualizarEmpresa = "
+            UPDATE OS_Empresas
+            SET
+                PlanoId = :PlanoId,
+                StatusComercial = 'Ativa',
+                DataInicioTeste = NULL,
+                DataFimTeste = NULL
+            WHERE EmpresaId = :EmpresaId
+        ";
+    }
+
+    $stmtAtualizarEmpresa = $conn->prepare($sqlAtualizarEmpresa);
+    $stmtAtualizarEmpresa->bindValue(":PlanoId", $planoId, PDO::PARAM_INT);
+    $stmtAtualizarEmpresa->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
+    $stmtAtualizarEmpresa->execute();
+
     $sqlCancelar = "
         UPDATE OS_Assinaturas
         SET Status = 'Cancelada',

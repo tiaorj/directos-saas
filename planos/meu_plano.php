@@ -287,8 +287,15 @@ if ($planoAtual) {
         <?php if (($planoAtual["Slug"] ?? "") === "teste-assistido"): ?>
             <div class="alert alert-info mb-4">
                 <strong>Teste Assistido</strong><br>
-                R$ 0 · Até 10 OS/mês · 1 usuário<br>
-                Avaliação inicial com implantação assistida
+                Status: <?= htmlspecialchars($planoAtual["StatusAssinatura"] ?? "Teste") ?><br>
+                Limite: 10 OS por mês<br>
+                Usuários: 1<br>
+                Fim do teste:
+                <?= !empty($planoAtual["DataFim"])
+                    ? htmlspecialchars(date("d/m/Y", strtotime($planoAtual["DataFim"])))
+                    : "-"
+                ?><br>
+                Avaliação inicial com implantação assistida.
             </div>
         <?php endif; ?>
 

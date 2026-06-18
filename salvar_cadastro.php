@@ -106,17 +106,17 @@ while (true) {
 $sqlPlano = "
     SELECT TOP 1 PlanoId
     FROM OS_Planos
-    WHERE Slug = 'gratuito'
+    WHERE Slug = 'teste-assistido'
       AND Ativo = 1
 ";
 
 $stmtPlano = $conn->prepare($sqlPlano);
 $stmtPlano->execute();
 
-$planoGratuitoId = (int)$stmtPlano->fetchColumn();
+$planoTesteId = (int)$stmtPlano->fetchColumn();
 
-if ($planoGratuitoId <= 0) {
-    redirecionarCadastroErro("Plano gratuito não encontrado. Verifique a configuração dos planos.");
+if ($planoTesteId <= 0) {
+    redirecionarCadastroErro("Plano de teste não encontrado. Entre em contato com o suporte.");
 }
 
 $conn->beginTransaction();
@@ -132,6 +132,11 @@ try {
             Telefone,
             WhatsApp,
             Slug,
+            PlanoId,
+            StatusComercial,
+            DataInicioTeste,
+            DataFimTeste,
+            ObservacaoComercial,
             Ativo
         )
         VALUES
@@ -143,6 +148,11 @@ try {
             :Telefone,
             :WhatsApp,
             :Slug,
+            :PlanoId,
+            'Teste',
+            GETDATE(),
+            DATEADD(DAY, 7, GETDATE()),
+            'Cadastro público criado no plano Teste Assistido.',
             1
         )
     ";
@@ -155,6 +165,7 @@ try {
     $stmtEmpresa->bindValue(":Telefone", $telefone !== "" ? $telefone : null);
     $stmtEmpresa->bindValue(":WhatsApp", $whatsApp !== "" ? $whatsApp : null);
     $stmtEmpresa->bindValue(":Slug", $slug);
+    $stmtEmpresa->bindValue(":PlanoId", $planoTesteId, PDO::PARAM_INT);
     $stmtEmpresa->execute();
 
     $empresaId = (int)$conn->lastInsertId();
@@ -212,7 +223,7 @@ try {
 
     $stmtAssinatura = $conn->prepare($sqlAssinatura);
     $stmtAssinatura->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
-    $stmtAssinatura->bindValue(":PlanoId", $planoGratuitoId, PDO::PARAM_INT);
+    $stmtAssinatura->bindValue(":PlanoId", $planoTesteId, PDO::PARAM_INT);
     $stmtAssinatura->execute();
 
     registrarAuditoria(
@@ -220,7 +231,7 @@ try {
         "CADASTRO_PUBLICO_EMPRESA",
         "OS_Empresas",
         $empresaId,
-        "Empresa criada pelo cadastro público no plano gratuito.",
+        "Empresa criada pelo cadastro público no plano Teste Assistido.",
         $empresaId,
         null
     );
