@@ -90,6 +90,10 @@ $baseUrl = rtrim(APP_URL, "/");
                 <span class="sidebar-icon">★</span>
                 <span>Meu Plano</span>
             </a>
+            <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/planos/solicitar.php">
+                <span class="sidebar-icon">⇧</span>
+                <span>Solicitar Plano</span>
+            </a>
             
             <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/configuracoes/index.php">
                 <span class="sidebar-icon">⚙</span>
@@ -122,6 +126,10 @@ $baseUrl = rtrim(APP_URL, "/");
                 <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/planos.php">
                     <span class="sidebar-icon">▤</span>
                     <span>Planos</span>
+                </a>
+                <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/solicitacoes_planos.php">
+                    <span class="sidebar-icon">⇄</span>
+                    <span>Solicitações de Plano</span>
                 </a>
                 <a class="sidebar-link" href="<?= htmlspecialchars($baseUrl) ?>/admin/assinaturas.php">
                     <span class="sidebar-icon">★</span>
