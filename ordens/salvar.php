@@ -41,6 +41,14 @@ $dataPrevisao = $_POST["DataPrevisao"] !== "" ? $_POST["DataPrevisao"] : null;
 $observacao = trim($_POST["Observacao"] ?? "");
 $prepararWhatsAppAposSalvar = (int)($_POST["PrepararWhatsAppAposSalvar"] ?? 0) === 1;
 
+if ($prepararWhatsAppAposSalvar) {
+    $validacaoWhatsApp = empresaPodeUsarRecursoPlano($conn, $empresaId, "whatsapp");
+
+    if (!$validacaoWhatsApp["permitido"]) {
+        die($validacaoWhatsApp["mensagem"]);
+    }
+}
+
 if ($clienteId <= 0) {
     die("Cliente é obrigatório.");
 }
@@ -191,16 +199,13 @@ if ($prepararWhatsAppAposSalvar) {
             }
 
             $partesMensagem = [];
-
-            $partesMensagem[] = "Olá, " . $ordemWhatsApp["ClienteNome"] . "! Sua ordem de serviço " . $codigoOS . " foi registrada com sucesso.";
+            $partesMensagem[] = "Olá, " . $ordemWhatsApp["ClienteNome"] . "! Sua ordem de serviço " . $codigoOS . " foi aberta.";
 
             if (!empty($ordemWhatsApp["Titulo"])) {
                 $partesMensagem[] = "Atendimento: " . $ordemWhatsApp["Titulo"] . ".";
             }
 
-            if (!empty($ordemWhatsApp["Status"])) {
-                $partesMensagem[] = "Status atual: " . $ordemWhatsApp["Status"] . ".";
-            }
+            $partesMensagem[] = "Status atual: " . $ordemWhatsApp["Status"] . ".";
 
             if ($linkPublico !== "") {
                 $partesMensagem[] = "Você pode acompanhar pelo link: " . $linkPublico;
@@ -228,7 +233,7 @@ if ($prepararWhatsAppAposSalvar) {
                 $telefone,
                 $mensagemWhatsApp
             );
-            
+
             registrarAuditoria(
                 $conn,
                 "WHATSAPP_MANUAL_OS_CRIADA",
@@ -243,10 +248,10 @@ if ($prepararWhatsAppAposSalvar) {
             "WHATSAPP_MANUAL_OS_CRIADA_ERRO",
             "OS_OrdensServico",
             $ordemServicoId,
-            "Erro ao preparar mensagem WhatsApp: " . $e->getMessage()
+            "Erro ao preparar mensagem WhatsApp após criação: " . $e->getMessage()
         );
     }
 }
 
-header("Location: visualizar.php?id=" . $ordemServicoId . "&mensagem=" . urlencode("OS criada com sucesso."));
+header("Location: visualizar.php?id=" . $ordemServicoId);
 exit;
