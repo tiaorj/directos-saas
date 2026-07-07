@@ -3,6 +3,7 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/planos.php";
 csrfValidarTokenGet();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
@@ -36,6 +37,17 @@ if (!$anexo) {
 }
 
 $novoStatus = (int)$anexo["VisivelCliente"] === 1 ? 0 : 1;
+
+if ($novoStatus === 1) {
+    $validacaoAnexos = empresaPodeUsarRecursoPlano($conn, $empresaId, "anexos");
+    $validacaoAreaCliente = empresaPodeUsarRecursoPlano($conn, $empresaId, "area_cliente");
+
+    if (!$validacaoAnexos["permitido"] || !$validacaoAreaCliente["permitido"]) {
+        $mensagem = !$validacaoAnexos["permitido"] ? $validacaoAnexos["mensagem"] : $validacaoAreaCliente["mensagem"];
+        header("Location: visualizar.php?id=" . $anexo["OrdemServicoId"] . "&mensagem=" . urlencode($mensagem));
+        exit;
+    }
+}
 
 $sqlUpdate = "
     UPDATE OS_OrdensServicoAnexos
