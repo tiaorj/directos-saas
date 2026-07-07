@@ -3,9 +3,17 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
+require_once "../includes/planos.php";
 
-$empresaId = $_SESSION["EmpresaId"];
+$empresaId = (int)$_SESSION["EmpresaId"];
 $ordemServicoId = (int)($_GET["id"] ?? 0);
+
+$validacaoAnexos = empresaPodeUsarRecursoPlano($conn, $empresaId, "anexos");
+
+if (!$validacaoAnexos["permitido"]) {
+    $voltar = $ordemServicoId > 0 ? "visualizar.php?id=" . $ordemServicoId : "listar.php";
+    die($validacaoAnexos["mensagem"] . " <br><br><a href='" . htmlspecialchars($voltar, ENT_QUOTES, "UTF-8") . "'>Voltar</a>");
+}
 
 exigirOrdemDaEmpresa($conn, $ordemServicoId);
 
