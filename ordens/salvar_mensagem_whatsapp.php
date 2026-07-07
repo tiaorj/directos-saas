@@ -6,6 +6,7 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 require_once "../includes/mensagens_whatsapp.php";
+require_once "../includes/planos.php";
 
 csrfValidarTokenPost();
 
@@ -16,6 +17,13 @@ $usuarioId = (int)($_SESSION["UsuarioId"] ?? 0);
 $ordemServicoId = (int)($_POST["OrdemServicoId"] ?? 0);
 $telefone = trim($_POST["Telefone"] ?? "");
 $mensagem = trim($_POST["Mensagem"] ?? "");
+
+$validacaoWhatsApp = empresaPodeUsarRecursoPlano($conn, $empresaId, "whatsapp");
+
+if (!$validacaoWhatsApp["permitido"]) {
+    header("Location: visualizar.php?id=" . $ordemServicoId . "&mensagem=" . urlencode($validacaoWhatsApp["mensagem"]));
+    exit;
+}
 
 if ($ordemServicoId <= 0) {
     die("Ordem de serviço inválida.");
