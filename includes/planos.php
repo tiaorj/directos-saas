@@ -200,3 +200,72 @@ function empresaPodeCriarUsuario($conn, $empresaId)
         "limite" => (int)$limite
     ];
 }
+
+function mapaRecursosPlano()
+{
+    return [
+        "anexos" => [
+            "campo" => "PermiteAnexos",
+            "nome" => "anexos"
+        ],
+        "area_cliente" => [
+            "campo" => "PermiteAreaCliente",
+            "nome" => "área do cliente"
+        ],
+        "whatsapp" => [
+            "campo" => "PermiteWhatsapp",
+            "nome" => "WhatsApp assistido"
+        ]
+    ];
+}
+
+function empresaPodeUsarRecursoPlano($conn, $empresaId, $recurso)
+{
+    $mapa = mapaRecursosPlano();
+
+    if (!isset($mapa[$recurso])) {
+        return [
+            "permitido" => false,
+            "mensagem" => "Recurso do plano inválido.",
+            "plano" => null
+        ];
+    }
+
+    $plano = obterPlanoEmpresa($conn, $empresaId);
+
+    if (!$plano) {
+        return [
+            "permitido" => false,
+            "mensagem" => "Empresa sem plano ativo.",
+            "plano" => null
+        ];
+    }
+
+    $campo = $mapa[$recurso]["campo"];
+    $nome = $mapa[$recurso]["nome"];
+
+    if ((int)($plano[$campo] ?? 0) !== 1) {
+        return [
+            "permitido" => false,
+            "mensagem" => "O plano " . $plano["Nome"] . " não permite " . $nome . ". Solicite alteração de plano para liberar este recurso.",
+            "plano" => $plano
+        ];
+    }
+
+    return [
+        "permitido" => true,
+        "mensagem" => "",
+        "plano" => $plano
+    ];
+}
+
+function bloquearRecursoPlano($conn, $empresaId, $recurso)
+{
+    $validacao = empresaPodeUsarRecursoPlano($conn, $empresaId, $recurso);
+
+    if (!$validacao["permitido"]) {
+        die($validacao["mensagem"]);
+    }
+
+    return $validacao;
+}
