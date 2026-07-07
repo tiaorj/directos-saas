@@ -29,6 +29,18 @@ function caminhoUploadFisico($caminhoArquivo)
 
 function diretorioUploadOs($empresaId, $ordemServicoId)
 {
+    global $conn;
+
+    if (isset($conn) && $conn instanceof PDO) {
+        require_once __DIR__ . '/planos.php';
+
+        $validacao = empresaPodeUsarRecursoPlano($conn, (int)$empresaId, 'anexos');
+
+        if (!$validacao['permitido']) {
+            die($validacao['mensagem']);
+        }
+    }
+
     $uploadDirBase = realpath(UPLOAD_DIR) ?: UPLOAD_DIR;
     $uploadDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, rtrim($uploadDirBase, '/\\'));
 
