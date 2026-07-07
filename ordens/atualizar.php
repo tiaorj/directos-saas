@@ -10,6 +10,7 @@ require_once "../includes/auditoria.php";
 require_once "../includes/mensagens_whatsapp.php";
 require_once "../includes/campos_os.php";
 require_once "../includes/demo.php";
+require_once "../includes/planos.php";
 bloquearAcaoDemo();
 csrfValidarTokenPost();
 
@@ -33,6 +34,14 @@ $mostrarValorCliente = isset($_POST["MostrarValorCliente"]) ? 1 : 0;
 $mostrarSolucaoCliente = isset($_POST["MostrarSolucaoCliente"]) ? 1 : 0;
 $mostrarHistoricoCliente = isset($_POST["MostrarHistoricoCliente"]) ? 1 : 0;
 $prepararWhatsAppAposAtualizar = (int)($_POST["PrepararWhatsAppAposAtualizar"] ?? 0) === 1;
+
+if ($prepararWhatsAppAposAtualizar) {
+    $validacaoWhatsApp = empresaPodeUsarRecursoPlano($conn, $empresaId, "whatsapp");
+
+    if (!$validacaoWhatsApp["permitido"]) {
+        die($validacaoWhatsApp["mensagem"]);
+    }
+}
 
 $camposPersonalizadosOS = buscarCamposPersonalizadosOS($conn, $empresaId, true);
 validarCamposPersonalizadosOS($camposPersonalizadosOS, $_POST);
