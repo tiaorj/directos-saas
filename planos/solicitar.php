@@ -9,8 +9,27 @@ $empresaId = (int)$_SESSION["EmpresaId"];
 $planoAtual = obterPlanoEmpresa($conn, $empresaId);
 $sucesso = $_GET["sucesso"] ?? "";
 $erro = $_GET["erro"] ?? "";
+$selectPermiteIA = selectPermiteIAPlano($conn);
 
-$stmtPlanos = $conn->prepare("SELECT PlanoId, Nome, Descricao, LimiteOSMes, LimiteUsuarios, ValorMensal FROM OS_Planos WHERE Ativo = 1 AND Slug <> 'teste-assistido' ORDER BY ValorMensal, Nome");
+$sqlPlanos = "
+    SELECT
+        PlanoId,
+        Nome,
+        Descricao,
+        LimiteOSMes,
+        LimiteUsuarios,
+        PermiteAnexos,
+        PermiteAreaCliente,
+        PermiteWhatsapp,
+        {$selectPermiteIA},
+        ValorMensal
+    FROM OS_Planos p
+    WHERE Ativo = 1
+      AND Slug <> 'teste-assistido'
+    ORDER BY ValorMensal, Nome
+";
+
+$stmtPlanos = $conn->prepare($sqlPlanos);
 $stmtPlanos->execute();
 $planos = $stmtPlanos->fetchAll(PDO::FETCH_ASSOC);
 
@@ -22,6 +41,11 @@ $solicitacaoPendente = $stmtPendente->fetch(PDO::FETCH_ASSOC);
 function limiteSolicitarPlano($valor)
 {
     return ($valor === null || $valor === "") ? "Ilimitado" : (string)(int)$valor;
+}
+
+function textoSimNaoRecurso($valor, $texto)
+{
+    return (int)$valor === 1 ? $texto : $texto . " não incluso";
 }
 ?>
 
@@ -52,7 +76,7 @@ function limiteSolicitarPlano($valor)
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-os mb-0">
                     <thead>
-                        <tr><th>Plano</th><th>Valor</th><th>Limites</th><th width="320">Solicitação</th></tr>
+                        <tr><th>Plano</th><th>Valor</th><th>Limites e recursos</th><th width="320">Solicitação</th></tr>
                     </thead>
                     <tbody>
                         <?php foreach ($planos as $plano): ?>
@@ -60,7 +84,14 @@ function limiteSolicitarPlano($valor)
                             <tr>
                                 <td><strong><?= htmlspecialchars($plano["Nome"] ?? "-") ?></strong><div class="os-subtitle"><?= htmlspecialchars($plano["Descricao"] ?? "") ?></div></td>
                                 <td>R$ <?= number_format((float)($plano["ValorMensal"] ?? 0), 2, ",", ".") ?></td>
-                                <td>OS/mês: <?= htmlspecialchars(limiteSolicitarPlano($plano["LimiteOSMes"] ?? null)) ?><br>Usuários: <?= htmlspecialchars(limiteSolicitarPlano($plano["LimiteUsuarios"] ?? null)) ?></td>
+                                <td>
+                                    OS/mês: <?= htmlspecialchars(limiteSolicitarPlano($plano["LimiteOSMes"] ?? null)) ?><br>
+                                    Usuários: <?= htmlspecialchars(limiteSolicitarPlano($plano["LimiteUsuarios"] ?? null)) ?><br>
+                                    <?= htmlspecialchars(textoSimNaoRecurso($plano["PermiteAnexos"] ?? 0, "Anexos")) ?><br>
+                                    <?= htmlspecialchars(textoSimNaoRecurso($plano["PermiteAreaCliente"] ?? 0, "Área do cliente")) ?><br>
+                                    <?= htmlspecialchars(textoSimNaoRecurso($plano["PermiteWhatsapp"] ?? 0, "WhatsApp")) ?><br>
+                                    <?= htmlspecialchars(textoSimNaoRecurso($plano["PermiteIA"] ?? 0, "IA")) ?>
+                                </td>
                                 <td>
                                     <?php if ($ehAtual): ?>
                                         <button class="btn btn-secondary w-100" disabled>Plano atual</button>
