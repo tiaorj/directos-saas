@@ -7,6 +7,7 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
 require_once "../includes/n8n.php";
+require_once "../includes/planos.php";
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -16,8 +17,15 @@ csrfValidarTokenPost();
 $ordemServicoId = (int)($_POST["OrdemServicoId"] ?? 0);
 $mensagem = trim($_POST["Mensagem"] ?? "");
 $telefone = trim($_POST["Telefone"] ?? "");
+$empresaId = (int)$_SESSION["EmpresaId"];
 
 try {
+    $validacaoWhatsApp = empresaPodeUsarRecursoPlano($conn, $empresaId, "whatsapp");
+
+    if (!$validacaoWhatsApp["permitido"]) {
+        throw new Exception($validacaoWhatsApp["mensagem"]);
+    }
+
     if ($ordemServicoId <= 0) {
         throw new Exception("OS inválida.");
     }
@@ -52,7 +60,7 @@ try {
 
     $stmt = $conn->prepare($sql);
     $stmt->bindValue(":OrdemServicoId", $ordemServicoId, PDO::PARAM_INT);
-    $stmt->bindValue(":EmpresaId", (int)$_SESSION["EmpresaId"], PDO::PARAM_INT);
+    $stmt->bindValue(":EmpresaId", $empresaId, PDO::PARAM_INT);
     $stmt->execute();
 
     $ordem = $stmt->fetch(PDO::FETCH_ASSOC);
