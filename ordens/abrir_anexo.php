@@ -3,9 +3,16 @@ require_once "../includes/proteger.php";
 require_once "../config/conexao.php";
 require_once "../includes/seguranca.php";
 require_once "../includes/arquivos.php";
+require_once "../includes/planos.php";
 
 $empresaId = (int)$_SESSION["EmpresaId"];
 $anexoId = (int)($_GET["id"] ?? 0);
+
+$validacaoAnexos = empresaPodeUsarRecursoPlano($conn, $empresaId, "anexos");
+
+if (!$validacaoAnexos["permitido"]) {
+    die($validacaoAnexos["mensagem"]);
+}
 
 exigirAnexoDaEmpresa($conn, $anexoId);
 
