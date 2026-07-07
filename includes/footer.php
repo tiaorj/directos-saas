@@ -2,7 +2,32 @@
     </main>
 </div>
 
+<?php
+require_once __DIR__ . "/../config/config.php";
+
+$recursosPlanoInterface = [
+    "anexos" => true,
+    "areaCliente" => true,
+    "whatsapp" => true,
+    "ia" => true
+];
+
+if (isset($_SESSION["EmpresaId"], $conn) && $conn instanceof PDO) {
+    require_once __DIR__ . "/planos.php";
+
+    $empresaIdFooter = (int)$_SESSION["EmpresaId"];
+    $recursosPlanoInterface["anexos"] = empresaPodeUsarRecursoPlano($conn, $empresaIdFooter, "anexos")["permitido"];
+    $recursosPlanoInterface["areaCliente"] = empresaPodeUsarRecursoPlano($conn, $empresaIdFooter, "area_cliente")["permitido"];
+    $recursosPlanoInterface["whatsapp"] = empresaPodeUsarRecursoPlano($conn, $empresaIdFooter, "whatsapp")["permitido"];
+    $recursosPlanoInterface["ia"] = empresaPodeUsarRecursoPlano($conn, $empresaIdFooter, "ia")["permitido"];
+}
+?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+window.DirectOSPlanoRecursos = <?= json_encode($recursosPlanoInterface, JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<script src="<?= htmlspecialchars(rtrim(APP_URL, "/")) ?>/assets/js/recursos-plano-ui.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const body = document.body;
