@@ -1,13 +1,33 @@
 <?php
 
+function planoTemColunaPermiteIA($conn)
+{
+    static $cache = null;
+
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    try {
+        $stmt = $conn->query("SELECT COL_LENGTH('OS_Planos', 'PermiteIA')");
+        $cache = $stmt && $stmt->fetchColumn() !== null;
+    } catch (Exception $e) {
+        $cache = false;
+    }
+
+    return $cache;
+}
+
+function selectPermiteIAPlano($conn)
+{
+    return planoTemColunaPermiteIA($conn)
+        ? "p.PermiteIA"
+        : "CAST(1 AS BIT) AS PermiteIA";
+}
+
 function obterPlanoEmpresa($conn, $empresaId)
 {
-    /*
-        Regra nova:
-        - O plano atual da empresa vem de OS_Empresas.PlanoId.
-        - OS_Assinaturas pode continuar existindo como histórico.
-        - Se PlanoId ainda estiver NULL em alguma empresa antiga, faz fallback para a última assinatura ativa.
-    */
+    $selectPermiteIA = selectPermiteIAPlano($conn);
 
     $sql = "
         SELECT
@@ -20,6 +40,7 @@ function obterPlanoEmpresa($conn, $empresaId)
             p.PermiteAnexos,
             p.PermiteAreaCliente,
             p.PermiteWhatsapp,
+            {$selectPermiteIA},
             p.ValorMensal,
             e.StatusComercial AS StatusAssinatura,
             e.DataInicioTeste AS DataInicio,
@@ -41,11 +62,6 @@ function obterPlanoEmpresa($conn, $empresaId)
         return $plano;
     }
 
-    /*
-        Fallback temporário:
-        Caso alguma empresa antiga ainda não tenha PlanoId preenchido,
-        usa a assinatura ativa antiga.
-    */
     $sqlFallback = "
         SELECT TOP 1
             p.PlanoId,
@@ -57,6 +73,7 @@ function obterPlanoEmpresa($conn, $empresaId)
             p.PermiteAnexos,
             p.PermiteAreaCliente,
             p.PermiteWhatsapp,
+            {$selectPermiteIA},
             p.ValorMensal,
             a.Status AS StatusAssinatura,
             a.DataInicio,
@@ -215,6 +232,10 @@ function mapaRecursosPlano()
         "whatsapp" => [
             "campo" => "PermiteWhatsapp",
             "nome" => "WhatsApp assistido"
+        ],
+        "ia" => [
+            "campo" => "PermiteIA",
+            "nome" => "integrações de texto com IA"
         ]
     ];
 }
