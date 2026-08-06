@@ -26,7 +26,8 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends m
 RUN pecl install sqlsrv pdo_sqlsrv \
     && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
-RUN a2enmod rewrite
+RUN a2dismod mpm_event mpm_worker \
+    && a2enmod mpm_prefork rewrite
 
 WORKDIR /var/www/html
 
