@@ -4,6 +4,7 @@ require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
 require_once "../includes/auditoria.php";
+require_once "../includes/planos.php";
 
 exigirPerfil(["SuperAdmin"]);
 csrfValidarTokenPost();
@@ -86,7 +87,9 @@ $limiteUsuarios = converterLimitePlano($_POST["LimiteUsuarios"] ?? "");
 $permiteAnexos = isset($_POST["PermiteAnexos"]) ? 1 : 0;
 $permiteAreaCliente = isset($_POST["PermiteAreaCliente"]) ? 1 : 0;
 $permiteWhatsapp = isset($_POST["PermiteWhatsapp"]) ? 1 : 0;
+$permiteIA = isset($_POST["PermiteIA"]) ? 1 : 0;
 $ativo = isset($_POST["Ativo"]) ? 1 : 0;
+$colunaPermiteIAExiste = planoTemColunaPermiteIA($conn);
 
 if ($nome === "") {
     redirecionarPlanoErro($planoId, "Nome do plano é obrigatório.");
@@ -131,6 +134,10 @@ if ((int)$stmtSlug->fetchColumn() > 0) {
 }
 
 try {
+    $campoIAUpdate = $colunaPermiteIAExiste ? ", PermiteIA = :PermiteIA" : "";
+    $campoIAInsert = $colunaPermiteIAExiste ? ", PermiteIA" : "";
+    $valorIAInsert = $colunaPermiteIAExiste ? ", :PermiteIA" : "";
+
     if ($planoId > 0) {
         $sql = "
             UPDATE OS_Planos
@@ -145,6 +152,7 @@ try {
                 PermiteWhatsapp = :PermiteWhatsapp,
                 ValorMensal = :ValorMensal,
                 Ativo = :Ativo
+                {$campoIAUpdate}
             WHERE PlanoId = :PlanoId
         ";
 
@@ -164,6 +172,7 @@ try {
                 PermiteWhatsapp,
                 ValorMensal,
                 Ativo
+                {$campoIAInsert}
             )
             OUTPUT INSERTED.PlanoId
             VALUES
@@ -178,6 +187,7 @@ try {
                 :PermiteWhatsapp,
                 :ValorMensal,
                 :Ativo
+                {$valorIAInsert}
             )
         ";
 
@@ -195,6 +205,10 @@ try {
     $stmt->bindValue(":ValorMensal", $valorMensal);
     $stmt->bindValue(":Ativo", $ativo, PDO::PARAM_INT);
 
+    if ($colunaPermiteIAExiste) {
+        $stmt->bindValue(":PermiteIA", $permiteIA, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
 
     if ($planoId <= 0) {
@@ -203,7 +217,7 @@ try {
 
     registrarAuditoria(
         $conn,
-        $planoId > 0 ? "SALVAR_PLANO" : "SALVAR_PLANO",
+        "SALVAR_PLANO",
         "OS_Planos",
         $planoId,
         "Plano " . $nome . " salvo pelo SuperAdmin.",

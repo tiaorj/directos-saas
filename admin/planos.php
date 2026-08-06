@@ -2,8 +2,11 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
+require_once "../includes/planos.php";
 
 exigirPerfil(["SuperAdmin"]);
+
+$selectPermiteIA = selectPermiteIAPlano($conn);
 
 $sql = "
     SELECT
@@ -16,17 +19,16 @@ $sql = "
         p.PermiteAnexos,
         p.PermiteAreaCliente,
         p.PermiteWhatsapp,
+        {$selectPermiteIA},
         p.ValorMensal,
         p.Ativo,
         p.DataCadastro,
-
         (
             SELECT COUNT(*)
             FROM OS_Empresas e
             WHERE e.PlanoId = p.PlanoId
               AND e.Ativo = 1
         ) AS EmpresasAtivas,
-
         (
             SELECT COUNT(*)
             FROM OS_Assinaturas a
@@ -44,7 +46,6 @@ $sql = "
 
 $stmt = $conn->prepare($sql);
 $stmt->execute();
-
 $planos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $totalPlanos = count($planos);
@@ -93,105 +94,38 @@ function badgeRecursoPlano($habilitado, $texto)
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            <a href="plano_editar.php" class="btn btn-primary">
-                Novo plano
-            </a>
-
-            <a href="metricas.php" class="btn btn-outline-primary">
-                Métricas SaaS
-            </a>
-
-            <a href="assinaturas.php" class="btn btn-outline-primary">
-                Assinaturas
-            </a>
-
-            <a href="empresas.php" class="btn btn-outline-secondary">
-                Empresas
-            </a>
+            <a href="plano_editar.php" class="btn btn-primary">Novo plano</a>
+            <a href="metricas.php" class="btn btn-outline-primary">Métricas SaaS</a>
+            <a href="assinaturas.php" class="btn btn-outline-primary">Assinaturas</a>
+            <a href="empresas.php" class="btn btn-outline-secondary">Empresas</a>
         </div>
     </div>
 
     <?php if ($sucesso !== ""): ?>
-        <div class="alert alert-success">
-            <?= htmlspecialchars($sucesso) ?>
-        </div>
+        <div class="alert alert-success"><?= htmlspecialchars($sucesso) ?></div>
     <?php endif; ?>
 
     <?php if ($erro !== ""): ?>
-        <div class="alert alert-danger">
-            <?= htmlspecialchars($erro) ?>
-        </div>
+        <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
     <?php endif; ?>
 
     <div class="row g-3 mb-4">
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Planos cadastrados</div>
-
-                    <h3 class="mb-0 mt-2">
-                        <?= (int)$totalPlanos ?>
-                    </h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Planos ativos</div>
-
-                    <h3 class="mb-0 mt-2 text-success">
-                        <?= (int)$totalPlanosAtivos ?>
-                    </h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Empresas ativas em planos</div>
-
-                    <h3 class="mb-0 mt-2 text-primary">
-                        <?= (int)$totalEmpresasAtivas ?>
-                    </h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="small text-muted">Receita potencial mensal</div>
-
-                    <h3 class="mb-0 mt-2 text-primary">
-                        R$ <?= number_format($receitaPotencial, 2, ",", ".") ?>
-                    </h3>
-                </div>
-            </div>
-        </div>
-
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="small text-muted">Planos cadastrados</div><h3 class="mb-0 mt-2"><?= (int)$totalPlanos ?></h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="small text-muted">Planos ativos</div><h3 class="mb-0 mt-2 text-success"><?= (int)$totalPlanosAtivos ?></h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="small text-muted">Empresas ativas em planos</div><h3 class="mb-0 mt-2 text-primary"><?= (int)$totalEmpresasAtivas ?></h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="small text-muted">Receita potencial mensal</div><h3 class="mb-0 mt-2 text-primary">R$ <?= number_format($receitaPotencial, 2, ",", ".") ?></h3></div></div></div>
     </div>
 
     <div class="card form-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>Planos cadastrados</span>
-
-            <span class="badge bg-primary">
-                <?= (int)$totalPlanos ?> registro(s)
-            </span>
+            <span class="badge bg-primary"><?= (int)$totalPlanos ?> registro(s)</span>
         </div>
 
         <div class="card-body p-0">
-
             <?php if (count($planos) === 0): ?>
-                <div class="empty-state">
-                    Nenhum plano cadastrado até o momento.
-                </div>
+                <div class="empty-state">Nenhum plano cadastrado até o momento.</div>
             <?php else: ?>
-
                 <div class="table-responsive">
                     <table class="table table-hover align-middle table-os mb-0">
                         <thead>
@@ -206,55 +140,31 @@ function badgeRecursoPlano($habilitado, $texto)
                                 <th width="120">Ações</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             <?php foreach ($planos as $plano): ?>
                                 <tr>
-                                    <td>
-                                        <strong>#<?= (int)$plano["PlanoId"] ?></strong>
-                                    </td>
-
+                                    <td><strong>#<?= (int)$plano["PlanoId"] ?></strong></td>
                                     <td>
                                         <strong><?= htmlspecialchars($plano["Nome"] ?? "-") ?></strong>
-
-                                        <div class="os-subtitle">
-                                            slug: <?= htmlspecialchars($plano["Slug"] ?? "-") ?>
-                                        </div>
-
+                                        <div class="os-subtitle">slug: <?= htmlspecialchars($plano["Slug"] ?? "-") ?></div>
                                         <?php if (!empty($plano["Descricao"])): ?>
-                                            <div class="os-subtitle">
-                                                <?= htmlspecialchars($plano["Descricao"]) ?>
-                                            </div>
+                                            <div class="os-subtitle"><?= htmlspecialchars($plano["Descricao"]) ?></div>
                                         <?php endif; ?>
                                     </td>
-
                                     <td>
-                                        <strong>
-                                            R$ <?= number_format((float)$plano["ValorMensal"], 2, ",", ".") ?>
-                                        </strong>
-
-                                        <div class="os-subtitle">
-                                            por mês
-                                        </div>
+                                        <strong>R$ <?= number_format((float)$plano["ValorMensal"], 2, ",", ".") ?></strong>
+                                        <div class="os-subtitle">por mês</div>
                                     </td>
-
                                     <td>
-                                        <div>
-                                            <strong>OS/mês:</strong>
-                                            <?= htmlspecialchars(formatarLimitePlanoAdmin($plano["LimiteOSMes"])) ?>
-                                        </div>
-
-                                        <div class="os-subtitle">
-                                            Usuários: <?= htmlspecialchars(formatarLimitePlanoAdmin($plano["LimiteUsuarios"])) ?>
-                                        </div>
+                                        <div><strong>OS/mês:</strong> <?= htmlspecialchars(formatarLimitePlanoAdmin($plano["LimiteOSMes"])) ?></div>
+                                        <div class="os-subtitle">Usuários: <?= htmlspecialchars(formatarLimitePlanoAdmin($plano["LimiteUsuarios"])) ?></div>
                                     </td>
-
                                     <td>
                                         <?= badgeRecursoPlano($plano["PermiteAnexos"], "Anexos") ?>
                                         <?= badgeRecursoPlano($plano["PermiteAreaCliente"], "Área cliente") ?>
                                         <?= badgeRecursoPlano($plano["PermiteWhatsapp"], "WhatsApp") ?>
+                                        <?= badgeRecursoPlano($plano["PermiteIA"], "IA") ?>
                                     </td>
-
                                     <td>
                                         <?php if ((int)$plano["Ativo"] === 1): ?>
                                             <span class="badge bg-success">Ativo</span>
@@ -262,34 +172,21 @@ function badgeRecursoPlano($habilitado, $texto)
                                             <span class="badge bg-secondary">Inativo</span>
                                         <?php endif; ?>
                                     </td>
-
                                     <td>
                                         <strong><?= (int)$plano["EmpresasAtivas"] ?></strong>
-
-                                        <div class="os-subtitle">
-                                            <?= (int)$plano["AssinaturasAtivas"] ?> assinatura(s)
-                                        </div>
+                                        <div class="os-subtitle"><?= (int)$plano["AssinaturasAtivas"] ?> assinatura(s)</div>
                                     </td>
-
                                     <td>
-                                        <a
-                                            href="plano_editar.php?id=<?= (int)$plano["PlanoId"] ?>"
-                                            class="btn btn-sm btn-outline-primary"
-                                        >
-                                            Editar
-                                        </a>
+                                        <a href="plano_editar.php?id=<?= (int)$plano["PlanoId"] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
-
             <?php endif; ?>
-
         </div>
     </div>
-
 </div>
 
 <?php require_once "../includes/footer.php"; ?>

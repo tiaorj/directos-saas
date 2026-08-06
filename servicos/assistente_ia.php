@@ -2,7 +2,9 @@
 require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../includes/csrf.php";
+require_once "../config/conexao.php";
 require_once "../config/config.php";
+require_once "../includes/planos.php";
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -14,6 +16,16 @@ $tipoIA = $_POST["TipoIA"] ?? "";
 $nome = trim($_POST["Nome"] ?? "");
 $descricaoAtual = trim($_POST["Descricao"] ?? "");
 $checklistAtual = trim($_POST["ChecklistPadrao"] ?? "");
+
+$validacaoIA = empresaPodeUsarRecursoPlano($conn, (int)$_SESSION["EmpresaId"], "ia");
+
+if (!$validacaoIA["permitido"]) {
+    echo json_encode([
+        "sucesso" => false,
+        "mensagem" => $validacaoIA["mensagem"]
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if (!in_array($tipoIA, ["descricao", "checklist"], true)) {
     echo json_encode([

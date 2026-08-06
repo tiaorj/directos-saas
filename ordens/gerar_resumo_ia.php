@@ -6,6 +6,7 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/ia.php";
 require_once "../includes/auditoria.php";
+require_once "../includes/planos.php";
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -19,6 +20,12 @@ $servico = trim($_POST["Servico"] ?? "");
 $cliente = trim($_POST["Cliente"] ?? "");
 
 try {
+    $validacaoIA = empresaPodeUsarRecursoPlano($conn, (int)$_SESSION["EmpresaId"], "ia");
+
+    if (!$validacaoIA["permitido"]) {
+        throw new Exception($validacaoIA["mensagem"]);
+    }
+
     if ($ordemServicoId > 0) {
         exigirOrdemDaEmpresa($conn, $ordemServicoId);
     }

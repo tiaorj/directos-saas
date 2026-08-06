@@ -3,11 +3,14 @@ require_once "../includes/proteger.php";
 require_once "../includes/permissoes.php";
 require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
+require_once "../includes/planos.php";
 
 exigirPerfil(["SuperAdmin"]);
 
 $planoId = (int)($_GET["id"] ?? 0);
 $modoEdicao = $planoId > 0;
+$selectPermiteIA = selectPermiteIAPlano($conn);
+$colunaPermiteIAExiste = planoTemColunaPermiteIA($conn);
 
 $plano = [
     "PlanoId" => 0,
@@ -19,6 +22,7 @@ $plano = [
     "PermiteAnexos" => 1,
     "PermiteAreaCliente" => 1,
     "PermiteWhatsapp" => 1,
+    "PermiteIA" => 1,
     "ValorMensal" => 0,
     "Ativo" => 1
 ];
@@ -35,10 +39,11 @@ if ($modoEdicao) {
             PermiteAnexos,
             PermiteAreaCliente,
             PermiteWhatsapp,
+            {$selectPermiteIA},
             ValorMensal,
             Ativo,
             DataCadastro
-        FROM OS_Planos
+        FROM OS_Planos p
         WHERE PlanoId = :PlanoId
     ";
 
@@ -90,6 +95,12 @@ function valorCampoPlano($plano, $campo)
         </div>
     <?php endif; ?>
 
+    <?php if (!$colunaPermiteIAExiste): ?>
+        <div class="alert alert-warning">
+            Para salvar o controle de IA por plano, execute primeiro o script <strong>database/007_permite_ia_planos.sql</strong> no banco.
+        </div>
+    <?php endif; ?>
+
     <form method="post" action="plano_salvar.php">
         <?= csrfInput() ?>
 
@@ -108,26 +119,12 @@ function valorCampoPlano($plano, $campo)
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nome do plano</label>
-                                <input
-                                    type="text"
-                                    name="Nome"
-                                    class="form-control"
-                                    maxlength="100"
-                                    value="<?= valorCampoPlano($plano, "Nome") ?>"
-                                    required
-                                >
+                                <input type="text" name="Nome" class="form-control" maxlength="100" value="<?= valorCampoPlano($plano, "Nome") ?>" required>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Slug</label>
-                                <input
-                                    type="text"
-                                    name="Slug"
-                                    class="form-control"
-                                    maxlength="50"
-                                    value="<?= valorCampoPlano($plano, "Slug") ?>"
-                                    placeholder="ex: profissional"
-                                >
+                                <input type="text" name="Slug" class="form-control" maxlength="50" value="<?= valorCampoPlano($plano, "Slug") ?>" placeholder="ex: profissional">
                                 <div class="input-help">
                                     Usado internamente pelo sistema. Exemplo: starter, profissional, empresa.
                                 </div>
@@ -136,57 +133,26 @@ function valorCampoPlano($plano, $campo)
 
                         <div class="mb-3">
                             <label class="form-label">Descrição</label>
-                            <textarea
-                                name="Descricao"
-                                class="form-control"
-                                rows="3"
-                                maxlength="255"
-                            ><?= valorCampoPlano($plano, "Descricao") ?></textarea>
+                            <textarea name="Descricao" class="form-control" rows="3" maxlength="255"><?= valorCampoPlano($plano, "Descricao") ?></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Valor mensal</label>
-                                <input
-                                    type="text"
-                                    name="ValorMensal"
-                                    class="form-control"
-                                    value="<?= number_format((float)($plano["ValorMensal"] ?? 0), 2, ",", ".") ?>"
-                                    required
-                                >
-                                <div class="input-help">
-                                    Exemplo: 79,00
-                                </div>
+                                <input type="text" name="ValorMensal" class="form-control" value="<?= number_format((float)($plano["ValorMensal"] ?? 0), 2, ",", ".") ?>" required>
+                                <div class="input-help">Exemplo: 79,00</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Limite de OS/mês</label>
-                                <input
-                                    type="number"
-                                    name="LimiteOSMes"
-                                    class="form-control"
-                                    min="0"
-                                    value="<?= $plano["LimiteOSMes"] === null ? "" : (int)$plano["LimiteOSMes"] ?>"
-                                    placeholder="Ilimitado"
-                                >
-                                <div class="input-help">
-                                    Deixe vazio para ilimitado.
-                                </div>
+                                <input type="number" name="LimiteOSMes" class="form-control" min="0" value="<?= $plano["LimiteOSMes"] === null ? "" : (int)$plano["LimiteOSMes"] ?>" placeholder="Ilimitado">
+                                <div class="input-help">Deixe vazio para ilimitado.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Limite de usuários</label>
-                                <input
-                                    type="number"
-                                    name="LimiteUsuarios"
-                                    class="form-control"
-                                    min="0"
-                                    value="<?= $plano["LimiteUsuarios"] === null ? "" : (int)$plano["LimiteUsuarios"] ?>"
-                                    placeholder="Ilimitado"
-                                >
-                                <div class="input-help">
-                                    Deixe vazio para ilimitado.
-                                </div>
+                                <input type="number" name="LimiteUsuarios" class="form-control" min="0" value="<?= $plano["LimiteUsuarios"] === null ? "" : (int)$plano["LimiteUsuarios"] ?>" placeholder="Ilimitado">
+                                <div class="input-help">Deixe vazio para ilimitado.</div>
                             </div>
                         </div>
 
@@ -203,65 +169,33 @@ function valorCampoPlano($plano, $campo)
                     <div class="card-body">
 
                         <div class="form-check form-switch mb-3">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                role="switch"
-                                name="PermiteAnexos"
-                                value="1"
-                                id="PermiteAnexos"
-                                <?= (int)($plano["PermiteAnexos"] ?? 0) === 1 ? "checked" : "" ?>
-                            >
-                            <label class="form-check-label" for="PermiteAnexos">
-                                Permite anexos
-                            </label>
+                            <input class="form-check-input" type="checkbox" role="switch" name="PermiteAnexos" value="1" id="PermiteAnexos" <?= (int)($plano["PermiteAnexos"] ?? 0) === 1 ? "checked" : "" ?>>
+                            <label class="form-check-label" for="PermiteAnexos">Permite anexos</label>
                         </div>
 
                         <div class="form-check form-switch mb-3">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                role="switch"
-                                name="PermiteAreaCliente"
-                                value="1"
-                                id="PermiteAreaCliente"
-                                <?= (int)($plano["PermiteAreaCliente"] ?? 0) === 1 ? "checked" : "" ?>
-                            >
-                            <label class="form-check-label" for="PermiteAreaCliente">
-                                Permite área do cliente
-                            </label>
+                            <input class="form-check-input" type="checkbox" role="switch" name="PermiteAreaCliente" value="1" id="PermiteAreaCliente" <?= (int)($plano["PermiteAreaCliente"] ?? 0) === 1 ? "checked" : "" ?>>
+                            <label class="form-check-label" for="PermiteAreaCliente">Permite área do cliente</label>
                         </div>
 
                         <div class="form-check form-switch mb-3">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                role="switch"
-                                name="PermiteWhatsapp"
-                                value="1"
-                                id="PermiteWhatsapp"
-                                <?= (int)($plano["PermiteWhatsapp"] ?? 0) === 1 ? "checked" : "" ?>
-                            >
-                            <label class="form-check-label" for="PermiteWhatsapp">
-                                Permite WhatsApp assistido
-                            </label>
+                            <input class="form-check-input" type="checkbox" role="switch" name="PermiteWhatsapp" value="1" id="PermiteWhatsapp" <?= (int)($plano["PermiteWhatsapp"] ?? 0) === 1 ? "checked" : "" ?>>
+                            <label class="form-check-label" for="PermiteWhatsapp">Permite WhatsApp assistido</label>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" name="PermiteIA" value="1" id="PermiteIA" <?= (int)($plano["PermiteIA"] ?? 0) === 1 ? "checked" : "" ?> <?= !$colunaPermiteIAExiste ? "disabled" : "" ?>>
+                            <label class="form-check-label" for="PermiteIA">Permite integrações de texto com IA</label>
+                            <div class="input-help">
+                                Controla melhorar descrição, gerar checklist, sugerir prioridade e textos com IA.
+                            </div>
                         </div>
 
                         <hr>
 
                         <div class="form-check form-switch mb-3">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                role="switch"
-                                name="Ativo"
-                                value="1"
-                                id="Ativo"
-                                <?= (int)($plano["Ativo"] ?? 0) === 1 ? "checked" : "" ?>
-                            >
-                            <label class="form-check-label" for="Ativo">
-                                Plano ativo
-                            </label>
+                            <input class="form-check-input" type="checkbox" role="switch" name="Ativo" value="1" id="Ativo" <?= (int)($plano["Ativo"] ?? 0) === 1 ? "checked" : "" ?>>
+                            <label class="form-check-label" for="Ativo">Plano ativo</label>
                         </div>
 
                         <div class="alert alert-light border mb-0">

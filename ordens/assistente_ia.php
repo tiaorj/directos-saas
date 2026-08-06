@@ -7,6 +7,7 @@ require_once "../includes/seguranca.php";
 require_once "../includes/csrf.php";
 require_once "../includes/ia.php";
 require_once "../includes/auditoria.php";
+require_once "../includes/planos.php";
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -25,6 +26,21 @@ $codigoOS = trim($_POST["CodigoOS"] ?? "");
 $tokenAcompanhamento = trim($_POST["TokenAcompanhamento"] ?? "");
 
 try {
+    $empresaId = (int)$_SESSION["EmpresaId"];
+    $validacaoIA = empresaPodeUsarRecursoPlano($conn, $empresaId, "ia");
+
+    if (!$validacaoIA["permitido"]) {
+        throw new Exception($validacaoIA["mensagem"]);
+    }
+
+    if ($tipo === "whatsapp") {
+        $validacaoWhatsApp = empresaPodeUsarRecursoPlano($conn, $empresaId, "whatsapp");
+
+        if (!$validacaoWhatsApp["permitido"]) {
+            throw new Exception($validacaoWhatsApp["mensagem"]);
+        }
+    }
+
     if ($ordemServicoId > 0) {
         exigirOrdemDaEmpresa($conn, $ordemServicoId);
     }
