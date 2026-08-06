@@ -15,7 +15,7 @@ if (!defined('APP_ENV')) {
 }
 
 if (!defined('APP_URL')) {
-    define('APP_URL', getenv('APP_URL') ?: 'http://localhost:8080/sistema-os-php-sqlserver');
+    define('APP_URL', rtrim((string) getenv('APP_URL'), '/'));
 }
 
 if (!defined('APP_DEBUG')) {
