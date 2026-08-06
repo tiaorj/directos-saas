@@ -26,8 +26,15 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends m
 RUN pecl install sqlsrv pdo_sqlsrv \
     && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
-RUN a2dismod mpm_event mpm_worker \
-    && a2enmod mpm_prefork rewrite
+# O mod_php exige exclusivamente o MPM Prefork.
+RUN rm -f \
+        /etc/apache2/mods-enabled/mpm_event.load \
+        /etc/apache2/mods-enabled/mpm_event.conf \
+        /etc/apache2/mods-enabled/mpm_worker.load \
+        /etc/apache2/mods-enabled/mpm_worker.conf \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite \
+    && apache2ctl configtest
 
 WORKDIR /var/www/html
 
