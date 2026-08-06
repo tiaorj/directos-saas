@@ -5,6 +5,7 @@ require_once "../config/conexao.php";
 require_once "../includes/csrf.php";
 
 exigirPerfil(["SuperAdmin"]);
+
 csrfValidarTokenPost();
 
 $empresaId = (int)$_SESSION["EmpresaId"];
